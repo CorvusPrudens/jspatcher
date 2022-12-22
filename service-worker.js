@@ -319,7 +319,7 @@ define(['./workbox-f76b7dd5'], (function (workbox) { 'use strict';
     "revision": "987cc16509739c52074516f060857dd0"
   }, {
     "url": "index.js",
-    "revision": "2786cdc4b2ac5991c0c8a6f7121d07aa"
+    "revision": "22e188fb7a3f38969e89a35c4f51a323"
   }, {
     "url": "js/017d998140f1ad199103.worker.js",
     "revision": null
@@ -348,12 +348,6 @@ define(['./workbox-f76b7dd5'], (function (workbox) { 'use strict';
     "url": "js/2e0391304b68c9279541.js",
     "revision": null
   }, {
-    "url": "js/36bc8aa54eb03bca2dcf.worklet.js",
-    "revision": null
-  }, {
-    "url": "js/3d66d3399e31e10f1c80.js",
-    "revision": null
-  }, {
     "url": "js/455af92e7e1dc39fdbc8060f6680ab32.worker.js",
     "revision": "aa4ccaed553f2300b7568f570811fa30"
   }, {
@@ -361,15 +355,6 @@ define(['./workbox-f76b7dd5'], (function (workbox) { 'use strict';
     "revision": null
   }, {
     "url": "js/524ec5fc982d3d4e327e.js",
-    "revision": null
-  }, {
-    "url": "js/56764150abc419839ff8.worker.js",
-    "revision": null
-  }, {
-    "url": "js/692f81aa5bbfa47d5dbd.js",
-    "revision": null
-  }, {
-    "url": "js/6b067643fa92909553e0.worker.js",
     "revision": null
   }, {
     "url": "js/6b1ed1bedd96f08944b0e5a8b12c4739.worker.js",
@@ -381,7 +366,7 @@ define(['./workbox-f76b7dd5'], (function (workbox) { 'use strict';
     "url": "js/7a7bb4fea8ae344974ca.js",
     "revision": null
   }, {
-    "url": "js/8a4347fec65c1c07c549.js",
+    "url": "js/890ac87450a333536f70.worker.js",
     "revision": null
   }, {
     "url": "js/8fa2586bde2598a52f05.worker.js",
@@ -393,16 +378,19 @@ define(['./workbox-f76b7dd5'], (function (workbox) { 'use strict';
     "url": "js/949204d4095be2321020.worklet.js",
     "revision": null
   }, {
+    "url": "js/95299ae0cca8b2b6b0db.worklet.js",
+    "revision": null
+  }, {
     "url": "js/97b78266f3a7d31a9167.worker.js",
     "revision": null
   }, {
     "url": "js/9886dc26a5fc81de36e6.js",
     "revision": null
   }, {
-    "url": "js/a96e3a2182789d074698.js",
+    "url": "js/a06a127ffaf1c61ee1db.worker.js",
     "revision": null
   }, {
-    "url": "js/a98981e7e7ba44414f86.js",
+    "url": "js/a96e3a2182789d074698.js",
     "revision": null
   }, {
     "url": "js/b48e24c12d2496127b6583b54fc55dfe.worker.js",
@@ -414,16 +402,13 @@ define(['./workbox-f76b7dd5'], (function (workbox) { 'use strict';
     "url": "js/bc92b42113beb4749365.js",
     "revision": null
   }, {
-    "url": "js/c4256d51453825c853cf.worker.js",
-    "revision": null
-  }, {
     "url": "js/ca2e25b9e44deb9d8a4a.js",
     "revision": null
   }, {
     "url": "js/ccc617a85eb7411370f7.worker.js",
     "revision": null
   }, {
-    "url": "js/d3702a9c42c10ddec1fb.worker.js",
+    "url": "js/d042a433e98612c44902.worker.js",
     "revision": null
   }, {
     "url": "js/d5652357bfdb09cbde7b.worker.js",
@@ -450,9 +435,6 @@ define(['./workbox-f76b7dd5'], (function (workbox) { 'use strict';
     "url": "js/e9af213515a48055d0d9.js",
     "revision": null
   }, {
-    "url": "js/e9ef2054d247a18f1639.js",
-    "revision": null
-  }, {
     "url": "js/eaf685b3c0a73438cd37.js",
     "revision": null
   }, {
@@ -462,20 +444,11 @@ define(['./workbox-f76b7dd5'], (function (workbox) { 'use strict';
     "url": "js/f972dd09676511318f5e.js",
     "revision": null
   }, {
+    "url": "js/fd88a0c52bb8b0b05c88.worker.js",
+    "revision": null
+  }, {
     "url": "manifest.json",
     "revision": "1cbaa3cdd5ba147975aa27bb8a1914f4"
-  }, {
-    "url": "packages/analysers/index.js",
-    "revision": "1ebf2dc29ad8a002cfb2dd3dad1a9df8"
-  }, {
-    "url": "packages/analysers/index.jspatpkg.js",
-    "revision": "a07d822052f82b81bf48230fbb81e078"
-  }, {
-    "url": "packages/cac/index.js",
-    "revision": "7ec52ba9573ad70301d290898ece61c1"
-  }, {
-    "url": "packages/cac/index.jspatpkg.js",
-    "revision": "9f3f895ba1dab5a482e5ccb150c0a6e4"
   }, {
     "url": "packages/dsp/index.js",
     "revision": "7c39aec8b6a21c8ed37f5e0fe65ea10a"
@@ -483,50 +456,14 @@ define(['./workbox-f76b7dd5'], (function (workbox) { 'use strict';
     "url": "packages/dsp/index.jspatpkg.js",
     "revision": "100c75105dd7cf252719df32109dfc2d"
   }, {
+    "url": "packages/electrosmith/index.js",
+    "revision": "484be5a1b94356da77da787b2b507a27"
+  }, {
+    "url": "packages/electrosmith/index.jspatpkg.js",
+    "revision": "2dab4e42b2e72d678ca02aa84c5a64d3"
+  }, {
     "url": "packages/internal-packages.json",
-    "revision": "9e8a27886c1337ab8451b486782171b0"
-  }, {
-    "url": "packages/live/index.js",
-    "revision": "fa6a6a09918e16781ac25b3ea025b4e5"
-  }, {
-    "url": "packages/live/index.jspatpkg.js",
-    "revision": "2d68d14a5dd2a5cc271d883f1119c08e"
-  }, {
-    "url": "packages/midi/index.js",
-    "revision": "83bdb9f4d9c6ee2bb77d3a226d556c38"
-  }, {
-    "url": "packages/midi/index.jspatpkg.js",
-    "revision": "78709633a9313f4c3aa3bfe58fc65aa1"
-  }, {
-    "url": "packages/op/index.js",
-    "revision": "549601486a7aef08ad83b657b6cdc2aa"
-  }, {
-    "url": "packages/op/index.jsdsppkg.aw.js",
-    "revision": "c670096c1a7f9c3bd31673cb0da82dd4"
-  }, {
-    "url": "packages/op/index.jsdsppkg.main.js",
-    "revision": "014457e0532b9ff74c951acc6394d04b"
-  }, {
-    "url": "packages/op/index.jspatpkg.js",
-    "revision": "d0a0f222e40668ef030524bbc5472bea"
-  }, {
-    "url": "packages/osc/index.js",
-    "revision": "ba4e20207eaef2d9fadc788bcf6ac7a1"
-  }, {
-    "url": "packages/osc/index.jspatpkg.js",
-    "revision": "955296225397a3c8b8625ab33db6da32"
-  }, {
-    "url": "packages/std/index.js",
-    "revision": "4a6a9bebb4e18578535820250f356961"
-  }, {
-    "url": "packages/std/index.jsdsppkg.aw.js",
-    "revision": "ac1e9a4b8c11141daf190f42a9cd6345"
-  }, {
-    "url": "packages/std/index.jsdsppkg.main.js",
-    "revision": "7b54ee32013949301f452a248eaa763a"
-  }, {
-    "url": "packages/std/index.jspatpkg.js",
-    "revision": "8b2563a360c25b2f93e136dd2a8e0c72"
+    "revision": "8ae36caeeb0c08398b33202eef660d07"
   }, {
     "url": "packages/ui/index.js",
     "revision": "3be3214dae806ef054b35014344b6f7e"
@@ -534,34 +471,28 @@ define(['./workbox-f76b7dd5'], (function (workbox) { 'use strict';
     "url": "packages/ui/index.jspatpkg.js",
     "revision": "8e31a703db86f6e764f7a5d5cdf78098"
   }, {
-    "url": "packages/webaudio/index.js",
-    "revision": "d09ab0b6eaf7e9027de37aa17bbc4108"
-  }, {
-    "url": "packages/webaudio/index.jspatpkg.js",
-    "revision": "01193be29c15ac36f796f5af9c3f8485"
-  }, {
-    "url": "src_core_audio_AudioEditor_ts-src_core_audio_AudioRecorder_ts-src_core_audio_PatcherAudio_ts.js/36bc8aa54eb03bca2dcf.worklet.js",
+    "url": "src_core_audio_AudioEditor_ts-src_core_audio_AudioRecorder_ts-src_core_audio_PatcherAudio_ts.js/95299ae0cca8b2b6b0db.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_image_ImageEditor_ts.js/36bc8aa54eb03bca2dcf.worklet.js",
+    "url": "src_core_image_ImageEditor_ts.js/95299ae0cca8b2b6b0db.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_image_PatcherImage_ts.js/36bc8aa54eb03bca2dcf.worklet.js",
+    "url": "src_core_image_PatcherImage_ts.js/95299ae0cca8b2b6b0db.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_text_PatcherText_ts.js/36bc8aa54eb03bca2dcf.worklet.js",
+    "url": "src_core_text_PatcherText_ts.js/95299ae0cca8b2b6b0db.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_text_TextEditor_ts.js/36bc8aa54eb03bca2dcf.worklet.js",
+    "url": "src_core_text_TextEditor_ts.js/95299ae0cca8b2b6b0db.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_video_PatcherVideo_ts.js/36bc8aa54eb03bca2dcf.worklet.js",
+    "url": "src_core_video_PatcherVideo_ts.js/95299ae0cca8b2b6b0db.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_video_VideoEditor_ts.js/36bc8aa54eb03bca2dcf.worklet.js",
+    "url": "src_core_video_VideoEditor_ts.js/95299ae0cca8b2b6b0db.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_worklets_PatcherNode_ts.js/36bc8aa54eb03bca2dcf.worklet.js",
+    "url": "src_core_worklets_PatcherNode_ts.js/95299ae0cca8b2b6b0db.worklet.js",
     "revision": null
   }], {});
   workbox.cleanupOutdatedCaches();

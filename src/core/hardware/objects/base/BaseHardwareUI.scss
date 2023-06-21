@@ -1,0 +1,8 @@
+.hardware-patcher.locked div.box-ui {
+    & > .hidden {
+        visibility: hidden;
+    }
+    & > .ignore-click {
+        pointer-events: none;
+    }
+}

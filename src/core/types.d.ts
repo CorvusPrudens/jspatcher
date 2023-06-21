@@ -5,12 +5,14 @@ import type Patcher from "./patcher/Patcher";
 import type Box from "./patcher/Box";
 import type Env from "./Env";
 import type WorkletEnvProcessor from "./worklets/WorkletEnv.worklet";
+import type TempHardwareFile from "./hardware/TempHardwareFile";
 import type TempPatcherFile from "./patcher/TempPatcherFile";
 import type TempAudioFile from "./audio/TempAudioFile";
 import type TempTextFile from "./text/TempTextFile";
 import type TempData from "./file/TempData";
 import type PersistentProjectFile from "./file/PersistentProjectFile";
 import type { ProjectProps } from "./Project";
+import { RawHardwarePatcher } from "./hardware/types";
 
 declare global {
     interface Window {
@@ -41,6 +43,8 @@ export type PatcherMode = "max" | "gen" | "faust" | "js" | "jsaw";
 
 export type PatcherFileExtension = "jspat" | "maxpat" | "gendsp" | "dsppat";
 
+export type HardwareFileExtension = "json";
+
 export type AudioFileExtension = "wav" | "aif" | "aiff" | "mp3" | "aac" | "flac" | "ogg" | "m4a";
 
 export type TextFileExtension = "txt" | "json";
@@ -49,17 +53,18 @@ export type ImageFileExtension = "apng" | "avif" | "gif" | "jpg" | "jpeg" | "jfi
 
 export type VideoFileExtension = "mp4" | "webm" | "3gp";
 
-export type FileExtension = PatcherFileExtension | AudioFileExtension | TextFileExtension | ImageFileExtension | VideoFileExtension;
+export type FileExtension = PatcherFileExtension | AudioFileExtension | TextFileExtension | ImageFileExtension | VideoFileExtension | HardwareFileExtension;
 
-export type TempItemType = "patcher" | "audio" | "text" | "unknown";
+export type TempItemType = "patcher" | "hardware" | "audio" | "text" | "unknown";
 
-export type SharedItemByType<T extends ProjectItemType> = T extends "patcher" ? TempPatcherFile | PersistentProjectFile : T extends "audio" ? TempAudioFile | PersistentProjectFile : T extends "text" ? TempTextFile | PersistentProjectFile : T extends "image" ? PersistentProjectFile : T extends "video" ? PersistentProjectFile : TempData;
+export type SharedItemByType<T extends ProjectItemType> = T extends "patcher" ? TempPatcherFile | PersistentProjectFile : T extends "audio" ? TempAudioFile | PersistentProjectFile : T extends "text" ? TempTextFile | PersistentProjectFile : T extends "image" ? PersistentProjectFile : T extends "video" ? PersistentProjectFile : T extends "hardware" ? TempHardwareFile | PersistentProjectFile : TempData;
 
-export type TempItemByType<T extends ProjectItemType> = T extends "patcher" ? TempPatcherFile : T extends "audio" ? TempAudioFile : T extends "text" ? TempTextFile : TempData;
+export type TempItemByType<T extends ProjectItemType> = T extends "patcher" ? TempPatcherFile : T extends "audio" ? TempAudioFile : T extends "text" ? TempTextFile : T extends "hardware" ? TempHardwareFile : TempData;
 
-export type ProjectItemType = "patcher" | "audio" | "text" | "image" | "video" | "folder" | "unknown";
+export type ProjectItemType = "patcher" | "hardware" | "audio" | "text" | "image" | "video" | "folder" | "unknown";
 
-export type ProjectItemDataType<T extends ProjectItemType = any> = T extends "folder" ? RawProjectItems : T extends "patcher" ? RawPatcher : T extends "text" ? string : ArrayBuffer;
+// TODO -- complete hardware type integration
+export type ProjectItemDataType<T extends ProjectItemType = any> = T extends "folder" ? RawProjectItems : T extends "patcher" ? RawPatcher : T extends "hardware" ? RawHardwarePatcher : T extends "text" ? string : ArrayBuffer;
 
 export interface RawProjectItem<T extends ProjectItemType = any> {
     id: string;
@@ -185,7 +190,7 @@ export interface TBox {
 export type TRect = [number, number, number, number];
 export type TPresentationRect = [number | string, number | string, number | string, number | string];
 
-export type TResizeHandlerType = "n" |"ne" |"e" | "se" | "w" | "sw" | "s" | "nw";
+export type TResizeHandlerType = "n" | "ne" | "e" | "se" | "w" | "sw" | "s" | "nw";
 
 export interface TSharedData {
     [category: string]: {

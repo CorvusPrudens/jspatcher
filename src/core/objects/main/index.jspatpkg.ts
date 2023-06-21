@@ -2,6 +2,7 @@ import In from "./In";
 import Out from "./Out";
 import AudioIn from "./AudioIn";
 import AudioOut from "./AudioOut";
+import Hardware from "./Hardware";
 import SubPatcher from "./SubPatcher";
 import FaustPatcher from "./FaustPatcher";
 import GenPatcher from "./GenPatcher";
@@ -19,17 +20,21 @@ export default async () => ({
     out: Out,
     "in~": AudioIn,
     "out~": AudioOut,
+    hardware: Hardware,
     patcher: SubPatcher,
     p: SubPatcher,
-    pdsp: DspSubPatcher,
-    faustPatcher: FaustPatcher,
-    pfaust: FaustPatcher,
-    gen: GenPatcher,
-    bpatcher: BPatcher,
-    "buffer~": Buffer,
-    "record~": Record,
-    "plugin~": Plugin,
-    share,
-    serial: Serial,
-    websocket: WS
+
+    // // TODO -- these two should be reincorporated when supported
+    // "buffer~": Buffer,
+    // "record~": Record,
+
+    // pdsp: DspSubPatcher,
+    // faustPatcher: FaustPatcher,
+    // pfaust: FaustPatcher,
+    // gen: GenPatcher,
+    // bpatcher: BPatcher,
+    // "plugin~": Plugin,
+    // share,
+    // serial: Serial,
+    // websocket: WS
 });

@@ -59,6 +59,68 @@ Change.outlets = [{
 
 /***/ }),
 
+/***/ "./src/objects/block/ftom.ts":
+/*!***********************************!*\
+  !*** ./src/objects/block/ftom.ts ***!
+  \***********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Ftom)
+/* harmony export */ });
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+
+
+class Ftom extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+  constructor() {
+    super(...arguments);
+    this._ = { note: void 0 };
+  }
+  subscribe() {
+    super.subscribe();
+    this.on("preInit", () => {
+      this.inlets = 1;
+      this.outlets = 1;
+    });
+    this.on("inlet", ({ data, inlet }) => {
+      if (inlet === 0) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+          try {
+            if (data <= 0) {
+              this._.note = -1500;
+            } else {
+              this._.note = 12 * Math.log(data / 220) / Math.log(2) + 57.01;
+            }
+          } catch (e) {
+            this.error(e);
+            return;
+          }
+        }
+        this.outlet(0, this._.note);
+      }
+    });
+  }
+}
+Ftom.package = "electrosmith";
+Ftom.author = "btice";
+Ftom.version = "1.0";
+Ftom.description = "Convert frequency in Hz to midi note number";
+Ftom.inlets = [
+  {
+    isHot: true,
+    type: "number",
+    description: "Frequency"
+  }
+];
+Ftom.outlets = [{
+  type: "number",
+  description: "Midi Note Number"
+}];
+
+
+/***/ }),
+
 /***/ "./src/objects/block/mtof.ts":
 /*!***********************************!*\
   !*** ./src/objects/block/mtof.ts ***!
@@ -87,7 +149,13 @@ class Mtof extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
       if (inlet === 0) {
         if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
           try {
-            this._.freq = 440 * Math.exp(0.0577625565 * (data - 69));
+            if (data <= -1500) {
+              this._.freq = 0;
+            } else if (data > 1499) {
+              this._.freq = 440 * Math.exp(0.0577625565 * (1499 - 69));
+            } else {
+              this._.freq = 440 * Math.exp(0.0577625565 * (data - 69));
+            }
           } catch (e) {
             this.error(e);
             return;
@@ -315,6 +383,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _objects_block_change__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./objects/block/change */ "./src/objects/block/change.ts");
 /* harmony import */ var _objects_block_swap__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./objects/block/swap */ "./src/objects/block/swap.ts");
 /* harmony import */ var _objects_block_mtof__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./objects/block/mtof */ "./src/objects/block/mtof.ts");
+/* harmony import */ var _objects_block_ftom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./objects/block/ftom */ "./src/objects/block/ftom.ts");
+
 
 
 
@@ -322,7 +392,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (async () => ({
   "change": _objects_block_change__WEBPACK_IMPORTED_MODULE_0__["default"],
   "swap": _objects_block_swap__WEBPACK_IMPORTED_MODULE_1__["default"],
-  "mtof": _objects_block_mtof__WEBPACK_IMPORTED_MODULE_2__["default"]
+  "mtof": _objects_block_mtof__WEBPACK_IMPORTED_MODULE_2__["default"],
+  "ftom": _objects_block_ftom__WEBPACK_IMPORTED_MODULE_3__["default"]
 }));
 
 })();

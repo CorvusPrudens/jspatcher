@@ -2,6 +2,67 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "../../../frontend/src/core/message.ts":
+/*!*********************************************!*\
+  !*** ../../../frontend/src/core/message.ts ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Message": () => (/* binding */ Message),
+/* harmony export */   "extractFirst": () => (/* binding */ extractFirst),
+/* harmony export */   "isMessage": () => (/* binding */ isMessage)
+/* harmony export */ });
+class Message extends Array {
+  static from(tokens) {
+    const newArr = new Message();
+    for (let i = 0; i < tokens.length; i++) {
+      newArr[i] = tokens[i];
+    }
+    return newArr;
+  }
+  startsWith(value) {
+    if (this.length) {
+      return this[0] === value;
+    }
+    return false;
+  }
+  endsWith(value) {
+    if (this.length) {
+      return this[this.length - 1] === value;
+    }
+    return false;
+  }
+  arithmetic(op) {
+    return (other) => {
+      const result = new Message();
+      const minLength = Math.min(this.length, other.length);
+      for (let i = 0; i < minLength; i++) {
+        if (typeof this[i] === "number" && typeof other[i] === "number") {
+          result.push(op(this[i], other[i]));
+        } else {
+          result.push(this[i]);
+        }
+      }
+      return result;
+    };
+  }
+}
+function isMessage(value) {
+  return value instanceof Message;
+}
+function extractFirst(data) {
+  if (data instanceof Message || data instanceof Array) {
+    return data[0];
+  } else {
+    return data;
+  }
+}
+
+
+/***/ }),
+
 /***/ "../../common/web/index.ts":
 /*!*********************************!*\
   !*** ../../common/web/index.ts ***!
@@ -215,10 +276,10 @@ JsDspProcessor.inlets = [];
 JsDspProcessor.outlets = [];
 JsDspProcessor.args = [];
 JsDspProcessor.props = {
-  "smoothInput": {
+  smoothInput: {
     type: "number",
-    default: 0,
-    description: "How much smoothing to apply over the block"
+    default: 0.05,
+    description: "Linear interpolation coefficient to block-rate input values in seconds"
   }
 };
 
@@ -338,6 +399,337 @@ const getJsWorkletProcessor = (processor, dspId, sampleRate) => {
 
 /***/ }),
 
+/***/ "./src/objects/block/line.ts":
+/*!***********************************!*\
+  !*** ./src/objects/block/line.ts ***!
+  \***********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Counter)
+/* harmony export */ });
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+
+class Counter extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+  constructor() {
+    super(...arguments);
+    this._ = {
+      start: 0,
+      last_output: 0,
+      grain: 20,
+      points: [],
+      num_points: 0,
+      intervalRef: null,
+      timeoutRef: null,
+      time: 0,
+      current_point: 0
+    };
+  }
+  get_output() {
+    const now = performance.now();
+    const current_point = this._.points[this._.current_point];
+    let progress = current_point.duration === 0 ? 1 : (now - this._.time) / current_point.duration;
+    if (progress > 1)
+      progress = 1;
+    const output = this._.start + (current_point.value - this._.start) * progress;
+    return output;
+  }
+  subscribe() {
+    super.subscribe();
+    const handleUpdate = () => {
+      const current_point = this._.points[this._.current_point];
+      const now = performance.now();
+      if (now - this._.time >= current_point.duration) {
+        this._.current_point++;
+        if (this._.current_point >= this._.num_points) {
+          this._.current_point = 0;
+          this.outlet(1, new _sdk__WEBPACK_IMPORTED_MODULE_0__.Bang());
+          this.outlet(0, current_point.value);
+          if (this._.intervalRef) {
+            window.clearInterval(this._.intervalRef);
+            this._.intervalRef = null;
+          }
+          return;
+        }
+        this._.time = now;
+        this._.start = current_point.value;
+      }
+      const output = this.get_output();
+      this.outlet(0, output);
+    };
+    const handleTimeout = () => {
+      handleUpdate();
+      this._.intervalRef = window.setInterval(handleUpdate, this._.grain);
+    };
+    const activateTimer = () => {
+      if (this._.timeoutRef) {
+        window.clearTimeout(this._.timeoutRef);
+        this._.timeoutRef = null;
+      }
+      if (this._.intervalRef) {
+        window.clearInterval(this._.intervalRef);
+        this._.intervalRef = null;
+      }
+      const timeout = this._.grain;
+      this._.timeoutRef = window.setTimeout(handleTimeout, timeout);
+      this._.time = performance.now();
+    };
+    this.on("preInit", () => {
+      this.inlets = 2;
+      this.outlets = 2;
+      let maxpoints = this.getProp("maxpoints");
+      this._.points = Array.from({ length: maxpoints }, () => ({ value: 0, duration: 0 }));
+      if (this.args.length >= 1) {
+        this._.start = this.args[0];
+      }
+      if (this.args.length >= 2) {
+        this._.grain = this.args[1];
+        if (this._.grain < 1) {
+          this.error("grain must be greater than or equal to 1");
+        }
+      }
+    });
+    this.on("propsUpdated", ({ props }) => {
+      let maxpoints = this.getProp("maxpoints");
+      this._.points = Array.from({ length: maxpoints }, () => ({ value: 0, duration: 0 }));
+    });
+    this.on("argsUpdated", ({ args }) => {
+      if (args.length >= 1) {
+        this._.start = args[0];
+      }
+      if (args.length >= 2) {
+        this._.grain = args[1];
+        if (this._.grain < 1) {
+          this.error("grain must be greater than or equal to 1");
+        }
+      }
+    });
+    this.on("inlet", async ({ data, inlet }) => {
+      if (inlet === 0) {
+        if (typeof data === "number") {
+          this._.start = data;
+          if (this._.intervalRef) {
+            window.clearInterval(this._.intervalRef);
+            this._.intervalRef = null;
+          }
+          this.outlet(0, this._.start);
+          return;
+        } else if (data.length == 1) {
+          this._.start = data[0];
+          if (this._.intervalRef) {
+            window.clearInterval(this._.intervalRef);
+            this._.intervalRef = null;
+          }
+          this.outlet(0, this._.start);
+          return;
+        } else {
+          const input_points = data.length / 2;
+          const max_points = input_points > this._.points.length ? this._.points.length : input_points;
+          for (let i = 0; i < max_points; i++) {
+            const index = i * 2;
+            this._.points[i].value = data[index];
+            this._.points[i].duration = data[index + 1];
+          }
+          this._.num_points = max_points;
+          this._.current_point = 0;
+          activateTimer();
+        }
+      } else if (inlet === 1) {
+        if (typeof data === "number") {
+          this._.grain = data;
+          if (this._.grain < 1) {
+            this.error("grain must be greater than or equal to 1");
+          }
+        }
+      }
+    });
+    this.on("destroy", () => {
+      if (this._.timeoutRef) {
+        window.clearTimeout(this._.timeoutRef);
+        this._.timeoutRef = null;
+      }
+      if (this._.intervalRef) {
+        window.clearInterval(this._.intervalRef);
+        this._.intervalRef = null;
+      }
+    });
+  }
+}
+Counter.package = "electrosmith";
+Counter.author = "Corvus Prudens";
+Counter.version = "1.0";
+Counter.description = "Generates linear sequences of numbers given a set of points.";
+Counter.inlets = [
+  {
+    isHot: true,
+    type: "anything",
+    description: "A single number to set the current value, or a list of number pairs to set the sequence"
+  },
+  {
+    isHot: false,
+    type: "number",
+    description: "The output rate in milliseconds"
+  }
+];
+Counter.outlets = [
+  {
+    type: "number",
+    description: "The current value in the sequence"
+  },
+  {
+    type: "bang",
+    description: "Bang when the sequence is complete"
+  }
+];
+Counter.args = [
+  {
+    type: "number",
+    description: "The initial value",
+    optional: true
+  },
+  {
+    type: "number",
+    description: "The output rate in milliseconds",
+    optional: true
+  }
+];
+Counter.props = {
+  maxpoints: {
+    type: "number",
+    default: 32,
+    description: "The maximum number of points in the sequence"
+  }
+};
+
+
+/***/ }),
+
+/***/ "./src/objects/block/metro.ts":
+/*!************************************!*\
+  !*** ./src/objects/block/metro.ts ***!
+  \************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Metro)
+/* harmony export */ });
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+/* harmony import */ var _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jspatcher/jspatcher/src/core/message */ "../../../frontend/src/core/message.ts");
+
+
+class Metro extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+  constructor() {
+    super(...arguments);
+    this._ = {
+      time: +this.args[0],
+      active: this.getProp("active"),
+      intervalRef: null,
+      timeoutRef: null,
+      last: 0
+    };
+  }
+  subscribe() {
+    super.subscribe();
+    const handleTimeout = () => {
+      this._.last = performance.now();
+      this.outlet(0, new _sdk__WEBPACK_IMPORTED_MODULE_0__.Bang());
+      this._.intervalRef = window.setInterval(() => {
+        this._.last = performance.now();
+        this.outlet(0, new _sdk__WEBPACK_IMPORTED_MODULE_0__.Bang());
+      }, this._.time);
+    };
+    const activateTimer = (time) => {
+      if (this._.timeoutRef) {
+        window.clearTimeout(this._.timeoutRef);
+        this._.timeoutRef = null;
+      }
+      if (this._.intervalRef) {
+        window.clearInterval(this._.intervalRef);
+        this._.intervalRef = null;
+      }
+      if (time && this._.active) {
+        const timeout = Math.max(0, this._.last + this._.time - performance.now());
+        this._.timeoutRef = window.setTimeout(handleTimeout, timeout);
+      }
+      this._.time = time;
+    };
+    this.on("preInit", () => {
+      this.inlets = 2;
+      this.outlets = 1;
+    });
+    this.on("postInit", () => {
+      activateTimer(+this.args[0]);
+    });
+    this.on("updateArgs", () => {
+      if (typeof this.args[0] === "number") {
+        activateTimer(Math.max(0, +this.args[0]));
+      }
+    });
+    this.on("updateProps", () => {
+      this._.active = this.getProp("active");
+    });
+    this.on("inlet", ({ data: rawData, inlet }) => {
+      if (inlet === 0) {
+        let data = (0,_jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_1__.extractFirst)(rawData);
+        if ((0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+          this._.active = true;
+        } else if (typeof data === "number") {
+          if (data > 0)
+            this._.active = true;
+          else
+            this._.active = false;
+        }
+        activateTimer(this._.time);
+      } else if (inlet === 1) {
+        let data = (0,_jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_1__.extractFirst)(rawData);
+        activateTimer(Math.max(0, +data));
+      }
+    });
+    this.on("destroy", () => {
+      if (this._.timeoutRef) {
+        window.clearTimeout(this._.timeoutRef);
+        this._.timeoutRef = null;
+      }
+      if (this._.intervalRef) {
+        window.clearInterval(this._.intervalRef);
+        this._.intervalRef = null;
+      }
+    });
+  }
+}
+Metro.description = "Metronome that outputs bangs according to the specified time";
+Metro.inlets = [{
+  isHot: true,
+  type: "anything",
+  description: "Start or stop the metronome"
+}, {
+  isHot: false,
+  type: "number",
+  description: "interval in milliseconds"
+}];
+Metro.outlets = [{
+  type: "bang",
+  description: "metronomic bangs"
+}];
+Metro.args = [{
+  type: "number",
+  optional: true,
+  default: 1,
+  description: "Initial interval in milliseconds"
+}];
+Metro.props = {
+  active: {
+    type: "boolean",
+    default: false,
+    description: "Globally activate or deactivate the metronome"
+  }
+};
+
+
+/***/ }),
+
 /***/ "./src/objects/dsp/cycle.ts":
 /*!**********************************!*\
   !*** ./src/objects/dsp/cycle.ts ***!
@@ -410,13 +802,59 @@ Cycle.argsOffset = 0;
 
 /***/ }),
 
+/***/ "./src/sdk.ts":
+/*!********************!*\
+  !*** ./src/sdk.ts ***!
+  \********************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Bang": () => (/* binding */ Bang),
+/* harmony export */   "BaseObject": () => (/* binding */ BaseObject),
+/* harmony export */   "BaseUI": () => (/* binding */ BaseUI),
+/* harmony export */   "Box": () => (/* binding */ Box),
+/* harmony export */   "CanvasUI": () => (/* binding */ CanvasUI),
+/* harmony export */   "DefaultObject": () => (/* binding */ DefaultObject),
+/* harmony export */   "DefaultUI": () => (/* binding */ DefaultUI),
+/* harmony export */   "Line": () => (/* binding */ Line),
+/* harmony export */   "Patcher": () => (/* binding */ Patcher),
+/* harmony export */   "React": () => (/* binding */ React),
+/* harmony export */   "Utils": () => (/* binding */ Utils),
+/* harmony export */   "generateDefaultObject": () => (/* binding */ generateDefaultObject),
+/* harmony export */   "generateRemoteObject": () => (/* binding */ generateRemoteObject),
+/* harmony export */   "generateRemotedObject": () => (/* binding */ generateRemotedObject),
+/* harmony export */   "isBang": () => (/* binding */ isBang)
+/* harmony export */ });
+const sdk = globalThis.jspatcherEnv.sdk;
+const {
+  React,
+  Patcher,
+  Box,
+  Line,
+  BaseObject,
+  BaseUI,
+  DefaultObject,
+  DefaultUI,
+  CanvasUI,
+  Utils,
+  generateRemotedObject,
+  generateDefaultObject,
+  generateRemoteObject,
+  Bang,
+  isBang
+} = sdk;
+
+
+/***/ }),
+
 /***/ "../../common/web/package.json":
 /*!*************************************!*\
   !*** ../../common/web/package.json ***!
   \*************************************/
 /***/ ((module) => {
 
-module.exports = JSON.parse('{"name":"@electrosmith/package-math","version":"1.0.0","description":"The math package for jspatcher","main":"dist/index.js","scripts":{"build":"webpack --mode development","build-watch":"webpack --mode development --watch --stats-children"},"keywords":["jspatcher"],"jspatcher":{"isJSPatcherPackage":true,"thumbnail":"","jspatpkg":"index.jspatpkg.js"},"author":"Corvus Prudens","license":"MIT","repository":"https://github.com/electro-smith/Patcher-Objects","devDependencies":{"@jspatcher/jspatcher":"^0.0.9","@types/react":"^17.0.19","clean-webpack-plugin":"^4.0.0-alpha.0","css-loader":"^6.4.0","esbuild-loader":"^2.15.1","react":"^17.0.2","sass":"^1.45.2","sass-loader":"^12.2.0","style-loader":"^3.3.0","typescript":"^4.4.2","webpack":"^5.51.1","webpack-cli":"^4.8.0"}}');
+module.exports = JSON.parse('{"name":"@electrosmith/package-math","version":"1.0.0","description":"The math package for jspatcher","main":"dist/index.js","scripts":{"build":"webpack --mode development","build-watch":"webpack --mode development --watch --stats-children"},"keywords":["jspatcher"],"jspatcher":{"isJSPatcherPackage":true,"thumbnail":"","jspatpkg":"index.jspatpkg.js"},"author":"Corvus Prudens","license":"MIT","repository":"https://github.com/electro-smith/Patcher-Objects","devDependencies":{"@jspatcher/jspatcher":"file:../../../frontend","@types/react":"^17.0.19","clean-webpack-plugin":"^4.0.0-alpha.0","css-loader":"^6.4.0","esbuild-loader":"^2.15.1","react":"^17.0.2","sass":"^1.45.2","sass-loader":"^12.2.0","style-loader":"^3.3.0","typescript":"^4.4.2","webpack":"^5.51.1","webpack-cli":"^4.8.0"}}');
 
 /***/ })
 
@@ -517,11 +955,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _objects_dsp_cycle__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./objects/dsp/cycle */ "./src/objects/dsp/cycle.ts");
-/* harmony import */ var _common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../common/web/jsDspObject */ "../../common/web/jsDspObject.ts");
+/* harmony import */ var _objects_block_line__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./objects/block/line */ "./src/objects/block/line.ts");
+/* harmony import */ var _objects_block_metro__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./objects/block/metro */ "./src/objects/block/metro.ts");
+/* harmony import */ var _common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../common/web/jsDspObject */ "../../common/web/jsDspObject.ts");
+
+
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (async () => ({
-  "cycle~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_1__.generateObject)(_objects_dsp_cycle__WEBPACK_IMPORTED_MODULE_0__["default"], "cycle~")
+  "cycle~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_cycle__WEBPACK_IMPORTED_MODULE_0__["default"], "cycle~"),
+  "line": _objects_block_line__WEBPACK_IMPORTED_MODULE_1__["default"],
+  "metro": _objects_block_metro__WEBPACK_IMPORTED_MODULE_2__["default"]
 }));
 
 })();

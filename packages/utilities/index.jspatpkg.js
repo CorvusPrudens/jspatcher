@@ -2,6 +2,71 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "../../../frontend/src/core/message.ts":
+/*!*********************************************!*\
+  !*** ../../../frontend/src/core/message.ts ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Message": () => (/* binding */ Message),
+/* harmony export */   "extractFirst": () => (/* binding */ extractFirst),
+/* harmony export */   "isMessage": () => (/* binding */ isMessage)
+/* harmony export */ });
+
+class Message extends Array {
+  static from(tokens) {
+    const newArr = new Message();
+    for (let i = 0; i < tokens.length; i++) {
+      newArr[i] = tokens[i];
+    }
+    return newArr;
+  }
+  startsWith(value) {
+    if (this.length) {
+      return this[0] === value;
+    }
+    return false;
+  }
+  endsWith(value) {
+    if (this.length) {
+      return this[this.length - 1] === value;
+    }
+    return false;
+  }
+  // Produces a function that iterates over two lists,
+  // performs the given operation on any pair of numbers,
+  // and returns the shortest collection between the two
+  arithmetic(op) {
+    return (other) => {
+      const result = new Message();
+      const minLength = Math.min(this.length, other.length);
+      for (let i = 0; i < minLength; i++) {
+        if (typeof this[i] === "number" && typeof other[i] === "number") {
+          result.push(op(this[i], other[i]));
+        } else {
+          result.push(this[i]);
+        }
+      }
+      return result;
+    };
+  }
+}
+function isMessage(value) {
+  return value instanceof Message;
+}
+function extractFirst(data) {
+  if (data instanceof Message || data instanceof Array) {
+    return data[0];
+  } else {
+    return data;
+  }
+}
+
+
+/***/ }),
+
 /***/ "./src/objects/block/change.ts":
 /*!*************************************!*\
   !*** ./src/objects/block/change.ts ***!
@@ -45,7 +110,7 @@ class Change extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
     });
   }
 }
-Change.description = "Binary Operation";
+Change.description = "Output a value only when the input stream changes";
 Change.inlets = [{
   isHot: true,
   type: "anything",
@@ -55,6 +120,131 @@ Change.outlets = [{
   type: "anything",
   description: "A value that has changed"
 }];
+
+
+/***/ }),
+
+/***/ "./src/objects/block/counter.ts":
+/*!**************************************!*\
+  !*** ./src/objects/block/counter.ts ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Counter)
+/* harmony export */ });
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+
+
+class Counter extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+  constructor() {
+    super(...arguments);
+    this._ = { start: 0, stop: 0, step: 1, current_step: 0, num_satisfied: 0 };
+  }
+  updateRange(args) {
+    if (args.length === 1) {
+      this._.start = 0;
+      this._.stop = +args[0];
+      this._.step = 1;
+    } else if (args.length === 2) {
+      this._.start = +args[0];
+      this._.stop = +args[1];
+      this._.step = 1;
+    } else {
+      this._.start = +args[0];
+      this._.stop = +args[1];
+      this._.step = +args[2];
+    }
+    if (this._.start <= this._.stop) {
+      if (this._.step <= 0) {
+        this.error("iteration will never terminate");
+        return;
+      }
+    } else if (this._.start > this._.stop) {
+      if (this._.step >= 0) {
+        this.error("iteration will never terminate");
+        return;
+      }
+    }
+    this._.current_step = this._.start;
+  }
+  subscribe() {
+    super.subscribe();
+    this.on("preInit", () => {
+      this.inlets = 1;
+      this.outlets = 3;
+      this.updateRange(this.args);
+    });
+    this.on("argsUpdated", ({ args }) => {
+      this.updateRange(args);
+    });
+    this.on("inlet", ({ inlet }) => {
+      if (inlet === 0) {
+        this.outlet(0, this._.current_step);
+        console.log(JSON.stringify(this._));
+        this._.current_step += this._.step;
+        if (this._.start <= this._.stop) {
+          if (this._.current_step + this._.step > this._.stop) {
+            this._.num_satisfied += 1;
+            this.outlet(1, new _sdk__WEBPACK_IMPORTED_MODULE_0__.Bang());
+            this.outlet(2, this._.num_satisfied);
+            this._.current_step = this._.start;
+          }
+        } else if (this._.start > this._.stop) {
+          if (this._.current_step + this._.step < this._.stop) {
+            this._.num_satisfied += 1;
+            this.outlet(1, new _sdk__WEBPACK_IMPORTED_MODULE_0__.Bang());
+            this.outlet(2, this._.num_satisfied);
+            this._.current_step = this._.start;
+          }
+        }
+      }
+    });
+  }
+}
+Counter.package = "electrosmith";
+Counter.author = "Corvus Prudens";
+Counter.version = "1.0";
+Counter.description = "Iterates over the given range.";
+Counter.inlets = [
+  {
+    isHot: true,
+    type: "bang",
+    description: "Advance the range one step"
+  }
+];
+Counter.outlets = [
+  {
+    type: "number",
+    description: "The current step in the range"
+  },
+  {
+    type: "bang",
+    description: "Bang when the range is satisfied"
+  },
+  {
+    type: "number",
+    description: "Outputs the number of ranges satisfied"
+  }
+];
+Counter.args = [
+  {
+    type: "number",
+    description: "The number of iterations if one argument is provided, or the start of the range",
+    optional: false
+  },
+  {
+    type: "number",
+    description: "The end of the range",
+    optional: true
+  },
+  {
+    type: "number",
+    description: "The step size",
+    optional: true
+  }
+];
 
 
 /***/ }),
@@ -121,6 +311,122 @@ Ftom.outlets = [{
 
 /***/ }),
 
+/***/ "./src/objects/block/iter.ts":
+/*!***********************************!*\
+  !*** ./src/objects/block/iter.ts ***!
+  \***********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Iter)
+/* harmony export */ });
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+
+
+class Iter extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+  constructor() {
+    super(...arguments);
+    this._ = { start: 0, stop: 0, step: 1 };
+  }
+  updateRange(args) {
+    if (args.length === 1) {
+      this._.start = 0;
+      this._.stop = +args[0];
+      this._.step = 1;
+    } else if (args.length === 2) {
+      this._.start = +args[0];
+      this._.stop = +args[1];
+      this._.step = 1;
+    } else {
+      this._.start = +args[0];
+      this._.stop = +args[1];
+      this._.step = +args[2];
+    }
+  }
+  subscribe() {
+    super.subscribe();
+    this.on("preInit", () => {
+      this.inlets = 1;
+      this.outlets = 3;
+      this.updateRange(this.args);
+    });
+    this.on("argsUpdated", ({ args }) => {
+      this.updateRange(args);
+    });
+    this.on("inlet", ({ data, inlet }) => {
+      if (inlet === 0) {
+        if (this._.start <= this._.stop) {
+          if (this._.step <= 0) {
+            this.error("iteration will never terminate");
+            return;
+          }
+          for (let i = this._.start; i < this._.stop; i += this._.step) {
+            this.outlet(0, new _sdk__WEBPACK_IMPORTED_MODULE_0__.Bang());
+            this.outlet(2, i);
+          }
+          this.outlet(1, new _sdk__WEBPACK_IMPORTED_MODULE_0__.Bang());
+        } else if (this._.start > this._.stop) {
+          if (this._.step >= 0) {
+            this.error("iteration will never terminate");
+            return;
+          }
+          for (let i = this._.start; i > this._.stop; i += this._.step) {
+            this.outlet(0, new _sdk__WEBPACK_IMPORTED_MODULE_0__.Bang());
+            this.outlet(2, i);
+          }
+          this.outlet(1, new _sdk__WEBPACK_IMPORTED_MODULE_0__.Bang());
+        }
+      }
+    });
+  }
+}
+Iter.package = "electrosmith";
+Iter.author = "Corvus Prudens";
+Iter.version = "1.0";
+Iter.description = "Repeatedly produce bangs until the range is satisfied.";
+Iter.inlets = [
+  {
+    isHot: true,
+    type: "bang",
+    description: "Start the iteration"
+  }
+];
+Iter.outlets = [
+  {
+    type: "bang",
+    description: "Bang for each step in the range"
+  },
+  {
+    type: "bang",
+    description: "Bang when the range is satisfied"
+  },
+  {
+    type: "number",
+    description: "Outputs the value at each step in the range"
+  }
+];
+Iter.args = [
+  {
+    type: "number",
+    description: "The number of iterations if one argument is provided, or the start of the range",
+    optional: false
+  },
+  {
+    type: "number",
+    description: "The end of the range",
+    optional: true
+  },
+  {
+    type: "number",
+    description: "The step size",
+    optional: true
+  }
+];
+
+
+/***/ }),
+
 /***/ "./src/objects/block/mtof.ts":
 /*!***********************************!*\
   !*** ./src/objects/block/mtof.ts ***!
@@ -180,6 +486,89 @@ Mtof.inlets = [
 Mtof.outlets = [{
   type: "number",
   description: "Frequency"
+}];
+
+
+/***/ }),
+
+/***/ "./src/objects/block/select.ts":
+/*!*************************************!*\
+  !*** ./src/objects/block/select.ts ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Select)
+/* harmony export */ });
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+/* harmony import */ var _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @jspatcher/jspatcher/src/core/message */ "../../../frontend/src/core/message.ts");
+
+
+
+class Select extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+  constructor() {
+    super(...arguments);
+    this._ = { right: void 0 };
+  }
+  subscribe() {
+    super.subscribe();
+    this.on("preInit", () => {
+      this.inlets = 1;
+      this.outlets = 1;
+      if (this.args.length) {
+        this._.right = this.args[0];
+      }
+    });
+    this.on("argsUpdated", ({ args }) => {
+      if (this.args.length) {
+        this._.right = args[0];
+      }
+    });
+    this.on("inlet", ({ data: rawData, inlet }) => {
+      if (inlet === 0) {
+        let data = rawData;
+        if (!(this._.right instanceof Array)) {
+          data = (0,_jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_1__.extractFirst)(rawData);
+        }
+        if (data === this._.right) {
+          this.outlet(0, new _sdk__WEBPACK_IMPORTED_MODULE_0__.Bang());
+        } else {
+          this.outlet(1, data);
+        }
+      } else if (inlet === 1) {
+        this._.right = rawData;
+      }
+    });
+  }
+}
+Select.description = "Output a bang when the value matches";
+Select.inlets = [
+  {
+    isHot: true,
+    type: "anything",
+    description: "The input to evaluate"
+  },
+  {
+    isHot: false,
+    type: "anything",
+    description: "The value to compare against"
+  }
+];
+Select.outlets = [
+  {
+    type: "bang",
+    description: "Bangs when the value matches"
+  },
+  {
+    type: "anything",
+    description: "Any input that did not match"
+  }
+];
+Select.args = [{
+  type: "anything",
+  optional: true,
+  description: "The value to compare against"
 }];
 
 
@@ -384,6 +773,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _objects_block_swap__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./objects/block/swap */ "./src/objects/block/swap.ts");
 /* harmony import */ var _objects_block_mtof__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./objects/block/mtof */ "./src/objects/block/mtof.ts");
 /* harmony import */ var _objects_block_ftom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./objects/block/ftom */ "./src/objects/block/ftom.ts");
+/* harmony import */ var _objects_block_iter__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./objects/block/iter */ "./src/objects/block/iter.ts");
+/* harmony import */ var _objects_block_counter__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./objects/block/counter */ "./src/objects/block/counter.ts");
+/* harmony import */ var _objects_block_select__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./objects/block/select */ "./src/objects/block/select.ts");
+
+
+
 
 
 
@@ -393,7 +788,10 @@ __webpack_require__.r(__webpack_exports__);
   "change": _objects_block_change__WEBPACK_IMPORTED_MODULE_0__["default"],
   "swap": _objects_block_swap__WEBPACK_IMPORTED_MODULE_1__["default"],
   "mtof": _objects_block_mtof__WEBPACK_IMPORTED_MODULE_2__["default"],
-  "ftom": _objects_block_ftom__WEBPACK_IMPORTED_MODULE_3__["default"]
+  "ftom": _objects_block_ftom__WEBPACK_IMPORTED_MODULE_3__["default"],
+  "iter": _objects_block_iter__WEBPACK_IMPORTED_MODULE_4__["default"],
+  "counter": _objects_block_counter__WEBPACK_IMPORTED_MODULE_5__["default"],
+  "select": _objects_block_select__WEBPACK_IMPORTED_MODULE_6__["default"]
 }));
 
 })();

@@ -170,6 +170,67 @@ module.exports = function (item) {
 
 /***/ }),
 
+/***/ "../../../frontend/src/core/message.ts":
+/*!*********************************************!*\
+  !*** ../../../frontend/src/core/message.ts ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Message": () => (/* binding */ Message),
+/* harmony export */   "isMessage": () => (/* binding */ isMessage),
+/* harmony export */   "extractFirst": () => (/* binding */ extractFirst)
+/* harmony export */ });
+class Message extends Array {
+  static from(tokens) {
+    const newArr = new Message();
+    for (let i = 0; i < tokens.length; i++) {
+      newArr[i] = tokens[i];
+    }
+    return newArr;
+  }
+  startsWith(value) {
+    if (this.length) {
+      return this[0] === value;
+    }
+    return false;
+  }
+  endsWith(value) {
+    if (this.length) {
+      return this[this.length - 1] === value;
+    }
+    return false;
+  }
+  arithmetic(op) {
+    return (other) => {
+      const result = new Message();
+      const minLength = Math.min(this.length, other.length);
+      for (let i = 0; i < minLength; i++) {
+        if (typeof this[i] === "number" && typeof other[i] === "number") {
+          result.push(op(this[i], other[i]));
+        } else {
+          result.push(this[i]);
+        }
+      }
+      return result;
+    };
+  }
+}
+function isMessage(value) {
+  return value instanceof Message;
+}
+function extractFirst(data) {
+  if (data instanceof Message || data instanceof Array) {
+    return data[0];
+  } else {
+    return data;
+  }
+}
+
+
+/***/ }),
+
 /***/ "./src/index.ts":
 /*!**********************!*\
   !*** ./src/index.ts ***!
@@ -244,13 +305,13 @@ UIObject.description = _index__WEBPACK_IMPORTED_MODULE_0__.description;
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Message": () => (/* binding */ Message),
-/* harmony export */   "isMessage": () => (/* binding */ isMessage),
 /* harmony export */   "default": () => (/* binding */ message)
 /* harmony export */ });
-/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../sdk */ "./src/sdk.ts");
-/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./base */ "./src/objects/base.ts");
-/* harmony import */ var _ui_message__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../ui/message */ "./src/ui/message.tsx");
+/* harmony import */ var _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jspatcher/jspatcher/src/core/message */ "../../../frontend/src/core/message.ts");
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../sdk */ "./src/sdk.ts");
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./base */ "./src/objects/base.ts");
+/* harmony import */ var _ui_message__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../ui/message */ "./src/ui/message.tsx");
+
 
 
 
@@ -308,7 +369,10 @@ function tokenizeMessage(text) {
     let end = tokens[i][length - 1] === '"' ? length - 1 : length;
     tokens[i] = tokens[i].slice(start, end).replace('\\"', '"');
   }
-  let output = new Message(...tokens.map((value) => Number(value) || value));
+  let output = _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.Message.from(tokens.map((value) => {
+    const num = Number(value);
+    return isNaN(num) ? value : num;
+  }));
   return output;
 }
 const FORMATTER_REGEX = /^\$[1-9][0-9]*$/;
@@ -323,38 +387,7 @@ function extractFormatters(message2) {
   }
   return formatters;
 }
-class Message extends Array {
-  startsWith(value) {
-    if (this.length) {
-      return this[0] === value;
-    }
-    return false;
-  }
-  endsWith(value) {
-    if (this.length) {
-      return this[this.length - 1] === value;
-    }
-    return false;
-  }
-  arithmetic(op) {
-    return (other) => {
-      const result = new Message();
-      const minLength = Math.min(this.length, other.length);
-      for (let i = 0; i < minLength; i++) {
-        if (typeof this[i] === "number" && typeof other[i] === "number") {
-          result.push(op(this[i], other[i]));
-        } else {
-          result.push(this[i]);
-        }
-      }
-      return result;
-    };
-  }
-}
-function isMessage(value) {
-  return value instanceof Message;
-}
-const _message = class extends _base__WEBPACK_IMPORTED_MODULE_1__["default"] {
+const _message = class extends _base__WEBPACK_IMPORTED_MODULE_2__["default"] {
   constructor() {
     super(...arguments);
     this._ = { buffer: [], editing: false, formatters: [] };
@@ -377,20 +410,18 @@ const _message = class extends _base__WEBPACK_IMPORTED_MODULE_1__["default"] {
       this.updateUI({ text: this.data.text });
     };
     this.produceOutput = (data) => {
-      if (Array.isArray(this._.buffer)) {
-        if (data && !(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data) && this._.formatters.length) {
-          if (data instanceof Message) {
-            for (let i = 0; i < data.length; i++)
-              this.formatMessage(i + 1, (message2, pos) => this._.buffer[message2][pos] = data[i]);
-          } else {
-            for (let b = 0; b < this._.buffer.length; b++) {
-              this.formatMessage(1, (message2, pos) => this._.buffer[message2][pos] = data);
-            }
+      console.log(JSON.stringify(this._.buffer));
+      if (data && !(0,_sdk__WEBPACK_IMPORTED_MODULE_1__.isBang)(data) && this._.formatters.length) {
+        if (data instanceof _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.Message) {
+          for (let i = 0; i < data.length; i++)
+            this.formatMessage(i + 1, (message2, pos) => this._.buffer[message2][pos] = data[i]);
+        } else {
+          for (let b = 0; b < this._.buffer.length; b++) {
+            this.formatMessage(1, (message2, pos) => this._.buffer[message2][pos] = data);
           }
         }
-        this._.buffer.forEach((m) => this.outlet(0, m));
       } else {
-        this.outlet(0, this._.buffer);
+        this._.buffer.forEach((message2) => this.outlet(0, message2));
       }
     };
   }
@@ -447,7 +478,7 @@ message.outlets = [{
   type: "anything",
   description: "Message to send"
 }];
-message.UI = _ui_message__WEBPACK_IMPORTED_MODULE_2__["default"];
+message.UI = _ui_message__WEBPACK_IMPORTED_MODULE_3__["default"];
 
 
 
@@ -686,6 +717,8 @@ class MessageUI extends _button__WEBPACK_IMPORTED_MODULE_0__["default"] {
     super(...arguments);
     this.handleChanged = (text) => this.object.handleUpdateArgs([text]);
     this.handleClick = (e) => {
+    };
+    this.handleMouseDown = (e) => {
       if (this.editor.state.locked)
         this.object.produceOutput(null);
     };
@@ -1062,7 +1095,7 @@ module.exports = styleTagTransform;
   \**********************/
 /***/ ((module) => {
 
-module.exports = JSON.parse('{"name":"@electrosmith/package-ui","version":"1.0.5","description":"The UI package for JSPatcher","main":"dist/index.js","scripts":{"build":"webpack --mode development","build-watch":"webpack --mode development --watch --stats-children"},"keywords":["jspatcher"],"jspatcher":{"isJSPatcherPackage":true,"thumbnail":"","jspatpkg":"index.jspatpkg.js"},"author":"Fr0stbyteR","license":"GPL-3.0-or-later","repository":"https://github.com/jspatcher/package-ui","devDependencies":{"@jspatcher/jspatcher":"^0.0.10","@types/react":"^17.0.30","clean-webpack-plugin":"^4.0.0","color-js":"^1.0.5","css-loader":"^6.4.0","esbuild-loader":"^2.16.0","monaco-editor":"^0.27.0","react":"^17.0.2","react-monaco-editor":"^0.44.0","sass":"^1.45.2","sass-loader":"^12.2.0","semantic-ui-react":"^2.0.4","style-loader":"^3.3.0","typescript":"^4.4.4","util":"^0.12.4","webpack":"^5.58.2","webpack-cli":"^4.9.1"}}');
+module.exports = JSON.parse('{"name":"@electrosmith/package-ui","version":"1.0.5","description":"The UI package for JSPatcher","main":"dist/index.js","scripts":{"build":"webpack --mode development","build-watch":"webpack --mode development --watch --stats-children"},"keywords":["jspatcher"],"jspatcher":{"isJSPatcherPackage":true,"thumbnail":"","jspatpkg":"index.jspatpkg.js"},"author":"Fr0stbyteR","license":"GPL-3.0-or-later","repository":"https://github.com/jspatcher/package-ui","devDependencies":{"@jspatcher/jspatcher":"file:../../../frontend","@types/react":"^17.0.30","clean-webpack-plugin":"^4.0.0","color-js":"^1.0.5","css-loader":"^6.4.0","esbuild-loader":"^2.16.0","monaco-editor":"^0.27.0","react":"^17.0.2","react-monaco-editor":"^0.44.0","sass":"^1.45.2","sass-loader":"^12.2.0","semantic-ui-react":"^2.0.4","style-loader":"^3.3.0","typescript":"^4.4.4","util":"^0.12.4","webpack":"^5.58.2","webpack-cli":"^4.9.1"}}');
 
 /***/ })
 

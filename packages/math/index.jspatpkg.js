@@ -215,10 +215,10 @@ JsDspProcessor.inlets = [];
 JsDspProcessor.outlets = [];
 JsDspProcessor.args = [];
 JsDspProcessor.props = {
-  "smoothInput": {
+  smoothInput: {
     type: "number",
-    default: 0,
-    description: "How much smoothing to apply over the block"
+    default: 0.05,
+    description: "Linear interpolation coefficient to block-rate input values in seconds"
   }
 };
 
@@ -531,30 +531,30 @@ Unary.outlets = [{
 
 /***/ }),
 
-/***/ "./src/objects/dsp/binary.ts":
-/*!***********************************!*\
-  !*** ./src/objects/dsp/binary.ts ***!
-  \***********************************/
+/***/ "./src/objects/dsp/add.ts":
+/*!********************************!*\
+  !*** ./src/objects/dsp/add.ts ***!
+  \********************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ Binary)
+/* harmony export */   "default": () => (/* binding */ Add)
 /* harmony export */ });
 /* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
 
-class Binary extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
+class Add extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
   process(inputs, outputs, parameters) {
     let in1 = inputs[0][0];
     let in2 = inputs[0][1];
     let outputStream = outputs[0][0];
     for (let i = 0; i < in1.length; i++) {
-      outputStream[i] = this.execute(in1[i], in2[i]);
+      outputStream[i] = in1[i] + in2[i];
     }
     return true;
   }
 }
-Binary.inlets = [
+Add.inlets = [
   {
     isHot: true,
     type: "signal",
@@ -568,14 +568,14 @@ Binary.inlets = [
     varLength: true
   }
 ];
-Binary.outlets = [
+Add.outlets = [
   {
     type: "signal",
     description: "audio output connection",
     varLength: true
   }
 ];
-Binary.args = [
+Add.args = [
   {
     type: "number",
     optional: true,
@@ -583,7 +583,292 @@ Binary.args = [
     default: 0
   }
 ];
-Binary.argsOffset = 1;
+Add.argsOffset = 1;
+
+
+/***/ }),
+
+/***/ "./src/objects/dsp/div.ts":
+/*!********************************!*\
+  !*** ./src/objects/dsp/div.ts ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Div)
+/* harmony export */ });
+/* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+
+class Div extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  process(inputs, outputs, parameters) {
+    let in1 = inputs[0][0];
+    let in2 = inputs[0][1];
+    let outputStream = outputs[0][0];
+    for (let i = 0; i < in1.length; i++) {
+      outputStream[i] = in1[i] / in2[i];
+    }
+    return true;
+  }
+}
+Div.inlets = [
+  {
+    isHot: true,
+    type: "signal",
+    description: "audio input connection 1",
+    varLength: true
+  },
+  {
+    isHot: true,
+    type: "signal",
+    description: "audio input connection 2",
+    varLength: true
+  }
+];
+Div.outlets = [
+  {
+    type: "signal",
+    description: "audio output connection",
+    varLength: true
+  }
+];
+Div.args = [
+  {
+    type: "number",
+    optional: true,
+    description: "initial argument",
+    default: 0
+  }
+];
+Div.argsOffset = 1;
+
+
+/***/ }),
+
+/***/ "./src/objects/dsp/mul.ts":
+/*!********************************!*\
+  !*** ./src/objects/dsp/mul.ts ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Mul)
+/* harmony export */ });
+/* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+
+class Mul extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  process(inputs, outputs, parameters) {
+    let in1 = inputs[0][0];
+    let in2 = inputs[0][1];
+    let outputStream = outputs[0][0];
+    for (let i = 0; i < in1.length; i++) {
+      outputStream[i] = in1[i] * in2[i];
+    }
+    return true;
+  }
+}
+Mul.inlets = [
+  {
+    isHot: true,
+    type: "signal",
+    description: "audio input connection 1",
+    varLength: true
+  },
+  {
+    isHot: true,
+    type: "signal",
+    description: "audio input connection 2",
+    varLength: true
+  }
+];
+Mul.outlets = [
+  {
+    type: "signal",
+    description: "audio output connection",
+    varLength: true
+  }
+];
+Mul.args = [
+  {
+    type: "number",
+    optional: true,
+    description: "initial argument",
+    default: 0
+  }
+];
+Mul.argsOffset = 1;
+
+
+/***/ }),
+
+/***/ "./src/objects/dsp/rev_div.ts":
+/*!************************************!*\
+  !*** ./src/objects/dsp/rev_div.ts ***!
+  \************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ ReverseDiv)
+/* harmony export */ });
+/* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+
+class ReverseDiv extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  process(inputs, outputs, parameters) {
+    let in1 = inputs[0][0];
+    let in2 = inputs[0][1];
+    let outputStream = outputs[0][0];
+    for (let i = 0; i < in1.length; i++) {
+      outputStream[i] = in2[i] / in1[i];
+    }
+    return true;
+  }
+}
+ReverseDiv.inlets = [
+  {
+    isHot: true,
+    type: "signal",
+    description: "audio input connection 1",
+    varLength: true
+  },
+  {
+    isHot: true,
+    type: "signal",
+    description: "audio input connection 2",
+    varLength: true
+  }
+];
+ReverseDiv.outlets = [
+  {
+    type: "signal",
+    description: "audio output connection",
+    varLength: true
+  }
+];
+ReverseDiv.args = [
+  {
+    type: "number",
+    optional: true,
+    description: "initial argument",
+    default: 0
+  }
+];
+ReverseDiv.argsOffset = 1;
+
+
+/***/ }),
+
+/***/ "./src/objects/dsp/rev_sub.ts":
+/*!************************************!*\
+  !*** ./src/objects/dsp/rev_sub.ts ***!
+  \************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ ReverseSub)
+/* harmony export */ });
+/* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+
+class ReverseSub extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  process(inputs, outputs, parameters) {
+    let in1 = inputs[0][0];
+    let in2 = inputs[0][1];
+    let outputStream = outputs[0][0];
+    for (let i = 0; i < in1.length; i++) {
+      outputStream[i] = in2[i] - in1[i];
+    }
+    return true;
+  }
+}
+ReverseSub.inlets = [
+  {
+    isHot: true,
+    type: "signal",
+    description: "audio input connection 1",
+    varLength: true
+  },
+  {
+    isHot: true,
+    type: "signal",
+    description: "audio input connection 2",
+    varLength: true
+  }
+];
+ReverseSub.outlets = [
+  {
+    type: "signal",
+    description: "audio output connection",
+    varLength: true
+  }
+];
+ReverseSub.args = [
+  {
+    type: "number",
+    optional: true,
+    description: "initial argument",
+    default: 0
+  }
+];
+ReverseSub.argsOffset = 1;
+
+
+/***/ }),
+
+/***/ "./src/objects/dsp/sub.ts":
+/*!********************************!*\
+  !*** ./src/objects/dsp/sub.ts ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Sub)
+/* harmony export */ });
+/* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+
+class Sub extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  process(inputs, outputs, parameters) {
+    let in1 = inputs[0][0];
+    let in2 = inputs[0][1];
+    let outputStream = outputs[0][0];
+    for (let i = 0; i < in1.length; i++) {
+      outputStream[i] = in1[i] - in2[i];
+    }
+    return true;
+  }
+}
+Sub.inlets = [
+  {
+    isHot: true,
+    type: "signal",
+    description: "audio input connection 1",
+    varLength: true
+  },
+  {
+    isHot: true,
+    type: "signal",
+    description: "audio input connection 2",
+    varLength: true
+  }
+];
+Sub.outlets = [
+  {
+    type: "signal",
+    description: "audio output connection",
+    varLength: true
+  }
+];
+Sub.args = [
+  {
+    type: "number",
+    optional: true,
+    description: "initial argument",
+    default: 0
+  }
+];
+Sub.argsOffset = 1;
 
 
 /***/ }),
@@ -658,7 +943,7 @@ const {
   \*************************************/
 /***/ ((module) => {
 
-module.exports = JSON.parse('{"name":"@electrosmith/package-math","version":"1.0.0","description":"The math package for jspatcher","main":"dist/index.js","scripts":{"build":"webpack --mode development","build-watch":"webpack --mode development --watch --stats-children"},"keywords":["jspatcher"],"jspatcher":{"isJSPatcherPackage":true,"thumbnail":"","jspatpkg":"index.jspatpkg.js"},"author":"Corvus Prudens","license":"MIT","repository":"https://github.com/electro-smith/Patcher-Objects","devDependencies":{"@jspatcher/jspatcher":"^0.0.9","@types/react":"^17.0.19","clean-webpack-plugin":"^4.0.0-alpha.0","css-loader":"^6.4.0","esbuild-loader":"^2.15.1","react":"^17.0.2","sass":"^1.45.2","sass-loader":"^12.2.0","style-loader":"^3.3.0","typescript":"^4.4.2","webpack":"^5.51.1","webpack-cli":"^4.8.0"}}');
+module.exports = JSON.parse('{"name":"@electrosmith/package-math","version":"1.0.0","description":"The math package for jspatcher","main":"dist/index.js","scripts":{"build":"webpack --mode development","build-watch":"webpack --mode development --watch --stats-children"},"keywords":["jspatcher"],"jspatcher":{"isJSPatcherPackage":true,"thumbnail":"","jspatpkg":"index.jspatpkg.js"},"author":"Corvus Prudens","license":"MIT","repository":"https://github.com/electro-smith/Patcher-Objects","devDependencies":{"@jspatcher/jspatcher":"file:../../../frontend","@types/react":"^17.0.19","clean-webpack-plugin":"^4.0.0-alpha.0","css-loader":"^6.4.0","esbuild-loader":"^2.15.1","react":"^17.0.2","sass":"^1.45.2","sass-loader":"^12.2.0","style-loader":"^3.3.0","typescript":"^4.4.2","webpack":"^5.51.1","webpack-cli":"^4.8.0"}}');
 
 /***/ }),
 
@@ -668,7 +953,7 @@ module.exports = JSON.parse('{"name":"@electrosmith/package-math","version":"1.0
   \**********************/
 /***/ ((module) => {
 
-module.exports = JSON.parse('{"name":"@electrosmith/package-math","version":"1.0.0","description":"The math package for jspatcher","main":"dist/index.js","scripts":{"build":"webpack --mode development","build-watch":"webpack --mode development --watch --stats-children"},"keywords":["jspatcher"],"jspatcher":{"isJSPatcherPackage":true,"thumbnail":"","jspatpkg":"index.jspatpkg.js"},"author":"Corvus Prudens","license":"MIT","repository":"https://github.com/electro-smith/Patcher-Objects","devDependencies":{"@jspatcher/jspatcher":"^0.0.9","@types/react":"^17.0.19","clean-webpack-plugin":"^4.0.0-alpha.0","css-loader":"^6.4.0","esbuild-loader":"^2.15.1","react":"^17.0.2","sass":"^1.45.2","sass-loader":"^12.2.0","style-loader":"^3.3.0","typescript":"^4.4.2","webpack":"^5.51.1","webpack-cli":"^4.8.0"}}');
+module.exports = JSON.parse('{"name":"@electrosmith/package-math","version":"1.0.0","description":"The math package for jspatcher","main":"dist/index.js","scripts":{"build":"webpack --mode development","build-watch":"webpack --mode development --watch --stats-children"},"keywords":["jspatcher"],"jspatcher":{"isJSPatcherPackage":true,"thumbnail":"","jspatpkg":"index.jspatpkg.js"},"author":"Corvus Prudens","license":"MIT","repository":"https://github.com/electro-smith/Patcher-Objects","devDependencies":{"@jspatcher/jspatcher":"file:../../../frontend","@types/react":"^17.0.19","clean-webpack-plugin":"^4.0.0-alpha.0","css-loader":"^6.4.0","esbuild-loader":"^2.15.1","react":"^17.0.2","sass":"^1.45.2","sass-loader":"^12.2.0","style-loader":"^3.3.0","typescript":"^4.4.2","webpack":"^5.51.1","webpack-cli":"^4.8.0"}}');
 
 /***/ })
 
@@ -769,10 +1054,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _objects_block_binary__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./objects/block/binary */ "./src/objects/block/binary.ts");
-/* harmony import */ var _objects_dsp_binary__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./objects/dsp/binary */ "./src/objects/dsp/binary.ts");
-/* harmony import */ var _objects_block_unary__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./objects/block/unary */ "./src/objects/block/unary.ts");
-/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./sdk */ "./src/sdk.ts");
-/* harmony import */ var _common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../../common/web/jsDspObject */ "../../common/web/jsDspObject.ts");
+/* harmony import */ var _objects_block_unary__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./objects/block/unary */ "./src/objects/block/unary.ts");
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./sdk */ "./src/sdk.ts");
+/* harmony import */ var _common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../common/web/jsDspObject */ "../../common/web/jsDspObject.ts");
+/* harmony import */ var _objects_dsp_add__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./objects/dsp/add */ "./src/objects/dsp/add.ts");
+/* harmony import */ var _objects_dsp_mul__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./objects/dsp/mul */ "./src/objects/dsp/mul.ts");
+/* harmony import */ var _objects_dsp_sub__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./objects/dsp/sub */ "./src/objects/dsp/sub.ts");
+/* harmony import */ var _objects_dsp_div__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./objects/dsp/div */ "./src/objects/dsp/div.ts");
+/* harmony import */ var _objects_dsp_rev_div__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./objects/dsp/rev_div */ "./src/objects/dsp/rev_div.ts");
+/* harmony import */ var _objects_dsp_rev_sub__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./objects/dsp/rev_sub */ "./src/objects/dsp/rev_sub.ts");
 var __defProp = Object.defineProperty;
 var __getOwnPropSymbols = Object.getOwnPropertySymbols;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
@@ -794,8 +1084,13 @@ var __spreadValues = (a, b) => {
 
 
 
-const Binary = (0,_sdk__WEBPACK_IMPORTED_MODULE_3__.generateDefaultObject)(_objects_block_binary__WEBPACK_IMPORTED_MODULE_0__["default"]);
-const Unary = (0,_sdk__WEBPACK_IMPORTED_MODULE_3__.generateDefaultObject)(_objects_block_unary__WEBPACK_IMPORTED_MODULE_2__["default"]);
+
+
+
+
+
+const Binary = (0,_sdk__WEBPACK_IMPORTED_MODULE_2__.generateDefaultObject)(_objects_block_binary__WEBPACK_IMPORTED_MODULE_0__["default"]);
+const Unary = (0,_sdk__WEBPACK_IMPORTED_MODULE_2__.generateDefaultObject)(_objects_block_unary__WEBPACK_IMPORTED_MODULE_1__["default"]);
 const BinaryObjects = {};
 const binary_functions = {
   "+": { f: (a, b) => a + b, n: "Add" },
@@ -814,7 +1109,9 @@ const binary_functions = {
   "||": { f: (a, b) => a || b, n: "Boolean OR" },
   "max": { f: (a, b) => a > b ? a : b, n: "Max" },
   "min": { f: (a, b) => a < b ? a : b, n: "Min" },
-  "pow": { f: (a, b) => a ** b, n: "Power" }
+  "pow": { f: (a, b) => a ** b, n: "Power" },
+  "%": { f: (a, b) => a % b, n: "Mod" },
+  "!%": { f: (a, b) => b % a, n: "Reverse Mod" }
 };
 for (const key in binary_functions) {
   BinaryObjects[key] = class extends Binary {
@@ -843,37 +1140,14 @@ for (const key in unary_functions) {
     }
   };
 }
-const binary_audio_functions = {
-  "+~": { f: (a, b) => a + b, n: "Add" },
-  "-~": { f: (a, b) => a - b, n: "Sub" },
-  "!-~": { f: (a, b) => b - a, n: "Reverse Sub" },
-  "*~": { f: (a, b) => a * b, n: "Mul" },
-  "/~": { f: (a, b) => a / b, n: "Div" },
-  "!/~": { f: (a, b) => b / a, n: "Reverse Div" },
-  "==~": { f: (a, b) => Number(a == b), n: "Equal" },
-  "!=~": { f: (a, b) => Number(a != b), n: "Not equal" },
-  ">~": { f: (a, b) => Number(a > b), n: "Greater" },
-  ">=~": { f: (a, b) => Number(a >= b), n: "Greater or equal" },
-  "<~": { f: (a, b) => Number(a < b), n: "Less" },
-  "<=~": { f: (a, b) => Number(a <= b), n: "Less or equal" },
-  "&&~": { f: (a, b) => Number(a && b), n: "Boolean AND" },
-  "||~": { f: (a, b) => Number(a || b), n: "Boolean OR" },
-  "max~": { f: (a, b) => a > b ? a : b, n: "Max" },
-  "min~": { f: (a, b) => a < b ? a : b, n: "Min" },
-  "pow~": { f: (a, b) => a ** b, n: "Power" }
+const BinaryAudioObjects = {
+  "+~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_add__WEBPACK_IMPORTED_MODULE_4__["default"], "Add"),
+  "-~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_sub__WEBPACK_IMPORTED_MODULE_6__["default"], "Sub"),
+  "*~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_mul__WEBPACK_IMPORTED_MODULE_5__["default"], "Mul"),
+  "/~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_div__WEBPACK_IMPORTED_MODULE_7__["default"], "Div"),
+  "!/~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_rev_div__WEBPACK_IMPORTED_MODULE_8__["default"], "Reverse Div"),
+  "!-~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_rev_sub__WEBPACK_IMPORTED_MODULE_9__["default"], "Reverse Sub")
 };
-const BinaryAudioObjects = {};
-for (const key in binary_audio_functions) {
-  BinaryAudioObjects[key] = (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__.generateObject)(class extends _objects_dsp_binary__WEBPACK_IMPORTED_MODULE_1__["default"] {
-    constructor() {
-      super(...arguments);
-      this.execute = binary_audio_functions[key].f;
-    }
-    static get _name() {
-      return binary_audio_functions[key].n;
-    }
-  }, key);
-}
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (async () => __spreadValues(__spreadValues(__spreadValues({}, BinaryObjects), UnaryObjects), BinaryAudioObjects));
 
 })();

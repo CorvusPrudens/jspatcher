@@ -249,6 +249,134 @@ Counter.args = [
 
 /***/ }),
 
+/***/ "./src/objects/block/dbtopow.ts":
+/*!**************************************!*\
+  !*** ./src/objects/block/dbtopow.ts ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Dbtopow)
+/* harmony export */ });
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+
+
+class Dbtopow extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+  constructor() {
+    super(...arguments);
+    this._ = { power: void 0 };
+  }
+  subscribe() {
+    super.subscribe();
+    this.on("preInit", () => {
+      this.inlets = 1;
+      this.outlets = 1;
+    });
+    this.on("inlet", ({ data, inlet }) => {
+      if (inlet === 0) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+          try {
+            if (data <= 0) {
+              this._.power = 0;
+            } else {
+              if (data > 870)
+                data = 870;
+              this._.power = Math.exp(2.302585092994046 * 0.1 * (data - 100));
+            }
+          } catch (e) {
+            this.error(e);
+            return;
+          }
+        }
+        this.outlet(0, this._.power);
+      }
+    });
+  }
+}
+Dbtopow.package = "electrosmith";
+Dbtopow.author = "btice";
+Dbtopow.version = "1.0";
+Dbtopow.description = "Convert decibels to power units (equal to the square of RMS Amplitude)";
+Dbtopow.inlets = [
+  {
+    isHot: true,
+    type: "number",
+    description: "Decibels"
+  }
+];
+Dbtopow.outlets = [{
+  type: "number",
+  description: "Power"
+}];
+
+
+/***/ }),
+
+/***/ "./src/objects/block/dbtorms.ts":
+/*!**************************************!*\
+  !*** ./src/objects/block/dbtorms.ts ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Dbtorms)
+/* harmony export */ });
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+
+
+class Dbtorms extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+  constructor() {
+    super(...arguments);
+    this._ = { rms: void 0 };
+  }
+  subscribe() {
+    super.subscribe();
+    this.on("preInit", () => {
+      this.inlets = 1;
+      this.outlets = 1;
+    });
+    this.on("inlet", ({ data, inlet }) => {
+      if (inlet === 0) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+          try {
+            if (data <= 0) {
+              this._.rms = 0;
+            } else {
+              if (data > 485)
+                data = 485;
+              this._.rms = Math.exp(2.302585092994046 * 0.05 * (data - 100));
+            }
+          } catch (e) {
+            this.error(e);
+            return;
+          }
+        }
+        this.outlet(0, this._.rms);
+      }
+    });
+  }
+}
+Dbtorms.package = "electrosmith";
+Dbtorms.author = "btice";
+Dbtorms.version = "1.0";
+Dbtorms.description = "Convert decibels to power units (equal to the square of RMS Amplitude)";
+Dbtorms.inlets = [
+  {
+    isHot: true,
+    type: "number",
+    description: "Decibels"
+  }
+];
+Dbtorms.outlets = [{
+  type: "number",
+  description: "RMS Amplitude"
+}];
+
+
+/***/ }),
+
 /***/ "./src/objects/block/ftom.ts":
 /*!***********************************!*\
   !*** ./src/objects/block/ftom.ts ***!
@@ -486,6 +614,136 @@ Mtof.inlets = [
 Mtof.outlets = [{
   type: "number",
   description: "Frequency"
+}];
+
+
+/***/ }),
+
+/***/ "./src/objects/block/powtodb.ts":
+/*!**************************************!*\
+  !*** ./src/objects/block/powtodb.ts ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Powtodb)
+/* harmony export */ });
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+
+
+class Powtodb extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+  constructor() {
+    super(...arguments);
+    this._ = { decibels: void 0 };
+  }
+  subscribe() {
+    super.subscribe();
+    this.on("preInit", () => {
+      this.inlets = 1;
+      this.outlets = 1;
+    });
+    this.on("inlet", ({ data, inlet }) => {
+      if (inlet === 0) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+          try {
+            if (data <= 0) {
+              this._.decibels = 0;
+            } else {
+              this._.decibels = 100 + 10 / 2.302585092994046 * Math.log(data);
+              if (this._.decibels < 0) {
+                this._.decibels = 0;
+              }
+            }
+          } catch (e) {
+            this.error(e);
+            return;
+          }
+        }
+        this.outlet(0, this._.decibels);
+      }
+    });
+  }
+}
+Powtodb.package = "electrosmith";
+Powtodb.author = "btice";
+Powtodb.version = "1.0";
+Powtodb.description = "Convert power units (equal to square of RMS Amplitude), to decibels";
+Powtodb.inlets = [
+  {
+    isHot: true,
+    type: "number",
+    description: "Power"
+  }
+];
+Powtodb.outlets = [{
+  type: "number",
+  description: "Decibels"
+}];
+
+
+/***/ }),
+
+/***/ "./src/objects/block/rmstodb.ts":
+/*!**************************************!*\
+  !*** ./src/objects/block/rmstodb.ts ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Rmstodb)
+/* harmony export */ });
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+
+
+class Rmstodb extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+  constructor() {
+    super(...arguments);
+    this._ = { decibels: void 0 };
+  }
+  subscribe() {
+    super.subscribe();
+    this.on("preInit", () => {
+      this.inlets = 1;
+      this.outlets = 1;
+    });
+    this.on("inlet", ({ data, inlet }) => {
+      if (inlet === 0) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+          try {
+            if (data <= 0) {
+              this._.decibels = 0;
+            } else {
+              this._.decibels = 100 + 20 / 2.302585092994046 * Math.log(data);
+              if (this._.decibels < 0) {
+                this._.decibels = 0;
+              }
+            }
+          } catch (e) {
+            this.error(e);
+            return;
+          }
+        }
+        this.outlet(0, this._.decibels);
+      }
+    });
+  }
+}
+Rmstodb.package = "electrosmith";
+Rmstodb.author = "btice";
+Rmstodb.version = "1.0";
+Rmstodb.description = "Convert RMS Amplitude to Decibels";
+Rmstodb.inlets = [
+  {
+    isHot: true,
+    type: "number",
+    description: "RMS"
+  }
+];
+Rmstodb.outlets = [{
+  type: "number",
+  description: "Decibels"
 }];
 
 
@@ -773,9 +1031,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _objects_block_swap__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./objects/block/swap */ "./src/objects/block/swap.ts");
 /* harmony import */ var _objects_block_mtof__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./objects/block/mtof */ "./src/objects/block/mtof.ts");
 /* harmony import */ var _objects_block_ftom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./objects/block/ftom */ "./src/objects/block/ftom.ts");
-/* harmony import */ var _objects_block_iter__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./objects/block/iter */ "./src/objects/block/iter.ts");
-/* harmony import */ var _objects_block_counter__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./objects/block/counter */ "./src/objects/block/counter.ts");
-/* harmony import */ var _objects_block_select__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./objects/block/select */ "./src/objects/block/select.ts");
+/* harmony import */ var _objects_block_powtodb__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./objects/block/powtodb */ "./src/objects/block/powtodb.ts");
+/* harmony import */ var _objects_block_dbtopow__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./objects/block/dbtopow */ "./src/objects/block/dbtopow.ts");
+/* harmony import */ var _objects_block_dbtorms__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./objects/block/dbtorms */ "./src/objects/block/dbtorms.ts");
+/* harmony import */ var _objects_block_rmstodb__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./objects/block/rmstodb */ "./src/objects/block/rmstodb.ts");
+/* harmony import */ var _objects_block_iter__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./objects/block/iter */ "./src/objects/block/iter.ts");
+/* harmony import */ var _objects_block_counter__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./objects/block/counter */ "./src/objects/block/counter.ts");
+/* harmony import */ var _objects_block_select__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./objects/block/select */ "./src/objects/block/select.ts");
+
+
+
+
 
 
 
@@ -789,9 +1055,13 @@ __webpack_require__.r(__webpack_exports__);
   "swap": _objects_block_swap__WEBPACK_IMPORTED_MODULE_1__["default"],
   "mtof": _objects_block_mtof__WEBPACK_IMPORTED_MODULE_2__["default"],
   "ftom": _objects_block_ftom__WEBPACK_IMPORTED_MODULE_3__["default"],
-  "iter": _objects_block_iter__WEBPACK_IMPORTED_MODULE_4__["default"],
-  "counter": _objects_block_counter__WEBPACK_IMPORTED_MODULE_5__["default"],
-  "select": _objects_block_select__WEBPACK_IMPORTED_MODULE_6__["default"]
+  "powtodb": _objects_block_powtodb__WEBPACK_IMPORTED_MODULE_4__["default"],
+  "dbtopow": _objects_block_dbtopow__WEBPACK_IMPORTED_MODULE_5__["default"],
+  "dbtorms": _objects_block_dbtorms__WEBPACK_IMPORTED_MODULE_6__["default"],
+  "rmstodb": _objects_block_rmstodb__WEBPACK_IMPORTED_MODULE_7__["default"],
+  "iter": _objects_block_iter__WEBPACK_IMPORTED_MODULE_8__["default"],
+  "counter": _objects_block_counter__WEBPACK_IMPORTED_MODULE_9__["default"],
+  "select": _objects_block_select__WEBPACK_IMPORTED_MODULE_10__["default"]
 }));
 
 })();

@@ -310,7 +310,7 @@ define(['./workbox-43d32f61'], (function (workbox) { 'use strict';
     "revision": "9e95a1bcac6cc2001d1c06c86e235f2f"
   }, {
     "url": "index.js",
-    "revision": "33e771b9183a8fd8beb854fc14c94f8c"
+    "revision": "41a083c2e787e91843a35b0be3f8e09c"
   }, {
     "url": "js/04b79c2db9d67ae77054.worker.js",
     "revision": null
@@ -339,9 +339,6 @@ define(['./workbox-43d32f61'], (function (workbox) { 'use strict';
     "url": "js/1b76c636af2e5193061d.worker.js",
     "revision": null
   }, {
-    "url": "js/2200ec866d0bcf23bbe4.worklet.js",
-    "revision": null
-  }, {
     "url": "js/2b48d30756418705e93b.js",
     "revision": null
   }, {
@@ -367,6 +364,9 @@ define(['./workbox-43d32f61'], (function (workbox) { 'use strict';
     "revision": null
   }, {
     "url": "js/5d877e0ec8230eaa8931.worklet.js",
+    "revision": null
+  }, {
+    "url": "js/5f6c3e1c412abfcec240.worklet.js",
     "revision": null
   }, {
     "url": "js/6b1ed1bedd96f08944b0e5a8b12c4739.worker.js",
@@ -436,7 +436,7 @@ define(['./workbox-43d32f61'], (function (workbox) { 'use strict';
     "revision": "e27e234eac8297a7cba68d54411523e0"
   }, {
     "url": "packages/generators/index.jspatpkg.js",
-    "revision": "df9bf8cd3d150ceb5d5232e43920ba1d"
+    "revision": "a56f2140aa80d75f1b77743c1a81d9e0"
   }, {
     "url": "packages/internal-packages.json",
     "revision": "a58b27b3464b896244d65202109e969c"
@@ -457,7 +457,7 @@ define(['./workbox-43d32f61'], (function (workbox) { 'use strict';
     "revision": "cdb7c48976af8e388ade5089f62375e0"
   }, {
     "url": "packages/ui/index.jspatpkg.js",
-    "revision": "a1c7b20c2794c5bf2614287bff0b1799"
+    "revision": "7369c946c12ef77ea0c7e3793bc81163"
   }, {
     "url": "packages/utilities/index.js",
     "revision": "91720f7c6c9464657f9b5559ccdc54b2"
@@ -465,34 +465,34 @@ define(['./workbox-43d32f61'], (function (workbox) { 'use strict';
     "url": "packages/utilities/index.jspatpkg.js",
     "revision": "2a5a4db7b0561b282fd86adcad808f47"
   }, {
-    "url": "src_core_audio_AudioEditor_ts-src_core_audio_AudioRecorder_ts-src_core_audio_PatcherAudio_ts.js/2200ec866d0bcf23bbe4.worklet.js",
+    "url": "src_core_audio_AudioEditor_ts-src_core_audio_AudioRecorder_ts-src_core_audio_PatcherAudio_ts.js/5f6c3e1c412abfcec240.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_hardware_HardwareEditor_ts.js/2200ec866d0bcf23bbe4.worklet.js",
+    "url": "src_core_hardware_HardwareEditor_ts.js/5f6c3e1c412abfcec240.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_hardware_Patcher_ts.js/2200ec866d0bcf23bbe4.worklet.js",
+    "url": "src_core_hardware_Patcher_ts.js/5f6c3e1c412abfcec240.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_image_ImageEditor_ts.js/2200ec866d0bcf23bbe4.worklet.js",
+    "url": "src_core_image_ImageEditor_ts.js/5f6c3e1c412abfcec240.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_image_PatcherImage_ts.js/2200ec866d0bcf23bbe4.worklet.js",
+    "url": "src_core_image_PatcherImage_ts.js/5f6c3e1c412abfcec240.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_text_PatcherText_ts.js/2200ec866d0bcf23bbe4.worklet.js",
+    "url": "src_core_text_PatcherText_ts.js/5f6c3e1c412abfcec240.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_text_TextEditor_ts.js/2200ec866d0bcf23bbe4.worklet.js",
+    "url": "src_core_text_TextEditor_ts.js/5f6c3e1c412abfcec240.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_video_PatcherVideo_ts.js/2200ec866d0bcf23bbe4.worklet.js",
+    "url": "src_core_video_PatcherVideo_ts.js/5f6c3e1c412abfcec240.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_video_VideoEditor_ts.js/2200ec866d0bcf23bbe4.worklet.js",
+    "url": "src_core_video_VideoEditor_ts.js/5f6c3e1c412abfcec240.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_worklets_PatcherNode_ts.js/2200ec866d0bcf23bbe4.worklet.js",
+    "url": "src_core_worklets_PatcherNode_ts.js/5f6c3e1c412abfcec240.worklet.js",
     "revision": null
   }], {});
   workbox.cleanupOutdatedCaches();

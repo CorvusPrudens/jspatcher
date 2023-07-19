@@ -410,7 +410,6 @@ const _message = class extends _base__WEBPACK_IMPORTED_MODULE_2__["default"] {
       this.updateUI({ text: this.data.text });
     };
     this.produceOutput = (data) => {
-      console.log(JSON.stringify(this._.buffer));
       if (data && !(0,_sdk__WEBPACK_IMPORTED_MODULE_1__.isBang)(data) && this._.formatters.length) {
         if (data instanceof _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.Message) {
           for (let i = 0; i < data.length; i++)
@@ -420,9 +419,8 @@ const _message = class extends _base__WEBPACK_IMPORTED_MODULE_2__["default"] {
             this.formatMessage(1, (message2, pos) => this._.buffer[message2][pos] = data);
           }
         }
-      } else {
-        this._.buffer.forEach((message2) => this.outlet(0, message2));
       }
+      this._.buffer.forEach((message2) => this.outlet(0, message2));
     };
   }
   subscribe() {

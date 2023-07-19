@@ -802,6 +802,81 @@ Cycle.argsOffset = 0;
 
 /***/ }),
 
+/***/ "./src/objects/dsp/phasor.ts":
+/*!***********************************!*\
+  !*** ./src/objects/dsp/phasor.ts ***!
+  \***********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Phasor)
+/* harmony export */ });
+/* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+
+class Phasor extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  process(inputs, outputs, parameters) {
+    let frequency = inputs[0][0];
+    let phase = inputs[0][1];
+    let outputStream = outputs[0][0];
+    for (let i = 0; i < frequency.length; i++) {
+      let step = frequency[i] / this.sample_rate_;
+      step = Math.max(Math.min(step, 1), -1);
+      let phase_offset = Math.min(Math.max(phase[i], 0), 1);
+      this.phase_ += step;
+      if (this.phase_ >= 1)
+        this.phase_ -= 1;
+      else if (this.phase_ < 0)
+        this.phase_ += 1;
+      outputStream[i] = (this.phase_ + phase_offset) % 1;
+    }
+    return true;
+  }
+  init(sampleRate) {
+    this.sample_rate_ = sampleRate;
+    this.phase_ = 0;
+  }
+}
+Phasor.inlets = [
+  {
+    isHot: true,
+    type: "signal",
+    description: "frequency",
+    varLength: true
+  },
+  {
+    isHot: true,
+    type: "signal",
+    description: "phase offset",
+    varLength: true
+  }
+];
+Phasor.outlets = [
+  {
+    type: "signal",
+    description: "output",
+    varLength: true
+  }
+];
+Phasor.args = [
+  {
+    type: "number",
+    optional: true,
+    description: "frequency",
+    default: 440
+  },
+  {
+    type: "number",
+    optional: true,
+    description: "phase offset",
+    default: 0
+  }
+];
+Phasor.argsOffset = 0;
+
+
+/***/ }),
+
 /***/ "./src/sdk.ts":
 /*!********************!*\
   !*** ./src/sdk.ts ***!
@@ -955,17 +1030,20 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _objects_dsp_cycle__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./objects/dsp/cycle */ "./src/objects/dsp/cycle.ts");
-/* harmony import */ var _objects_block_line__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./objects/block/line */ "./src/objects/block/line.ts");
-/* harmony import */ var _objects_block_metro__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./objects/block/metro */ "./src/objects/block/metro.ts");
-/* harmony import */ var _common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../common/web/jsDspObject */ "../../common/web/jsDspObject.ts");
+/* harmony import */ var _objects_dsp_phasor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./objects/dsp/phasor */ "./src/objects/dsp/phasor.ts");
+/* harmony import */ var _objects_block_line__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./objects/block/line */ "./src/objects/block/line.ts");
+/* harmony import */ var _objects_block_metro__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./objects/block/metro */ "./src/objects/block/metro.ts");
+/* harmony import */ var _common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../../common/web/jsDspObject */ "../../common/web/jsDspObject.ts");
+
 
 
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (async () => ({
-  "cycle~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_cycle__WEBPACK_IMPORTED_MODULE_0__["default"], "cycle~"),
-  "line": _objects_block_line__WEBPACK_IMPORTED_MODULE_1__["default"],
-  "metro": _objects_block_metro__WEBPACK_IMPORTED_MODULE_2__["default"]
+  "cycle~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__.generateObject)(_objects_dsp_cycle__WEBPACK_IMPORTED_MODULE_0__["default"], "cycle~"),
+  "phasor~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__.generateObject)(_objects_dsp_phasor__WEBPACK_IMPORTED_MODULE_1__["default"], "phasor~"),
+  "line": _objects_block_line__WEBPACK_IMPORTED_MODULE_2__["default"],
+  "metro": _objects_block_metro__WEBPACK_IMPORTED_MODULE_3__["default"]
 }));
 
 })();

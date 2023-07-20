@@ -67,6 +67,97 @@ function extractFirst(data) {
 
 /***/ }),
 
+/***/ "./src/objects/block/append.ts":
+/*!*************************************!*\
+  !*** ./src/objects/block/append.ts ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Append": () => (/* binding */ Append)
+/* harmony export */ });
+/* harmony import */ var _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jspatcher/jspatcher/src/core/message */ "../../../frontend/src/core/message.ts");
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+
+
+
+class Append extends _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultObject {
+  constructor() {
+    super(...arguments);
+    this._ = { result: void 0, appender: void 0 };
+  }
+  updateAppender(args) {
+    if (args.length == 0) {
+      this._.appender = void 0;
+    } else {
+      this._.appender = args[0];
+    }
+  }
+  subscribe() {
+    super.subscribe();
+    this.on("preInit", () => {
+      this.inlets = 2;
+      this.outlets = 1;
+      this.updateAppender(this.args);
+    });
+    this.on("updateArgs", (args) => {
+      this.updateAppender(args);
+    });
+    this.on("inlet", ({ data, inlet }) => {
+      if (inlet === 0) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_1__.isBang)(data)) {
+          try {
+            if (data instanceof Array || data instanceof _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.Message) {
+              this._.result = _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.Message.from(data);
+            } else {
+              this._.result = _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.Message.from([data]);
+            }
+            if (this._.appender instanceof Array || this._.appender instanceof _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.Message) {
+              this._.result = _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.Message.from(this._.result.concat(this._.appender));
+            } else {
+              this._.result.push(this._.appender);
+            }
+            this.outlet(0, this._.result);
+          } catch (e) {
+            this.error(e);
+            return;
+          }
+        } else {
+          this.outlet(0, this._.result);
+        }
+      } else if (inlet === 1) {
+        this.updateAppender([data]);
+      }
+    });
+  }
+}
+Append.description = "Append a value to a message";
+Append.inlets = [
+  {
+    isHot: true,
+    type: "anything",
+    description: "The input message"
+  },
+  {
+    isHot: false,
+    type: "anything",
+    description: "The item to append"
+  }
+];
+Append.outlets = [{
+  type: "anything",
+  description: "The resulting message"
+}];
+Append.args = [{
+  type: "anything",
+  optional: true,
+  description: "The item to append"
+}];
+
+
+/***/ }),
+
 /***/ "./src/objects/block/change.ts":
 /*!*************************************!*\
   !*** ./src/objects/block/change.ts ***!
@@ -684,6 +775,101 @@ Powtodb.outlets = [{
 
 /***/ }),
 
+/***/ "./src/objects/block/prepend.ts":
+/*!**************************************!*\
+  !*** ./src/objects/block/prepend.ts ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Prepend": () => (/* binding */ Prepend)
+/* harmony export */ });
+/* harmony import */ var _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jspatcher/jspatcher/src/core/message */ "../../../frontend/src/core/message.ts");
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+
+
+
+class Prepend extends _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultObject {
+  constructor() {
+    super(...arguments);
+    this._ = { result: void 0, prepender: void 0 };
+  }
+  updatePrepender(args) {
+    if (args.length == 0) {
+      this._.prepender = void 0;
+    } else {
+      this._.prepender = args[0];
+    }
+  }
+  subscribe() {
+    super.subscribe();
+    this.on("preInit", () => {
+      this.inlets = 2;
+      this.outlets = 1;
+      this.updatePrepender(this.args);
+    });
+    this.on("updateArgs", (args) => {
+      this.updatePrepender(args);
+    });
+    this.on("inlet", ({ data, inlet }) => {
+      if (inlet === 0) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_1__.isBang)(data)) {
+          try {
+            if (this._.prepender) {
+              if (this._.prepender instanceof Array || this._.prepender instanceof _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.Message) {
+                this._.result = _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.Message.from(this._.prepender);
+              } else {
+                this._.result = _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.Message.from([this._.prepender]);
+              }
+            } else {
+              this._.result = new _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.Message();
+            }
+            if (data instanceof Array || data instanceof _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.Message) {
+              this._.result = _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.Message.from(this._.result.concat(data));
+            } else {
+              this._.result.push(data);
+            }
+            this.outlet(0, this._.result);
+          } catch (e) {
+            this.error(e);
+            return;
+          }
+        } else {
+          this.outlet(0, this._.result);
+        }
+      } else if (inlet === 1) {
+        this.updatePrepender([data]);
+      }
+    });
+  }
+}
+Prepend.description = "Prepend a value to a message";
+Prepend.inlets = [
+  {
+    isHot: true,
+    type: "anything",
+    description: "The input message"
+  },
+  {
+    isHot: false,
+    type: "anything",
+    description: "The item to prepend"
+  }
+];
+Prepend.outlets = [{
+  type: "anything",
+  description: "The resulting message"
+}];
+Prepend.args = [{
+  type: "anything",
+  optional: true,
+  description: "The item to prepend"
+}];
+
+
+/***/ }),
+
 /***/ "./src/objects/block/rmstodb.ts":
 /*!**************************************!*\
   !*** ./src/objects/block/rmstodb.ts ***!
@@ -1038,6 +1224,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _objects_block_iter__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./objects/block/iter */ "./src/objects/block/iter.ts");
 /* harmony import */ var _objects_block_counter__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./objects/block/counter */ "./src/objects/block/counter.ts");
 /* harmony import */ var _objects_block_select__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./objects/block/select */ "./src/objects/block/select.ts");
+/* harmony import */ var _objects_block_append__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./objects/block/append */ "./src/objects/block/append.ts");
+/* harmony import */ var _objects_block_prepend__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./objects/block/prepend */ "./src/objects/block/prepend.ts");
+
+
 
 
 
@@ -1061,7 +1251,9 @@ __webpack_require__.r(__webpack_exports__);
   "rmstodb": _objects_block_rmstodb__WEBPACK_IMPORTED_MODULE_7__["default"],
   "iter": _objects_block_iter__WEBPACK_IMPORTED_MODULE_8__["default"],
   "counter": _objects_block_counter__WEBPACK_IMPORTED_MODULE_9__["default"],
-  "select": _objects_block_select__WEBPACK_IMPORTED_MODULE_10__["default"]
+  "select": _objects_block_select__WEBPACK_IMPORTED_MODULE_10__["default"],
+  "append": _objects_block_append__WEBPACK_IMPORTED_MODULE_11__.Append,
+  "prepend": _objects_block_prepend__WEBPACK_IMPORTED_MODULE_12__.Prepend
 }));
 
 })();

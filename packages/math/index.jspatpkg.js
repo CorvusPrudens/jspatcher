@@ -77,7 +77,7 @@ class JsWorkletManager {
     }
   }
 }
-function generateObject(Processor, name) {
+function generateObject(Processor, name, dependencies, enums) {
   var _a;
   return _a = class extends _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultObject {
     constructor() {
@@ -135,7 +135,7 @@ function generateObject(Processor, name) {
       });
       this.on("postInit", async () => {
         const { dspId, constants, merger, splitter, argsOffset } = this._;
-        const url = (0,_workletCreator__WEBPACK_IMPORTED_MODULE_2__["default"])(Processor, dspId, this.audioCtx.sampleRate);
+        const url = (0,_workletCreator__WEBPACK_IMPORTED_MODULE_2__["default"])(Processor, dspId, this.audioCtx.sampleRate, dependencies, enums);
         await JsWorkletManager.addModule(this.audioCtx, dspId, url);
         const node = new AudioWorkletNode(this.audioCtx, dspId);
         this._.node = node;
@@ -177,7 +177,7 @@ function generateObject(Processor, name) {
         node == null ? void 0 : node.disconnect();
       });
     }
-  }, _a.package = _index__WEBPACK_IMPORTED_MODULE_0__.name, _a.author = _index__WEBPACK_IMPORTED_MODULE_0__.author, _a.version = _index__WEBPACK_IMPORTED_MODULE_0__.version, _a.description = _index__WEBPACK_IMPORTED_MODULE_0__.description, _a.inlets = Processor.inlets, _a.outlets = Processor.outlets, _a.args = Processor.args, _a.props = Processor.props, _a.UI = _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultUI, _a;
+  }, _a.package = _index__WEBPACK_IMPORTED_MODULE_0__.name, _a.author = _index__WEBPACK_IMPORTED_MODULE_0__.author, _a.version = _index__WEBPACK_IMPORTED_MODULE_0__.version, _a.description = Processor.description, _a.inlets = Processor.inlets, _a.outlets = Processor.outlets, _a.args = Processor.args, _a.props = Processor.props, _a.UI = _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultUI, _a;
 }
 
 
@@ -301,9 +301,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
 
-const getJsWorkletProcessor = (processor, dspId, sampleRate) => {
+const getJsWorkletProcessor = (processor, dspId, sampleRate, dependencies, enums) => {
   const inherited_string = processor.toString().replace(/extends (.*?) {/, `extends ${_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"].name} {`);
+  const js_enums = enums ? enums.map((e) => `const ${e.name} = ${JSON.stringify(e.item)}`).join("\n") : "";
+  const deps = dependencies ? dependencies.map((dep) => `const ${dep.name} = ${dep.toString()}`).join("\n") : "";
   const processorCode = `
+
+        ${js_enums}
+
+        ${deps}
 
         const ${_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"].name} = ${_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"].toString()}
 
@@ -330,7 +336,9 @@ const getJsWorkletProcessor = (processor, dspId, sampleRate) => {
         registerProcessor("${dspId}", JsWorkletProcessor);
 
     `;
-  const url = URL.createObjectURL(new Blob([processorCode], { type: "text/javascript" }));
+  const processorCodeCleaned = processorCode.replace(/_.+?__WEBPACK_IMPORTED_MODULE_\d+__\./g, "");
+  console.log(processorCodeCleaned);
+  const url = URL.createObjectURL(new Blob([processorCodeCleaned], { type: "text/javascript" }));
   return url;
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (getJsWorkletProcessor);

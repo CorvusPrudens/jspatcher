@@ -138,7 +138,7 @@ class JsWorkletManager {
     }
   }
 }
-function generateObject(Processor, name) {
+function generateObject(Processor, name, dependencies, enums) {
   var _a;
   return _a = class extends _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultObject {
     constructor() {
@@ -196,7 +196,7 @@ function generateObject(Processor, name) {
       });
       this.on("postInit", async () => {
         const { dspId, constants, merger, splitter, argsOffset } = this._;
-        const url = (0,_workletCreator__WEBPACK_IMPORTED_MODULE_2__["default"])(Processor, dspId, this.audioCtx.sampleRate);
+        const url = (0,_workletCreator__WEBPACK_IMPORTED_MODULE_2__["default"])(Processor, dspId, this.audioCtx.sampleRate, dependencies, enums);
         await JsWorkletManager.addModule(this.audioCtx, dspId, url);
         const node = new AudioWorkletNode(this.audioCtx, dspId);
         this._.node = node;
@@ -238,7 +238,7 @@ function generateObject(Processor, name) {
         node == null ? void 0 : node.disconnect();
       });
     }
-  }, _a.package = _index__WEBPACK_IMPORTED_MODULE_0__.name, _a.author = _index__WEBPACK_IMPORTED_MODULE_0__.author, _a.version = _index__WEBPACK_IMPORTED_MODULE_0__.version, _a.description = _index__WEBPACK_IMPORTED_MODULE_0__.description, _a.inlets = Processor.inlets, _a.outlets = Processor.outlets, _a.args = Processor.args, _a.props = Processor.props, _a.UI = _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultUI, _a;
+  }, _a.package = _index__WEBPACK_IMPORTED_MODULE_0__.name, _a.author = _index__WEBPACK_IMPORTED_MODULE_0__.author, _a.version = _index__WEBPACK_IMPORTED_MODULE_0__.version, _a.description = Processor.description, _a.inlets = Processor.inlets, _a.outlets = Processor.outlets, _a.args = Processor.args, _a.props = Processor.props, _a.UI = _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultUI, _a;
 }
 
 
@@ -362,9 +362,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
 
-const getJsWorkletProcessor = (processor, dspId, sampleRate) => {
+const getJsWorkletProcessor = (processor, dspId, sampleRate, dependencies, enums) => {
   const inherited_string = processor.toString().replace(/extends (.*?) {/, `extends ${_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"].name} {`);
+  const js_enums = enums ? enums.map((e) => `const ${e.name} = ${JSON.stringify(e.item)}`).join("\n") : "";
+  const deps = dependencies ? dependencies.map((dep) => `const ${dep.name} = ${dep.toString()}`).join("\n") : "";
   const processorCode = `
+
+        ${js_enums}
+
+        ${deps}
 
         const ${_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"].name} = ${_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"].toString()}
 
@@ -391,7 +397,9 @@ const getJsWorkletProcessor = (processor, dspId, sampleRate) => {
         registerProcessor("${dspId}", JsWorkletProcessor);
 
     `;
-  const url = URL.createObjectURL(new Blob([processorCode], { type: "text/javascript" }));
+  const processorCodeCleaned = processorCode.replace(/_.+?__WEBPACK_IMPORTED_MODULE_\d+__\./g, "");
+  console.log(processorCodeCleaned);
+  const url = URL.createObjectURL(new Blob([processorCodeCleaned], { type: "text/javascript" }));
   return url;
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (getJsWorkletProcessor);
@@ -747,7 +755,7 @@ class Cycle extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["def
     let frequency = inputs[0][0];
     let phase = inputs[0][1];
     let outputStream = outputs[0][0];
-    for (let i = 0; i < frequency.length; i++) {
+    for (let i = 0; i < outputStream.length; i++) {
       let step = frequency[i] / this.sample_rate_;
       let phase_offset = Math.min(Math.max(phase[i], 0), 1);
       this.phase_ += step;
@@ -762,6 +770,7 @@ class Cycle extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["def
     this.phase_ = 0;
   }
 }
+Cycle.description = "Pure sine wave";
 Cycle.inlets = [
   {
     isHot: true,
@@ -802,6 +811,152 @@ Cycle.argsOffset = 0;
 
 /***/ }),
 
+/***/ "./src/objects/dsp/oscillator.ts":
+/*!***************************************!*\
+  !*** ./src/objects/dsp/oscillator.ts ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Oscillator": () => (/* binding */ Oscillator),
+/* harmony export */   "Waveform": () => (/* binding */ Waveform)
+/* harmony export */ });
+var Waveform = /* @__PURE__ */ ((Waveform2) => {
+  Waveform2[Waveform2["WAVE_SIN"] = 0] = "WAVE_SIN";
+  Waveform2[Waveform2["WAVE_TRI"] = 1] = "WAVE_TRI";
+  Waveform2[Waveform2["WAVE_SAW"] = 2] = "WAVE_SAW";
+  Waveform2[Waveform2["WAVE_RAMP"] = 3] = "WAVE_RAMP";
+  Waveform2[Waveform2["WAVE_SQUARE"] = 4] = "WAVE_SQUARE";
+  Waveform2[Waveform2["WAVE_POLYBLEP_TRI"] = 5] = "WAVE_POLYBLEP_TRI";
+  Waveform2[Waveform2["WAVE_POLYBLEP_SAW"] = 6] = "WAVE_POLYBLEP_SAW";
+  Waveform2[Waveform2["WAVE_POLYBLEP_SQUARE"] = 7] = "WAVE_POLYBLEP_SQUARE";
+  Waveform2[Waveform2["WAVE_LAST"] = 8] = "WAVE_LAST";
+  return Waveform2;
+})(Waveform || {});
+class Oscillator {
+  constructor(sampleRate) {
+    this.srRecip = 1 / sampleRate;
+    this.freq = 100;
+    this.amp = 0.5;
+    this.pw = 0.5;
+    this.phase = 0;
+    this.phaseInc = this.CalcPhaseInc(this.freq);
+    this.waveform = 0 /* WAVE_SIN */;
+    this.eoc = true;
+    this.eor = true;
+    this.lastOut = 0;
+  }
+  SetFreq(f) {
+    this.freq = f;
+    this.phaseInc = this.CalcPhaseInc(f);
+  }
+  SetAmp(a) {
+    this.amp = a;
+  }
+  SetWaveform(wf) {
+    this.waveform = wf < 8 /* WAVE_LAST */ ? wf : 0 /* WAVE_SIN */;
+  }
+  SetPw(pw) {
+    this.pw = this.fclamp(pw, 0, 1);
+  }
+  IsEOR() {
+    return this.eor;
+  }
+  IsEOC() {
+    return this.eoc;
+  }
+  IsRising() {
+    return this.phase < 0.5;
+  }
+  IsFalling() {
+    return this.phase >= 0.5;
+  }
+  PhaseAdd(_phase) {
+    this.phase += _phase;
+  }
+  Reset(_phase = 0) {
+    this.phase = _phase;
+  }
+  CalcPhaseInc(f) {
+    return f * this.srRecip;
+  }
+  fclamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+  }
+  Process() {
+    let out;
+    let t;
+    switch (this.waveform) {
+      case 0 /* WAVE_SIN */:
+        out = Math.sin(this.phase * 2 * Math.PI);
+        break;
+      case 1 /* WAVE_TRI */:
+        t = -1 + 2 * this.phase;
+        out = 2 * (Math.abs(t) - 0.5);
+        break;
+      case 2 /* WAVE_SAW */:
+        out = -1 * (this.phase * 2 - 1);
+        break;
+      case 3 /* WAVE_RAMP */:
+        out = this.phase * 2 - 1;
+        break;
+      case 4 /* WAVE_SQUARE */:
+        out = this.phase < this.pw ? 1 : -1;
+        break;
+      case 5 /* WAVE_POLYBLEP_TRI */:
+        t = this.phase;
+        out = this.phase < 0.5 ? 1 : -1;
+        out += this.Polyblep(this.phaseInc, t);
+        out -= this.Polyblep(this.phaseInc, (t + 0.5) % 1);
+        out = this.phaseInc * out + (1 - this.phaseInc) * this.lastOut;
+        this.lastOut = out;
+        out *= 4;
+        break;
+      case 6 /* WAVE_POLYBLEP_SAW */:
+        t = this.phase;
+        out = 2 * t - 1;
+        out -= this.Polyblep(this.phaseInc, t);
+        out *= -1;
+        break;
+      case 7 /* WAVE_POLYBLEP_SQUARE */:
+        t = this.phase;
+        out = this.phase < this.pw ? 1 : -1;
+        out += this.Polyblep(this.phaseInc, t);
+        out -= this.Polyblep(this.phaseInc, (t + (1 - this.pw)) % 1);
+        out *= 0.707;
+        break;
+      default:
+        out = 0;
+        break;
+    }
+    this.phase += this.phaseInc;
+    if (this.phase > 1) {
+      this.phase -= 1;
+      this.eoc = true;
+    } else {
+      this.eoc = false;
+    }
+    this.eor = this.phase - this.phaseInc < 0.5 && this.phase >= 0.5;
+    return out * this.amp;
+  }
+  Polyblep(phaseInc, t) {
+    let dt = phaseInc;
+    if (t < dt) {
+      t /= dt;
+      return t + t - t * t - 1;
+    } else if (t > 1 - dt) {
+      t = (t - 1) / dt;
+      return t * t + t + t + 1;
+    } else {
+      return 0;
+    }
+  }
+}
+
+
+/***/ }),
+
 /***/ "./src/objects/dsp/phasor.ts":
 /*!***********************************!*\
   !*** ./src/objects/dsp/phasor.ts ***!
@@ -819,7 +974,7 @@ class Phasor extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["de
     let frequency = inputs[0][0];
     let phase = inputs[0][1];
     let outputStream = outputs[0][0];
-    for (let i = 0; i < frequency.length; i++) {
+    for (let i = 0; i < outputStream.length; i++) {
       let step = frequency[i] / this.sample_rate_;
       step = Math.max(Math.min(step, 1), -1);
       let phase_offset = Math.min(Math.max(phase[i], 0), 1);
@@ -837,6 +992,7 @@ class Phasor extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["de
     this.phase_ = 0;
   }
 }
+Phasor.description = "Pure ramp wave";
 Phasor.inlets = [
   {
     isHot: true,
@@ -873,6 +1029,504 @@ Phasor.args = [
   }
 ];
 Phasor.argsOffset = 0;
+
+
+/***/ }),
+
+/***/ "./src/objects/dsp/pramp.ts":
+/*!**********************************!*\
+  !*** ./src/objects/dsp/pramp.ts ***!
+  \**********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ PureRamp)
+/* harmony export */ });
+/* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+/* harmony import */ var _oscillator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./oscillator */ "./src/objects/dsp/oscillator.ts");
+
+
+class PureRamp extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  process(inputs, outputs, parameters) {
+    let frequency = inputs[0][0];
+    let outputStream = outputs[0][0];
+    for (let i = 0; i < outputStream.length; i++) {
+      this.osc.SetFreq(frequency[i] * -1);
+      outputStream[i] = this.osc.Process();
+    }
+    return true;
+  }
+  init(sampleRate) {
+    this.osc = new _oscillator__WEBPACK_IMPORTED_MODULE_1__.Oscillator(sampleRate);
+    this.osc.SetAmp(1);
+    this.osc.SetWaveform(_oscillator__WEBPACK_IMPORTED_MODULE_1__.Waveform.WAVE_SAW);
+  }
+}
+PureRamp.description = "Pure Ramp wave oscillator";
+PureRamp.inlets = [
+  {
+    isHot: true,
+    type: "signal",
+    description: "frequency",
+    varLength: true
+  }
+];
+PureRamp.outlets = [
+  {
+    type: "signal",
+    description: "output",
+    varLength: true
+  }
+];
+PureRamp.args = [
+  {
+    type: "number",
+    optional: true,
+    description: "frequency",
+    default: 440
+  }
+];
+PureRamp.argsOffset = 0;
+
+
+/***/ }),
+
+/***/ "./src/objects/dsp/prect.ts":
+/*!**********************************!*\
+  !*** ./src/objects/dsp/prect.ts ***!
+  \**********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ PureRect)
+/* harmony export */ });
+/* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+/* harmony import */ var _oscillator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./oscillator */ "./src/objects/dsp/oscillator.ts");
+
+
+class PureRect extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  process(inputs, outputs, parameters) {
+    let frequency = inputs[0][0];
+    let pulseWidth = inputs[0][1];
+    let outputStream = outputs[0][0];
+    for (let i = 0; i < outputStream.length; i++) {
+      this.osc.SetFreq(frequency[i]);
+      this.osc.SetPw(pulseWidth[i]);
+      outputStream[i] = this.osc.Process();
+    }
+    return true;
+  }
+  init(sampleRate) {
+    this.osc = new _oscillator__WEBPACK_IMPORTED_MODULE_1__.Oscillator(sampleRate);
+    this.osc.SetAmp(1);
+    this.osc.SetWaveform(_oscillator__WEBPACK_IMPORTED_MODULE_1__.Waveform.WAVE_SQUARE);
+  }
+}
+PureRect.description = "Pure Rectangle wave oscillator";
+PureRect.inlets = [
+  {
+    isHot: true,
+    type: "signal",
+    description: "frequency",
+    varLength: true
+  },
+  {
+    isHot: true,
+    type: "signal",
+    description: "pulse width"
+  }
+];
+PureRect.outlets = [
+  {
+    type: "signal",
+    description: "output",
+    varLength: true
+  }
+];
+PureRect.args = [
+  {
+    type: "number",
+    optional: true,
+    description: "frequency",
+    default: 440
+  },
+  {
+    type: "number",
+    optional: true,
+    description: "pulse width",
+    default: 0.5
+  }
+];
+PureRect.argsOffset = 0;
+
+
+/***/ }),
+
+/***/ "./src/objects/dsp/psaw.ts":
+/*!*********************************!*\
+  !*** ./src/objects/dsp/psaw.ts ***!
+  \*********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ PureSaw)
+/* harmony export */ });
+/* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+/* harmony import */ var _oscillator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./oscillator */ "./src/objects/dsp/oscillator.ts");
+
+
+class PureSaw extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  process(inputs, outputs, parameters) {
+    let frequency = inputs[0][0];
+    let outputStream = outputs[0][0];
+    for (let i = 0; i < outputStream.length; i++) {
+      this.osc.SetFreq(frequency[i]);
+      outputStream[i] = this.osc.Process();
+    }
+    return true;
+  }
+  init(sampleRate) {
+    this.osc = new _oscillator__WEBPACK_IMPORTED_MODULE_1__.Oscillator(sampleRate);
+    this.osc.SetAmp(1);
+    this.osc.SetWaveform(_oscillator__WEBPACK_IMPORTED_MODULE_1__.Waveform.WAVE_SAW);
+  }
+}
+PureSaw.description = "Pure Sawtooth wave oscillator";
+PureSaw.inlets = [
+  {
+    isHot: true,
+    type: "signal",
+    description: "frequency",
+    varLength: true
+  }
+];
+PureSaw.outlets = [
+  {
+    type: "signal",
+    description: "output",
+    varLength: true
+  }
+];
+PureSaw.args = [
+  {
+    type: "number",
+    optional: true,
+    description: "frequency",
+    default: 440
+  }
+];
+PureSaw.argsOffset = 0;
+
+
+/***/ }),
+
+/***/ "./src/objects/dsp/ptri.ts":
+/*!*********************************!*\
+  !*** ./src/objects/dsp/ptri.ts ***!
+  \*********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ PureTri)
+/* harmony export */ });
+/* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+/* harmony import */ var _oscillator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./oscillator */ "./src/objects/dsp/oscillator.ts");
+
+
+class PureTri extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  process(inputs, outputs, parameters) {
+    let frequency = inputs[0][0];
+    let outputStream = outputs[0][0];
+    for (let i = 0; i < outputStream.length; i++) {
+      this.osc.SetFreq(frequency[i]);
+      outputStream[i] = this.osc.Process();
+    }
+    return true;
+  }
+  init(sampleRate) {
+    this.osc = new _oscillator__WEBPACK_IMPORTED_MODULE_1__.Oscillator(sampleRate);
+    this.osc.SetAmp(1);
+    this.osc.SetWaveform(_oscillator__WEBPACK_IMPORTED_MODULE_1__.Waveform.WAVE_TRI);
+  }
+}
+PureTri.description = "Pure Triangle wave oscillator";
+PureTri.inlets = [
+  {
+    isHot: true,
+    type: "signal",
+    description: "frequency",
+    varLength: true
+  }
+];
+PureTri.outlets = [
+  {
+    type: "signal",
+    description: "output",
+    varLength: true
+  }
+];
+PureTri.args = [
+  {
+    type: "number",
+    optional: true,
+    description: "frequency",
+    default: 440
+  }
+];
+PureTri.argsOffset = 0;
+
+
+/***/ }),
+
+/***/ "./src/objects/dsp/ramp.ts":
+/*!*********************************!*\
+  !*** ./src/objects/dsp/ramp.ts ***!
+  \*********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Ramp)
+/* harmony export */ });
+/* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+/* harmony import */ var _oscillator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./oscillator */ "./src/objects/dsp/oscillator.ts");
+
+
+class Ramp extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  process(inputs, outputs, parameters) {
+    let frequency = inputs[0][0];
+    let outputStream = outputs[0][0];
+    for (let i = 0; i < outputStream.length; i++) {
+      this.osc.SetFreq(frequency[i] * -1);
+      outputStream[i] = this.osc.Process();
+    }
+    return true;
+  }
+  init(sampleRate) {
+    this.osc = new _oscillator__WEBPACK_IMPORTED_MODULE_1__.Oscillator(sampleRate);
+    this.osc.SetAmp(1);
+    this.osc.SetWaveform(_oscillator__WEBPACK_IMPORTED_MODULE_1__.Waveform.WAVE_POLYBLEP_SAW);
+  }
+}
+Ramp.description = "Ramp wave oscillator";
+Ramp.inlets = [
+  {
+    isHot: true,
+    type: "signal",
+    description: "frequency",
+    varLength: true
+  }
+];
+Ramp.outlets = [
+  {
+    type: "signal",
+    description: "output",
+    varLength: true
+  }
+];
+Ramp.args = [
+  {
+    type: "number",
+    optional: true,
+    description: "frequency",
+    default: 440
+  }
+];
+Ramp.argsOffset = 0;
+
+
+/***/ }),
+
+/***/ "./src/objects/dsp/rect.ts":
+/*!*********************************!*\
+  !*** ./src/objects/dsp/rect.ts ***!
+  \*********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Rect)
+/* harmony export */ });
+/* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+/* harmony import */ var _oscillator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./oscillator */ "./src/objects/dsp/oscillator.ts");
+
+
+class Rect extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  process(inputs, outputs, parameters) {
+    let frequency = inputs[0][0];
+    let pulseWidth = inputs[0][1];
+    let outputStream = outputs[0][0];
+    for (let i = 0; i < outputStream.length; i++) {
+      this.osc.SetFreq(frequency[i]);
+      this.osc.SetPw(pulseWidth[i]);
+      outputStream[i] = this.osc.Process();
+    }
+    return true;
+  }
+  init(sampleRate) {
+    this.osc = new _oscillator__WEBPACK_IMPORTED_MODULE_1__.Oscillator(sampleRate);
+    this.osc.SetAmp(1);
+    this.osc.SetWaveform(_oscillator__WEBPACK_IMPORTED_MODULE_1__.Waveform.WAVE_POLYBLEP_SQUARE);
+  }
+}
+Rect.description = "Rectangle wave oscillator";
+Rect.inlets = [
+  {
+    isHot: true,
+    type: "signal",
+    description: "frequency",
+    varLength: true
+  },
+  {
+    isHot: true,
+    type: "signal",
+    description: "pulse width"
+  }
+];
+Rect.outlets = [
+  {
+    type: "signal",
+    description: "output",
+    varLength: true
+  }
+];
+Rect.args = [
+  {
+    type: "number",
+    optional: true,
+    description: "frequency",
+    default: 440
+  },
+  {
+    type: "number",
+    optional: true,
+    description: "pulse width",
+    default: 0.5
+  }
+];
+Rect.argsOffset = 0;
+
+
+/***/ }),
+
+/***/ "./src/objects/dsp/saw.ts":
+/*!********************************!*\
+  !*** ./src/objects/dsp/saw.ts ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Saw)
+/* harmony export */ });
+/* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+/* harmony import */ var _oscillator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./oscillator */ "./src/objects/dsp/oscillator.ts");
+
+
+class Saw extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  process(inputs, outputs, parameters) {
+    let frequency = inputs[0][0];
+    let outputStream = outputs[0][0];
+    for (let i = 0; i < outputStream.length; i++) {
+      this.osc.SetFreq(frequency[i]);
+      outputStream[i] = this.osc.Process();
+    }
+    return true;
+  }
+  init(sampleRate) {
+    this.osc = new _oscillator__WEBPACK_IMPORTED_MODULE_1__.Oscillator(sampleRate);
+    this.osc.SetAmp(1);
+    this.osc.SetWaveform(_oscillator__WEBPACK_IMPORTED_MODULE_1__.Waveform.WAVE_POLYBLEP_SAW);
+  }
+}
+Saw.description = "Sawtooth wave oscillator";
+Saw.inlets = [
+  {
+    isHot: true,
+    type: "signal",
+    description: "frequency",
+    varLength: true
+  }
+];
+Saw.outlets = [
+  {
+    type: "signal",
+    description: "output",
+    varLength: true
+  }
+];
+Saw.args = [
+  {
+    type: "number",
+    optional: true,
+    description: "frequency",
+    default: 440
+  }
+];
+Saw.argsOffset = 0;
+
+
+/***/ }),
+
+/***/ "./src/objects/dsp/tri.ts":
+/*!********************************!*\
+  !*** ./src/objects/dsp/tri.ts ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Tri)
+/* harmony export */ });
+/* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+/* harmony import */ var _oscillator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./oscillator */ "./src/objects/dsp/oscillator.ts");
+
+
+class Tri extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  process(inputs, outputs, parameters) {
+    let frequency = inputs[0][0];
+    let outputStream = outputs[0][0];
+    for (let i = 0; i < outputStream.length; i++) {
+      this.osc.SetFreq(frequency[i]);
+      outputStream[i] = this.osc.Process();
+    }
+    return true;
+  }
+  init(sampleRate) {
+    this.osc = new _oscillator__WEBPACK_IMPORTED_MODULE_1__.Oscillator(sampleRate);
+    this.osc.SetAmp(1);
+    this.osc.SetWaveform(_oscillator__WEBPACK_IMPORTED_MODULE_1__.Waveform.WAVE_POLYBLEP_TRI);
+  }
+}
+Tri.description = "Triangle wave oscillator";
+Tri.inlets = [
+  {
+    isHot: true,
+    type: "signal",
+    description: "frequency",
+    varLength: true
+  }
+];
+Tri.outlets = [
+  {
+    type: "signal",
+    description: "output",
+    varLength: true
+  }
+];
+Tri.args = [
+  {
+    type: "number",
+    optional: true,
+    description: "frequency",
+    default: 440
+  }
+];
+Tri.argsOffset = 0;
 
 
 /***/ }),
@@ -1034,6 +1688,24 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _objects_block_line__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./objects/block/line */ "./src/objects/block/line.ts");
 /* harmony import */ var _objects_block_metro__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./objects/block/metro */ "./src/objects/block/metro.ts");
 /* harmony import */ var _common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../../common/web/jsDspObject */ "../../common/web/jsDspObject.ts");
+/* harmony import */ var _objects_dsp_saw__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./objects/dsp/saw */ "./src/objects/dsp/saw.ts");
+/* harmony import */ var _objects_dsp_tri__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./objects/dsp/tri */ "./src/objects/dsp/tri.ts");
+/* harmony import */ var _objects_dsp_rect__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./objects/dsp/rect */ "./src/objects/dsp/rect.ts");
+/* harmony import */ var _objects_dsp_ramp__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./objects/dsp/ramp */ "./src/objects/dsp/ramp.ts");
+/* harmony import */ var _objects_dsp_pramp__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./objects/dsp/pramp */ "./src/objects/dsp/pramp.ts");
+/* harmony import */ var _objects_dsp_prect__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./objects/dsp/prect */ "./src/objects/dsp/prect.ts");
+/* harmony import */ var _objects_dsp_psaw__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./objects/dsp/psaw */ "./src/objects/dsp/psaw.ts");
+/* harmony import */ var _objects_dsp_ptri__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./objects/dsp/ptri */ "./src/objects/dsp/ptri.ts");
+/* harmony import */ var _objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./objects/dsp/oscillator */ "./src/objects/dsp/oscillator.ts");
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1042,6 +1714,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (async () => ({
   "cycle~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__.generateObject)(_objects_dsp_cycle__WEBPACK_IMPORTED_MODULE_0__["default"], "cycle~"),
   "phasor~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__.generateObject)(_objects_dsp_phasor__WEBPACK_IMPORTED_MODULE_1__["default"], "phasor~"),
+  "saw~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__.generateObject)(_objects_dsp_saw__WEBPACK_IMPORTED_MODULE_5__["default"], "saw~", [_objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Oscillator], [{ name: "Waveform", item: _objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Waveform }]),
+  "tri~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__.generateObject)(_objects_dsp_tri__WEBPACK_IMPORTED_MODULE_6__["default"], "tri~", [_objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Oscillator], [{ name: "Waveform", item: _objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Waveform }]),
+  "rect~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__.generateObject)(_objects_dsp_rect__WEBPACK_IMPORTED_MODULE_7__["default"], "rect~", [_objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Oscillator], [{ name: "Waveform", item: _objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Waveform }]),
+  "ramp~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__.generateObject)(_objects_dsp_ramp__WEBPACK_IMPORTED_MODULE_8__["default"], "ramp~", [_objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Oscillator], [{ name: "Waveform", item: _objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Waveform }]),
+  "pramp~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__.generateObject)(_objects_dsp_pramp__WEBPACK_IMPORTED_MODULE_9__["default"], "pramp~", [_objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Oscillator], [{ name: "Waveform", item: _objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Waveform }]),
+  "prect~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__.generateObject)(_objects_dsp_prect__WEBPACK_IMPORTED_MODULE_10__["default"], "prect~", [_objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Oscillator], [{ name: "Waveform", item: _objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Waveform }]),
+  "psaw~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__.generateObject)(_objects_dsp_psaw__WEBPACK_IMPORTED_MODULE_11__["default"], "psaw~", [_objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Oscillator], [{ name: "Waveform", item: _objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Waveform }]),
+  "ptri~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__.generateObject)(_objects_dsp_ptri__WEBPACK_IMPORTED_MODULE_12__["default"], "ptri~", [_objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Oscillator], [{ name: "Waveform", item: _objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Waveform }]),
   "line": _objects_block_line__WEBPACK_IMPORTED_MODULE_2__["default"],
   "metro": _objects_block_metro__WEBPACK_IMPORTED_MODULE_3__["default"]
 }));

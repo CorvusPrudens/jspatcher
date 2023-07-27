@@ -653,6 +653,178 @@ Div.argsOffset = 1;
 
 /***/ }),
 
+/***/ "./src/objects/dsp/hip.ts":
+/*!********************************!*\
+  !*** ./src/objects/dsp/hip.ts ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Hip)
+/* harmony export */ });
+/* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+
+class Hip extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  process(inputs, outputs, parameters) {
+    let inputStream = inputs[0][0];
+    let frequency = inputs[0][1];
+    let outputStream = outputs[0][0];
+    let last = 0;
+    let coef = 0;
+    let normal = 0;
+    let newval = 0;
+    for (let i = 0; i < inputStream.length; i++) {
+      this.hz_ = frequency[i];
+      if (this.hz_ < 0) {
+        this.hz_ = 0;
+      }
+      this.coef_ = 1 - this.hz_ * (2 * Math.PI) / this.sample_rate_;
+      if (this.coef_ < 0) {
+        this.coef_ = 0;
+      } else if (this.coef_ > 1) {
+        this.coef_ = 1;
+      }
+      coef = this.coef_;
+      last = this.last_;
+      if (coef < 1) {
+        normal = 0.5 * (1 + coef);
+        newval = inputStream[i] + coef * last;
+        outputStream[i] = normal * (newval - last);
+        last = newval;
+        this.last_ = last;
+      } else {
+        outputStream[i] = inputStream[i];
+        this.last_ = 0;
+      }
+    }
+    return true;
+  }
+  init(sampleRate) {
+    this.sample_rate_ = sampleRate;
+    this.hz_ = 0;
+    this.coef_ = 0;
+    this.last_ = 0;
+  }
+}
+Hip.inlets = [
+  {
+    isHot: true,
+    type: "signal",
+    description: "audio signal",
+    varLength: true
+  },
+  {
+    isHot: true,
+    type: "signal",
+    description: "rolloff frequency",
+    varLength: true
+  }
+];
+Hip.outlets = [
+  {
+    type: "signal",
+    description: "output",
+    varLength: true
+  }
+];
+Hip.args = [
+  {
+    type: "number",
+    optional: true,
+    description: "rolloff frequency",
+    default: 0
+  }
+];
+Hip.argsOffset = 0;
+
+
+/***/ }),
+
+/***/ "./src/objects/dsp/lop.ts":
+/*!********************************!*\
+  !*** ./src/objects/dsp/lop.ts ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Lop)
+/* harmony export */ });
+/* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+
+class Lop extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  process(inputs, outputs, parameters) {
+    let inputStream = inputs[0][0];
+    let frequency = inputs[0][1];
+    let outputStream = outputs[0][0];
+    this.conversion_ = 2 * Math.PI / this.sample_rate_;
+    let coef = 0;
+    let feedback = 0;
+    let last = this.last_;
+    for (let i = 0; i < inputStream.length; i++) {
+      last = this.last_;
+      if (frequency[i] != this.hz_) {
+        this.hz_ = frequency[i];
+        coef = frequency[i] * this.conversion_;
+        if (coef > 1) {
+          coef = 1;
+        } else if (coef < 0) {
+          coef = 0;
+        }
+        this.coef_ = coef;
+      } else {
+        coef = this.coef_;
+      }
+      feedback = 1 - coef;
+      last = coef * inputStream[i] + feedback * last;
+      outputStream[i] = last;
+      this.last_ = last;
+    }
+    return true;
+  }
+  init(sampleRate) {
+    this.sample_rate_ = sampleRate;
+    this.conversion_ = 0;
+    this.last_ = 0;
+    this.hz_ = 0;
+    this.coef_ = 0;
+  }
+}
+Lop.inlets = [
+  {
+    isHot: true,
+    type: "signal",
+    description: "audio signal",
+    varLength: true
+  },
+  {
+    isHot: true,
+    type: "signal",
+    description: "rolloff frequency",
+    varLength: true
+  }
+];
+Lop.outlets = [
+  {
+    type: "signal",
+    description: "output",
+    varLength: true
+  }
+];
+Lop.args = [
+  {
+    type: "number",
+    optional: true,
+    description: "rolloff frequency",
+    default: 0
+  }
+];
+Lop.argsOffset = 0;
+
+
+/***/ }),
+
 /***/ "./src/objects/dsp/mul.ts":
 /*!********************************!*\
   !*** ./src/objects/dsp/mul.ts ***!
@@ -1071,6 +1243,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _objects_dsp_div__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./objects/dsp/div */ "./src/objects/dsp/div.ts");
 /* harmony import */ var _objects_dsp_rev_div__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./objects/dsp/rev_div */ "./src/objects/dsp/rev_div.ts");
 /* harmony import */ var _objects_dsp_rev_sub__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./objects/dsp/rev_sub */ "./src/objects/dsp/rev_sub.ts");
+/* harmony import */ var _objects_dsp_hip__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./objects/dsp/hip */ "./src/objects/dsp/hip.ts");
+/* harmony import */ var _objects_dsp_lop__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./objects/dsp/lop */ "./src/objects/dsp/lop.ts");
 var __defProp = Object.defineProperty;
 var __getOwnPropSymbols = Object.getOwnPropertySymbols;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
@@ -1087,6 +1261,8 @@ var __spreadValues = (a, b) => {
     }
   return a;
 };
+
+
 
 
 
@@ -1156,7 +1332,11 @@ const BinaryAudioObjects = {
   "!/~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_rev_div__WEBPACK_IMPORTED_MODULE_8__["default"], "Reverse Div"),
   "!-~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_rev_sub__WEBPACK_IMPORTED_MODULE_9__["default"], "Reverse Sub")
 };
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (async () => __spreadValues(__spreadValues(__spreadValues({}, BinaryObjects), UnaryObjects), BinaryAudioObjects));
+const FilterAudioObjects = {
+  "hip~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_hip__WEBPACK_IMPORTED_MODULE_10__["default"], "Hip"),
+  "lop~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_lop__WEBPACK_IMPORTED_MODULE_11__["default"], "Lop")
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (async () => __spreadValues(__spreadValues(__spreadValues(__spreadValues({}, BinaryObjects), UnaryObjects), BinaryAudioObjects), FilterAudioObjects));
 
 })();
 

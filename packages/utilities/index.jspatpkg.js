@@ -273,7 +273,6 @@ class Counter extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
     this.on("inlet", ({ inlet }) => {
       if (inlet === 0) {
         this.outlet(0, this._.current_step);
-        console.log(JSON.stringify(this._));
         this._.current_step += this._.step;
         if (this._.start <= this._.stop) {
           if (this._.current_step + this._.step > this._.stop) {
@@ -400,6 +399,7 @@ Dbtopow.outlets = [{
   type: "number",
   description: "Power"
 }];
+Dbtopow.docs = "utilities/docs/dbtopow.html";
 
 
 /***/ }),
@@ -464,6 +464,7 @@ Dbtorms.outlets = [{
   type: "number",
   description: "RMS Amplitude"
 }];
+Dbtorms.docs = "utilities/docs/dbtorms.html";
 
 
 /***/ }),
@@ -526,6 +527,7 @@ Ftom.outlets = [{
   type: "number",
   description: "Midi Note Number"
 }];
+Ftom.docs = "utilities/docs/ftom.html";
 
 
 /***/ }),
@@ -706,6 +708,7 @@ Mtof.outlets = [{
   type: "number",
   description: "Frequency"
 }];
+Mtof.docs = "utilities/docs/mtof.html";
 
 
 /***/ }),
@@ -771,6 +774,7 @@ Powtodb.outlets = [{
   type: "number",
   description: "Decibels"
 }];
+Powtodb.docs = "utilities/docs/powtodb.html";
 
 
 /***/ }),
@@ -931,6 +935,7 @@ Rmstodb.outlets = [{
   type: "number",
   description: "Decibels"
 }];
+Rmstodb.docs = "utilities/docs/rmstodb.html";
 
 
 /***/ }),

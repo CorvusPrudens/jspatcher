@@ -67,6 +67,378 @@ function extractFirst(data) {
 
 /***/ }),
 
+/***/ "../../common/web/index.ts":
+/*!*********************************!*\
+  !*** ../../common/web/index.ts ***!
+  \*********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "author": () => (/* binding */ author),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
+/* harmony export */   "description": () => (/* binding */ description),
+/* harmony export */   "jspatcher": () => (/* binding */ jspatcher),
+/* harmony export */   "keywords": () => (/* binding */ keywords),
+/* harmony export */   "license": () => (/* binding */ license),
+/* harmony export */   "name": () => (/* binding */ name),
+/* harmony export */   "version": () => (/* binding */ version)
+/* harmony export */ });
+/* harmony import */ var _package_info__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./package-info */ "../../common/web/package-info.ts");
+
+var __defProp = Object.defineProperty;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+
+const name = _package_info__WEBPACK_IMPORTED_MODULE_0__["default"].name.split("/").pop().replace(/^package-/, "");
+const { author, license, keywords, version, description, jspatcher } = _package_info__WEBPACK_IMPORTED_MODULE_0__["default"];
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__spreadValues({ name, author, license, keywords, version, description }, jspatcher));
+
+
+/***/ }),
+
+/***/ "../../common/web/jsDspObject.ts":
+/*!***************************************!*\
+  !*** ../../common/web/jsDspObject.ts ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "generateObject": () => (/* binding */ generateObject)
+/* harmony export */ });
+/* harmony import */ var _index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./index */ "../../common/web/index.ts");
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./sdk */ "../../common/web/sdk.ts");
+/* harmony import */ var _workletCreator__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./workletCreator */ "../../common/web/workletCreator.ts");
+
+
+
+
+class JsWorkletManager {
+  constructor() {
+  }
+  static getSet() {
+    if (!JsWorkletManager.registered_modules) {
+      JsWorkletManager.registered_modules = /* @__PURE__ */ new Set();
+    }
+    return JsWorkletManager.registered_modules;
+  }
+  static async addModule(audioCtx, name, url) {
+    let set = JsWorkletManager.getSet();
+    if (!set.has(name)) {
+      set.add(name);
+      await audioCtx.audioWorklet.addModule(url);
+    }
+  }
+}
+function generateObject(Processor, name, dependencies, enums) {
+  var _a;
+  return _a = class extends _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultObject {
+    constructor() {
+      super(...arguments);
+      this._ = {
+        dspId: name,
+        defaultInputs: [],
+        constants: [],
+        constantsConnected: [],
+        argsOffset: Processor.argsOffset || 0
+      };
+    }
+    get audioConnections() {
+      return this.inletLines.map((set) => [...set].find((l) => !l.disabled && l.isConnectableByAudio)).map((l) => !!l);
+    }
+    checkAndFillUnconnected() {
+      const { audioConnections } = this;
+      const { constants, constantsConnected } = this._;
+      if (!this.inlets)
+        return;
+      for (let i = 0; i < this.inlets; i++) {
+        if (audioConnections[i] === constantsConnected[i])
+          continue;
+        const constant = constants[i];
+        if (audioConnections[i]) {
+          constant.offset.value = 0;
+        } else if (!audioConnections[i] && !constantsConnected[i]) {
+          constant.offset.value = this._.defaultInputs[i] || 0;
+        }
+        constantsConnected[i] = audioConnections[i];
+      }
+    }
+    subscribe() {
+      super.subscribe();
+      this.on("preInit", () => {
+        const { inputs, outputs } = { inputs: Processor.inlets.length, outputs: Processor.outlets.length };
+        if (inputs) {
+          const merger = this.audioCtx.createChannelMerger(inputs);
+          this._.merger = merger;
+          for (let i = 0; i < inputs; i++) {
+            const constant = this.audioCtx.createConstantSource();
+            this._.constants[i] = constant;
+            constant.connect(merger, 0, i);
+            this._.constantsConnected[i] = false;
+          }
+        }
+        const splitter = this.audioCtx.createChannelSplitter(outputs);
+        this._.splitter = splitter;
+        this.inlets = inputs;
+        this.outlets = outputs;
+        this.disconnectAudio();
+        this.inletAudioConnections = this._.constants.map((node) => ({ node: node.offset, index: 0 }));
+        this.outletAudioConnections = new Array(outputs).fill(null).map((v, i) => ({ node: splitter, index: i }));
+        this.connectAudio();
+      });
+      this.on("postInit", async () => {
+        const { dspId, constants, merger, splitter, argsOffset } = this._;
+        const url = (0,_workletCreator__WEBPACK_IMPORTED_MODULE_2__["default"])(Processor, dspId, this.audioCtx.sampleRate, dependencies, enums);
+        await JsWorkletManager.addModule(this.audioCtx, dspId, url);
+        const node = new AudioWorkletNode(this.audioCtx, dspId);
+        this._.node = node;
+        this.checkAndFillUnconnected();
+        merger == null ? void 0 : merger.connect(node);
+        node.connect(splitter);
+        constants.forEach((constant, i) => {
+          var _a2;
+          const argValue = this.args[i - argsOffset];
+          if (!this._.constantsConnected[i])
+            constant.offset.value = typeof argValue === "number" ? +argValue : (_a2 = this._.defaultInputs[i]) != null ? _a2 : 0;
+          constant.start();
+        });
+      });
+      this.on("argsUpdated", () => {
+        this._.constants.forEach((constant, i) => {
+          var _a2;
+          const argValue = this.args[i - this._.argsOffset];
+          if (!this._.constantsConnected[i])
+            constant.offset.value = typeof argValue === "number" ? +argValue : (_a2 = this._.defaultInputs[i]) != null ? _a2 : 0;
+        });
+      });
+      this.on("inlet", ({ inlet, data }) => {
+        if (typeof data === "number") {
+          if (this._.constants[inlet] && !this._.constantsConnected[inlet]) {
+            const constant = this._.constants[inlet];
+            constant.offset.value = constant.offset.value;
+            constant.offset.linearRampToValueAtTime(data, this.audioCtx.currentTime + this.getProp("smoothInput"));
+          }
+        }
+      });
+      this.on("connectedInlet", () => this.checkAndFillUnconnected());
+      this.on("disconnectedInlet", () => this.checkAndFillUnconnected());
+      this.on("destroy", () => {
+        const { constants, merger, splitter, node } = this._;
+        constants.forEach((constant) => constant == null ? void 0 : constant.disconnect());
+        merger == null ? void 0 : merger.disconnect();
+        splitter == null ? void 0 : splitter.disconnect();
+        node == null ? void 0 : node.disconnect();
+      });
+    }
+  }, _a.package = _index__WEBPACK_IMPORTED_MODULE_0__.name, _a.author = _index__WEBPACK_IMPORTED_MODULE_0__.author, _a.version = _index__WEBPACK_IMPORTED_MODULE_0__.version, _a.description = Processor.description, _a.inlets = Processor.inlets, _a.outlets = Processor.outlets, _a.args = Processor.args, _a.props = Processor.props, _a.docs = Processor.docs, _a.UI = _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultUI, _a;
+}
+
+
+/***/ }),
+
+/***/ "../../common/web/jsDspProcessor.ts":
+/*!******************************************!*\
+  !*** ../../common/web/jsDspProcessor.ts ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "JsParamDescriptor": () => (/* binding */ JsParamDescriptor),
+/* harmony export */   "default": () => (/* binding */ JsDspProcessor)
+/* harmony export */ });
+
+class JsParamDescriptor {
+}
+class JsDspProcessor {
+  static get parameterDescriptors() {
+    const params = [];
+    for (const name in this.paramDescriptors) {
+      params.push(this.paramDescriptors[name]);
+    }
+    return params;
+  }
+  init(sampleRate) {
+  }
+  process(inputs, outputs, parameters) {
+    return true;
+  }
+}
+JsDspProcessor.paramDescriptors = {};
+JsDspProcessor.inlets = [];
+JsDspProcessor.outlets = [];
+JsDspProcessor.args = [];
+JsDspProcessor.props = {
+  smoothInput: {
+    type: "number",
+    default: 0.05,
+    description: "Linear interpolation coefficient to block-rate input values in seconds"
+  }
+};
+
+
+/***/ }),
+
+/***/ "../../common/web/package-info.ts":
+/*!****************************************!*\
+  !*** ../../common/web/package-info.ts ***!
+  \****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+var _package_json__WEBPACK_IMPORTED_MODULE_0___namespace_cache;
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _package_json__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./package.json */ "../../common/web/package.json");
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (/*#__PURE__*/ (_package_json__WEBPACK_IMPORTED_MODULE_0___namespace_cache || (_package_json__WEBPACK_IMPORTED_MODULE_0___namespace_cache = __webpack_require__.t(_package_json__WEBPACK_IMPORTED_MODULE_0__, 2))));
+
+
+/***/ }),
+
+/***/ "../../common/web/scaleFunction.ts":
+/*!*****************************************!*\
+  !*** ../../common/web/scaleFunction.ts ***!
+  \*****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "scale": () => (/* binding */ scale)
+/* harmony export */ });
+
+function scale(input, inputMin, inputMax, outputMin, outputMax) {
+  const inputRange = inputMax - inputMin;
+  const outputRange = outputMax - outputMin;
+  if (inputRange === 0) {
+    return outputMin;
+  }
+  return (input - inputMin) * outputRange / inputRange + outputMin;
+}
+
+
+/***/ }),
+
+/***/ "../../common/web/sdk.ts":
+/*!*******************************!*\
+  !*** ../../common/web/sdk.ts ***!
+  \*******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Bang": () => (/* binding */ Bang),
+/* harmony export */   "BaseObject": () => (/* binding */ BaseObject),
+/* harmony export */   "BaseUI": () => (/* binding */ BaseUI),
+/* harmony export */   "Box": () => (/* binding */ Box),
+/* harmony export */   "CanvasUI": () => (/* binding */ CanvasUI),
+/* harmony export */   "DefaultObject": () => (/* binding */ DefaultObject),
+/* harmony export */   "DefaultUI": () => (/* binding */ DefaultUI),
+/* harmony export */   "Line": () => (/* binding */ Line),
+/* harmony export */   "Patcher": () => (/* binding */ Patcher),
+/* harmony export */   "React": () => (/* binding */ React),
+/* harmony export */   "Utils": () => (/* binding */ Utils),
+/* harmony export */   "generateDefaultObject": () => (/* binding */ generateDefaultObject),
+/* harmony export */   "generateRemoteObject": () => (/* binding */ generateRemoteObject),
+/* harmony export */   "generateRemotedObject": () => (/* binding */ generateRemotedObject),
+/* harmony export */   "isBang": () => (/* binding */ isBang)
+/* harmony export */ });
+
+const sdk = globalThis.jspatcherEnv.sdk;
+const {
+  React,
+  Patcher,
+  Box,
+  Line,
+  BaseObject,
+  BaseUI,
+  DefaultObject,
+  DefaultUI,
+  CanvasUI,
+  Utils,
+  generateRemotedObject,
+  generateDefaultObject,
+  generateRemoteObject,
+  Bang,
+  isBang
+} = sdk;
+
+
+/***/ }),
+
+/***/ "../../common/web/workletCreator.ts":
+/*!******************************************!*\
+  !*** ../../common/web/workletCreator.ts ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+
+
+const getJsWorkletProcessor = (processor, dspId, sampleRate, dependencies, enums) => {
+  const inherited_string = processor.toString().replace(/extends (.*?) {/, `extends ${_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"].name} {`);
+  const js_enums = enums ? enums.map((e) => `const ${e.name} = ${JSON.stringify(e.item)}`).join("\n") : "";
+  const deps = dependencies ? dependencies.map((dep) => `const ${dep.name} = ${dep.toString()}`).join("\n") : "";
+  const processorCode = `
+
+        ${js_enums}
+
+        ${deps}
+
+        const ${_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"].name} = ${_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"].toString()}
+
+        const ProcessorClass = ${inherited_string}
+
+        class JsWorkletProcessor extends AudioWorkletProcessor {
+
+            constructor(options) {
+                super(options);
+                this.processor = new ProcessorClass();
+                this.processor.init(${sampleRate});
+            }
+
+            process(inputs, outputs, parameters) {
+                return this.processor.process(inputs, outputs, parameters);
+            }
+
+            static get parameterDescriptors() {
+                return ProcessorClass.parameterDescriptors;
+            }
+        }
+
+        // TODO -- fix already registered error
+        registerProcessor("${dspId}", JsWorkletProcessor);
+
+    `;
+  const processorCodeCleaned = processorCode.replace(/_.+?__WEBPACK_IMPORTED_MODULE_\d+__\./g, "");
+  const url = URL.createObjectURL(new Blob([processorCodeCleaned], { type: "text/javascript" }));
+  return url;
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (getJsWorkletProcessor);
+
+
+/***/ }),
+
 /***/ "./src/objects/block/append.ts":
 /*!*************************************!*\
   !*** ./src/objects/block/append.ts ***!
@@ -940,6 +1312,269 @@ Rmstodb.docs = "utilities/docs/rmstodb.html";
 
 /***/ }),
 
+/***/ "./src/objects/block/scale.ts":
+/*!************************************!*\
+  !*** ./src/objects/block/scale.ts ***!
+  \************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Scale)
+/* harmony export */ });
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+/* harmony import */ var _common_web_scaleFunction__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../../../common/web/scaleFunction */ "../../common/web/scaleFunction.ts");
+
+
+
+class Scale extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+  constructor() {
+    super(...arguments);
+    this._ = { output: void 0, inputLow: void 0, inputHigh: void 0, outputLow: void 0, outputHigh: void 0 };
+  }
+  // static docs: string = "utilities/docs/mtof.html";
+  updateRange(args) {
+    this._.inputLow = args[0] || 0;
+    this._.inputHigh = args[1] || 0;
+    this._.outputLow = args[2] || 0;
+    this._.outputHigh = args[3] || 0;
+  }
+  subscribe() {
+    super.subscribe();
+    this.on("preInit", () => {
+      this.inlets = 5;
+      this.outlets = 1;
+    });
+    this.on("postInit", () => {
+      this.updateRange(this.args);
+    });
+    this.on("argsUpdated", ({ args }) => {
+      this.updateRange(args);
+    });
+    this.on("inlet", ({ data, inlet }) => {
+      if (inlet === 0) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+          try {
+            this._.output = (0,_common_web_scaleFunction__WEBPACK_IMPORTED_MODULE_1__.scale)(data, this._.inputLow, this._.inputHigh, this._.outputLow, this._.outputHigh);
+          } catch (e) {
+            this.error(e);
+            return;
+          }
+        }
+        this.outlet(0, this._.output);
+      } else if (inlet === 1) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+          this._.inputLow = +data;
+        }
+      } else if (inlet === 2) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+          this._.inputHigh = +data;
+        }
+      } else if (inlet === 3) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+          this._.outputLow = +data;
+        }
+      } else if (inlet === 4) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+          this._.outputHigh = +data;
+        }
+      }
+    });
+  }
+}
+Scale.package = "electrosmith";
+Scale.author = "Corvus Prudens";
+Scale.version = "1.0";
+Scale.description = "Scale a number from an input range to an output range";
+Scale.inlets = [
+  {
+    isHot: true,
+    type: "number",
+    description: "Number to scale"
+  },
+  {
+    isHot: false,
+    type: "number",
+    description: "Input range minimum"
+  },
+  {
+    isHot: false,
+    type: "number",
+    description: "Input range maximum"
+  },
+  {
+    isHot: false,
+    type: "number",
+    description: "Output range minimum"
+  },
+  {
+    isHot: false,
+    type: "number",
+    description: "Output range maximum"
+  }
+];
+Scale.outlets = [{
+  type: "number",
+  description: "Scaled number"
+}];
+Scale.args = [
+  {
+    optional: true,
+    type: "number",
+    description: "Input range minimum"
+  },
+  {
+    optional: true,
+    type: "number",
+    description: "Input range maximum"
+  },
+  {
+    optional: true,
+    type: "number",
+    description: "Output range minimum"
+  },
+  {
+    optional: true,
+    type: "number",
+    description: "Output range maximum"
+  }
+];
+
+
+/***/ }),
+
+/***/ "./src/objects/block/scalec.ts":
+/*!*************************************!*\
+  !*** ./src/objects/block/scalec.ts ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ ScaleClamped)
+/* harmony export */ });
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+/* harmony import */ var _common_web_scaleFunction__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../../../common/web/scaleFunction */ "../../common/web/scaleFunction.ts");
+
+
+
+class ScaleClamped extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+  constructor() {
+    super(...arguments);
+    this._ = { output: void 0, inputLow: void 0, inputHigh: void 0, outputLow: void 0, outputHigh: void 0 };
+  }
+  // static docs: string = "utilities/docs/mtof.html";
+  updateRange(args) {
+    this._.inputLow = args[0] || 0;
+    this._.inputHigh = args[1] || 0;
+    this._.outputLow = args[2] || 0;
+    this._.outputHigh = args[3] || 0;
+  }
+  subscribe() {
+    super.subscribe();
+    this.on("preInit", () => {
+      this.inlets = 5;
+      this.outlets = 1;
+    });
+    this.on("postInit", () => {
+      this.updateRange(this.args);
+    });
+    this.on("argsUpdated", ({ args }) => {
+      this.updateRange(args);
+    });
+    this.on("inlet", ({ data, inlet }) => {
+      if (inlet === 0) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+          try {
+            const clamped = Math.min(Math.max(data, this._.inputLow), this._.inputHigh);
+            this._.output = (0,_common_web_scaleFunction__WEBPACK_IMPORTED_MODULE_1__.scale)(clamped, this._.inputLow, this._.inputHigh, this._.outputLow, this._.outputHigh);
+          } catch (e) {
+            this.error(e);
+            return;
+          }
+        }
+        this.outlet(0, this._.output);
+      } else if (inlet === 1) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+          this._.inputLow = +data;
+        }
+      } else if (inlet === 2) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+          this._.inputHigh = +data;
+        }
+      } else if (inlet === 3) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+          this._.outputLow = +data;
+        }
+      } else if (inlet === 4) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+          this._.outputHigh = +data;
+        }
+      }
+    });
+  }
+}
+ScaleClamped.package = "electrosmith";
+ScaleClamped.author = "Corvus Prudens";
+ScaleClamped.version = "1.0";
+ScaleClamped.description = "Scale a number from an input range to an output range with clamping";
+ScaleClamped.inlets = [
+  {
+    isHot: true,
+    type: "number",
+    description: "Number to scale"
+  },
+  {
+    isHot: false,
+    type: "number",
+    description: "Input range minimum"
+  },
+  {
+    isHot: false,
+    type: "number",
+    description: "Input range maximum"
+  },
+  {
+    isHot: false,
+    type: "number",
+    description: "Output range minimum"
+  },
+  {
+    isHot: false,
+    type: "number",
+    description: "Output range maximum"
+  }
+];
+ScaleClamped.outlets = [{
+  type: "number",
+  description: "Scaled number"
+}];
+ScaleClamped.args = [
+  {
+    optional: true,
+    type: "number",
+    description: "Input range minimum"
+  },
+  {
+    optional: true,
+    type: "number",
+    description: "Input range maximum"
+  },
+  {
+    optional: true,
+    type: "number",
+    description: "Output range minimum"
+  },
+  {
+    optional: true,
+    type: "number",
+    description: "Output range maximum"
+  }
+];
+
+
+/***/ }),
+
 /***/ "./src/objects/block/select.ts":
 /*!*************************************!*\
   !*** ./src/objects/block/select.ts ***!
@@ -1105,6 +1740,243 @@ Swap.args = [{
 
 /***/ }),
 
+/***/ "./src/objects/dsp/mtof_audio.ts":
+/*!***************************************!*\
+  !*** ./src/objects/dsp/mtof_audio.ts ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ MtofAudio)
+/* harmony export */ });
+/* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+
+
+class MtofAudio extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  process(inputs, outputs, parameters) {
+    const frequency = inputs[0][0];
+    const outputStream = outputs[0][0];
+    for (let i = 0; i < outputStream.length; i++) {
+      const data = frequency[i];
+      if (data <= -1500) {
+        outputStream[i] = 0;
+      } else if (data > 1499) {
+        outputStream[i] = 440 * Math.exp(0.0577625565 * (1499 - 69));
+      } else {
+        outputStream[i] = 440 * Math.exp(0.0577625565 * (data - 69));
+      }
+    }
+    return true;
+  }
+}
+MtofAudio.description = "Convert midi note number to frequency in Hz";
+MtofAudio.inlets = [
+  {
+    isHot: true,
+    type: "signal",
+    description: "Midi Note Number"
+  }
+];
+MtofAudio.outlets = [{
+  type: "signal",
+  description: "Frequency"
+}];
+MtofAudio.argsOffset = 0;
+MtofAudio.docs = "utilities/docs/mtof.html";
+
+
+/***/ }),
+
+/***/ "./src/objects/dsp/scale_audio.ts":
+/*!****************************************!*\
+  !*** ./src/objects/dsp/scale_audio.ts ***!
+  \****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ ScaleAudio)
+/* harmony export */ });
+/* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+/* harmony import */ var _common_web_scaleFunction__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../../../common/web/scaleFunction */ "../../common/web/scaleFunction.ts");
+
+
+
+class ScaleAudio extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  // static docs: string = "utilities/docs/mtof.html";
+  process(inputs, outputs, parameters) {
+    const inputStream = inputs[0][0];
+    const inputLow = inputs[0][1];
+    const inputHigh = inputs[0][2];
+    const outputLow = inputs[0][3];
+    const outputHigh = inputs[0][4];
+    const outputStream = outputs[0][0];
+    for (let i = 0; i < outputStream.length; i++) {
+      const data = inputStream[i];
+      outputStream[i] = (0,_common_web_scaleFunction__WEBPACK_IMPORTED_MODULE_1__.scale)(data, inputLow[i], inputHigh[i], outputLow[i], outputHigh[i]);
+    }
+    return true;
+  }
+}
+ScaleAudio.description = "Scale a number from an input range to an output range";
+ScaleAudio.inlets = [
+  {
+    isHot: true,
+    type: "signal",
+    description: "Number to scale"
+  },
+  {
+    isHot: false,
+    type: "signal",
+    description: "Input range minimum"
+  },
+  {
+    isHot: false,
+    type: "signal",
+    description: "Input range maximum"
+  },
+  {
+    isHot: false,
+    type: "signal",
+    description: "Output range minimum"
+  },
+  {
+    isHot: false,
+    type: "signal",
+    description: "Output range maximum"
+  }
+];
+ScaleAudio.outlets = [{
+  type: "signal",
+  description: "Scaled number"
+}];
+ScaleAudio.args = [
+  {
+    optional: true,
+    type: "number",
+    description: "Input range minimum",
+    default: 0
+  },
+  {
+    optional: true,
+    type: "number",
+    description: "Input range maximum",
+    default: 0
+  },
+  {
+    optional: true,
+    type: "number",
+    description: "Output range minimum",
+    default: 0
+  },
+  {
+    optional: true,
+    type: "number",
+    description: "Output range maximum",
+    default: 0
+  }
+];
+ScaleAudio.argsOffset = 1;
+
+
+/***/ }),
+
+/***/ "./src/objects/dsp/scalec_audio.ts":
+/*!*****************************************!*\
+  !*** ./src/objects/dsp/scalec_audio.ts ***!
+  \*****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ ScaleClampedAudio)
+/* harmony export */ });
+/* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+/* harmony import */ var _common_web_scaleFunction__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../../../common/web/scaleFunction */ "../../common/web/scaleFunction.ts");
+
+
+
+class ScaleClampedAudio extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  // static docs: string = "utilities/docs/mtof.html";
+  process(inputs, outputs, parameters) {
+    const inputStream = inputs[0][0];
+    const inputLow = inputs[0][1];
+    const inputHigh = inputs[0][2];
+    const outputLow = inputs[0][3];
+    const outputHigh = inputs[0][4];
+    const outputStream = outputs[0][0];
+    for (let i = 0; i < outputStream.length; i++) {
+      const data = inputStream[i];
+      const clamped = Math.min(Math.max(data, inputLow[i]), inputHigh[i]);
+      outputStream[i] = (0,_common_web_scaleFunction__WEBPACK_IMPORTED_MODULE_1__.scale)(clamped, inputLow[i], inputHigh[i], outputLow[i], outputHigh[i]);
+    }
+    return true;
+  }
+}
+ScaleClampedAudio.description = "Scale a number from an input range to an output range with clamping";
+ScaleClampedAudio.inlets = [
+  {
+    isHot: true,
+    type: "signal",
+    description: "Number to scale"
+  },
+  {
+    isHot: false,
+    type: "signal",
+    description: "Input range minimum"
+  },
+  {
+    isHot: false,
+    type: "signal",
+    description: "Input range maximum"
+  },
+  {
+    isHot: false,
+    type: "signal",
+    description: "Output range minimum"
+  },
+  {
+    isHot: false,
+    type: "signal",
+    description: "Output range maximum"
+  }
+];
+ScaleClampedAudio.outlets = [{
+  type: "signal",
+  description: "Scaled number"
+}];
+ScaleClampedAudio.args = [
+  {
+    optional: true,
+    type: "number",
+    description: "Input range minimum",
+    default: 0
+  },
+  {
+    optional: true,
+    type: "number",
+    description: "Input range maximum",
+    default: 0
+  },
+  {
+    optional: true,
+    type: "number",
+    description: "Output range minimum",
+    default: 0
+  },
+  {
+    optional: true,
+    type: "number",
+    description: "Output range maximum",
+    default: 0
+  }
+];
+ScaleClampedAudio.argsOffset = 1;
+
+
+/***/ }),
+
 /***/ "./src/sdk.ts":
 /*!********************!*\
   !*** ./src/sdk.ts ***!
@@ -1150,6 +2022,16 @@ const {
 } = sdk;
 
 
+/***/ }),
+
+/***/ "../../common/web/package.json":
+/*!*************************************!*\
+  !*** ../../common/web/package.json ***!
+  \*************************************/
+/***/ ((module) => {
+
+module.exports = JSON.parse('{"name":"@electrosmith/package-math","version":"1.0.0","description":"The math package for jspatcher","main":"dist/index.js","scripts":{"build":"webpack --mode development","build-watch":"webpack --mode development --watch --stats-children"},"keywords":["jspatcher"],"jspatcher":{"isJSPatcherPackage":true,"thumbnail":"","jspatpkg":"index.jspatpkg.js"},"author":"Corvus Prudens","license":"MIT","repository":"https://github.com/electro-smith/Patcher-Objects","devDependencies":{"@jspatcher/jspatcher":"file:../../../frontend","@types/react":"^17.0.19","clean-webpack-plugin":"^4.0.0-alpha.0","css-loader":"^6.4.0","esbuild-loader":"^2.15.1","react":"^17.0.2","sass":"^1.45.2","sass-loader":"^12.2.0","style-loader":"^3.3.0","typescript":"^4.4.2","webpack":"^5.51.1","webpack-cli":"^4.8.0"}}');
+
 /***/ })
 
 /******/ 	});
@@ -1179,6 +2061,36 @@ const {
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/create fake namespace object */
+/******/ 	(() => {
+/******/ 		var getProto = Object.getPrototypeOf ? (obj) => (Object.getPrototypeOf(obj)) : (obj) => (obj.__proto__);
+/******/ 		var leafPrototypes;
+/******/ 		// create a fake namespace object
+/******/ 		// mode & 1: value is a module id, require it
+/******/ 		// mode & 2: merge all properties of value into the ns
+/******/ 		// mode & 4: return value when already ns object
+/******/ 		// mode & 16: return value when it's Promise-like
+/******/ 		// mode & 8|1: behave like require
+/******/ 		__webpack_require__.t = function(value, mode) {
+/******/ 			if(mode & 1) value = this(value);
+/******/ 			if(mode & 8) return value;
+/******/ 			if(typeof value === 'object' && value) {
+/******/ 				if((mode & 4) && value.__esModule) return value;
+/******/ 				if((mode & 16) && typeof value.then === 'function') return value;
+/******/ 			}
+/******/ 			var ns = Object.create(null);
+/******/ 			__webpack_require__.r(ns);
+/******/ 			var def = {};
+/******/ 			leafPrototypes = leafPrototypes || [null, getProto({}), getProto([]), getProto(getProto)];
+/******/ 			for(var current = mode & 2 && value; typeof current == 'object' && !~leafPrototypes.indexOf(current); current = getProto(current)) {
+/******/ 				Object.getOwnPropertyNames(current).forEach((key) => (def[key] = () => (value[key])));
+/******/ 			}
+/******/ 			def['default'] = () => (value);
+/******/ 			__webpack_require__.d(ns, def);
+/******/ 			return ns;
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/define property getters */
 /******/ 	(() => {
 /******/ 		// define getter functions for harmony exports
@@ -1231,6 +2143,20 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _objects_block_select__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./objects/block/select */ "./src/objects/block/select.ts");
 /* harmony import */ var _objects_block_append__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./objects/block/append */ "./src/objects/block/append.ts");
 /* harmony import */ var _objects_block_prepend__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./objects/block/prepend */ "./src/objects/block/prepend.ts");
+/* harmony import */ var _objects_dsp_mtof_audio__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./objects/dsp/mtof_audio */ "./src/objects/dsp/mtof_audio.ts");
+/* harmony import */ var _common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ../../../common/web/jsDspObject */ "../../common/web/jsDspObject.ts");
+/* harmony import */ var _objects_block_scale__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./objects/block/scale */ "./src/objects/block/scale.ts");
+/* harmony import */ var _objects_block_scalec__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./objects/block/scalec */ "./src/objects/block/scalec.ts");
+/* harmony import */ var _objects_dsp_scale_audio__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./objects/dsp/scale_audio */ "./src/objects/dsp/scale_audio.ts");
+/* harmony import */ var _objects_dsp_scalec_audio__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./objects/dsp/scalec_audio */ "./src/objects/dsp/scalec_audio.ts");
+/* harmony import */ var _common_web_scaleFunction__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ../../../common/web/scaleFunction */ "../../common/web/scaleFunction.ts");
+
+
+
+
+
+
+
 
 
 
@@ -1258,7 +2184,12 @@ __webpack_require__.r(__webpack_exports__);
   "counter": _objects_block_counter__WEBPACK_IMPORTED_MODULE_9__["default"],
   "select": _objects_block_select__WEBPACK_IMPORTED_MODULE_10__["default"],
   "append": _objects_block_append__WEBPACK_IMPORTED_MODULE_11__.Append,
-  "prepend": _objects_block_prepend__WEBPACK_IMPORTED_MODULE_12__.Prepend
+  "prepend": _objects_block_prepend__WEBPACK_IMPORTED_MODULE_12__.Prepend,
+  "scale": _objects_block_scale__WEBPACK_IMPORTED_MODULE_15__["default"],
+  "scalec": _objects_block_scalec__WEBPACK_IMPORTED_MODULE_16__["default"],
+  "mtof~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_14__.generateObject)(_objects_dsp_mtof_audio__WEBPACK_IMPORTED_MODULE_13__["default"], "mtof~"),
+  "scale~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_14__.generateObject)(_objects_dsp_scale_audio__WEBPACK_IMPORTED_MODULE_17__["default"], "scale~", [_common_web_scaleFunction__WEBPACK_IMPORTED_MODULE_19__.scale]),
+  "scalec~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_14__.generateObject)(_objects_dsp_scalec_audio__WEBPACK_IMPORTED_MODULE_18__["default"], "scalec~", [_common_web_scaleFunction__WEBPACK_IMPORTED_MODULE_19__.scale])
 }));
 
 })();

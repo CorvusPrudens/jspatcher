@@ -836,6 +836,7 @@ var Waveform = /* @__PURE__ */ ((Waveform2) => {
 class Oscillator {
   constructor(sampleRate) {
     this.srRecip = 1 / sampleRate;
+    this.nyquist = sampleRate * 0.5;
     this.freq = 100;
     this.amp = 0.5;
     this.pw = 0.5;
@@ -847,8 +848,9 @@ class Oscillator {
     this.lastOut = 0;
   }
   SetFreq(f) {
-    this.freq = f;
-    this.phaseInc = this.CalcPhaseInc(f);
+    const clamped = this.fclamp(f, -this.nyquist, this.nyquist);
+    this.freq = clamped;
+    this.phaseInc = this.CalcPhaseInc(clamped);
   }
   SetAmp(a) {
     this.amp = a;

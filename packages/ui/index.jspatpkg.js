@@ -1137,6 +1137,159 @@ const { author, license, keywords, version, description, jspatcher } = _package_
 
 /***/ }),
 
+/***/ "./src/objects/base-live.ts":
+/*!**********************************!*\
+  !*** ./src/objects/base-live.ts ***!
+  \**********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ LiveObject)
+/* harmony export */ });
+/* harmony import */ var _index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../index */ "./src/index.ts");
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../sdk */ "./src/sdk.ts");
+/* harmony import */ var _ui_base_live__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../ui/base-live */ "./src/ui/base-live.tsx");
+
+
+
+;
+class LiveObject extends _sdk__WEBPACK_IMPORTED_MODULE_1__.BaseObject {
+  constructor() {
+    super(...arguments);
+    this.state = { value: 0 };
+    this._ = { displayValue: "0" };
+  }
+  toValidValue(value) {
+    const min = this.getProp("min");
+    const max = this.getProp("max");
+    const step = this.getProp("step");
+    const v = Math.min(max, Math.max(min, value));
+    return min + Math.floor((v - min) / step) * step;
+  }
+  toDisplayValue(value) {
+    const { type, unitStyle, units, enums } = this.props;
+    return (0,_ui_base_live__WEBPACK_IMPORTED_MODULE_2__.getDisplayValue)(value, type, unitStyle, units, enums);
+  }
+  validateValue(valueIn, id) {
+    const value = this.toValidValue(valueIn || 0);
+    if (value === this.state.value)
+      return;
+    this.setState({ value }, id);
+    this._.displayValue = this.toDisplayValue(this.state.value);
+  }
+  onChangeFromUI(e) {
+    this.emit("changeFromUI", e);
+  }
+  subscribe() {
+    super.subscribe();
+    this.on("updateProps", (props) => {
+      if (typeof props.max !== "undefined" || typeof props.min !== "undefined" || typeof props.step !== "undefined") {
+        const lastValue = this.state.value;
+        this.validateValue(this.state.value);
+        if (lastValue !== this.state.value)
+          this.updateUI({ value: this.state.value });
+      }
+    });
+  }
+}
+LiveObject.package = _index__WEBPACK_IMPORTED_MODULE_0__.name;
+LiveObject.author = _index__WEBPACK_IMPORTED_MODULE_0__.author;
+LiveObject.version = _index__WEBPACK_IMPORTED_MODULE_0__.version;
+LiveObject.description = _index__WEBPACK_IMPORTED_MODULE_0__.description;
+LiveObject.props = {
+  min: {
+    type: "number",
+    default: 0,
+    description: "Minimum value",
+    isUIState: true
+  },
+  max: {
+    type: "number",
+    default: 127,
+    description: "Maximum value",
+    isUIState: true
+  },
+  step: {
+    type: "number",
+    default: 1,
+    description: "Value change step",
+    isUIState: true
+  },
+  type: {
+    type: "enum",
+    enums: ["enum", "float", "int"],
+    default: "int",
+    description: "Value type",
+    isUIState: true
+  },
+  enums: {
+    type: "object",
+    default: [""],
+    description: "Enum values",
+    isUIState: true
+  },
+  active: {
+    type: "boolean",
+    default: true,
+    description: "Active state",
+    isUIState: true
+  },
+  focus: {
+    type: "boolean",
+    default: false,
+    description: "Focus state",
+    isUIState: true
+  },
+  shortName: {
+    type: "string",
+    default: "",
+    description: "Short name to display",
+    isUIState: true
+  },
+  longName: {
+    type: "string",
+    default: "",
+    description: "Long name to display",
+    isUIState: true
+  },
+  unitStyle: {
+    type: "enum",
+    enums: ["float", "int", "time", "hertz", "decibel", "%", "pan", "semitones", "midi", "custom", "native"],
+    default: "int",
+    description: "Style of unit to display",
+    isUIState: true
+  },
+  units: {
+    type: "string",
+    default: "",
+    description: "If unitStyle set to custom, display this as unit",
+    isUIState: true
+  },
+  exponent: {
+    type: "number",
+    default: 0,
+    description: "UI modulation bpf, 0 for linear",
+    isUIState: true
+  },
+  speedLim: {
+    type: "number",
+    default: 16,
+    description: "Value output speed limit in ms",
+    isUIState: true
+  },
+  frameRate: {
+    type: "number",
+    default: 60,
+    description: "UI refresh rate",
+    isUIState: true
+  }
+};
+
+
+/***/ }),
+
 /***/ "./src/objects/base.ts":
 /*!*****************************!*\
   !*** ./src/objects/base.ts ***!
@@ -1158,6 +1311,124 @@ UIObject.package = _index__WEBPACK_IMPORTED_MODULE_0__.name;
 UIObject.author = _index__WEBPACK_IMPORTED_MODULE_0__.author;
 UIObject.version = _index__WEBPACK_IMPORTED_MODULE_0__.version;
 UIObject.description = _index__WEBPACK_IMPORTED_MODULE_0__.description;
+
+
+/***/ }),
+
+/***/ "./src/objects/button-live.ts":
+/*!************************************!*\
+  !*** ./src/objects/button-live.ts ***!
+  \************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ LiveButton)
+/* harmony export */ });
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../sdk */ "./src/sdk.ts");
+/* harmony import */ var _ui_button_live__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../ui/button-live */ "./src/ui/button-live.tsx");
+/* harmony import */ var _base_live__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./base-live */ "./src/objects/base-live.ts");
+
+
+
+class LiveButton extends _base_live__WEBPACK_IMPORTED_MODULE_2__["default"] {
+  subscribe() {
+    super.subscribe();
+    const validateAndUpdateUI = (value = 0, id) => {
+      this.validateValue(value, id);
+      this.updateUI({ value: this.state.value });
+    };
+    this.on("preInit", () => {
+      this.inlets = 1;
+      this.outlets = 1;
+      validateAndUpdateUI(0);
+    });
+    this.on("inlet", ({ data, inlet }) => {
+      if (inlet === 0) {
+        validateAndUpdateUI(1);
+        this.outlet(0, new _sdk__WEBPACK_IMPORTED_MODULE_0__.Bang());
+      }
+    });
+    this.on("changeFromUI", ({ value }) => {
+      validateAndUpdateUI(value);
+      if (value)
+        this.outlet(0, new _sdk__WEBPACK_IMPORTED_MODULE_0__.Bang());
+    });
+    this.on("updateState", ({ state: { value }, id }) => {
+      validateAndUpdateUI(value, id);
+      if (value)
+        this.outlet(0, new _sdk__WEBPACK_IMPORTED_MODULE_0__.Bang());
+    });
+  }
+}
+LiveButton.description = "Button";
+LiveButton.inlets = [{
+  isHot: true,
+  type: "anything",
+  description: "Output a bang when anything is received."
+}];
+LiveButton.outlets = [{
+  type: "bang",
+  description: "Bang"
+}];
+LiveButton.props = {
+  shortName: {
+    type: "string",
+    default: "live.button",
+    description: "Short name to display",
+    isUIState: true
+  },
+  longName: {
+    type: "string",
+    default: "live.button",
+    description: "Long name to display",
+    isUIState: true
+  },
+  max: {
+    type: "number",
+    default: 1,
+    description: "Maximum value",
+    isUIState: true
+  },
+  bgColor: {
+    type: "color",
+    default: "rgba(90, 90, 90, 1)",
+    description: "Background color (inactive)",
+    isUIState: true
+  },
+  activeBgColor: {
+    type: "color",
+    default: "rgba(195, 195, 195, 1)",
+    description: "Background color (active)",
+    isUIState: true
+  },
+  bgOnColor: {
+    type: "color",
+    default: "rgba(195, 195, 195, 1)",
+    description: "Background color (on / inactive)",
+    isUIState: true
+  },
+  activeBgOnColor: {
+    type: "color",
+    default: "rgba(109, 215, 255, 1)",
+    description: "Background color (on / active)",
+    isUIState: true
+  },
+  borderColor: {
+    type: "color",
+    default: "rgba(80, 80, 80, 1)",
+    description: "Border color (unfocus)",
+    isUIState: true
+  },
+  focusBorderColor: {
+    type: "color",
+    default: "rgba(80, 80, 80, 1)",
+    description: "Border color (focus)",
+    isUIState: true
+  }
+};
+LiveButton.UI = _ui_button_live__WEBPACK_IMPORTED_MODULE_1__["default"];
 
 
 /***/ }),
@@ -1795,6 +2066,133 @@ Spectroscope.UI = _ui_spectroscope__WEBPACK_IMPORTED_MODULE_1__["default"];
 
 /***/ }),
 
+/***/ "./src/objects/toggle.ts":
+/*!*******************************!*\
+  !*** ./src/objects/toggle.ts ***!
+  \*******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ LiveToggle)
+/* harmony export */ });
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../sdk */ "./src/sdk.ts");
+/* harmony import */ var _ui_toggle__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../ui/toggle */ "./src/ui/toggle.tsx");
+/* harmony import */ var _base_live__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./base-live */ "./src/objects/base-live.ts");
+
+
+
+class LiveToggle extends _base_live__WEBPACK_IMPORTED_MODULE_2__["default"] {
+  subscribe() {
+    super.subscribe();
+    const validateAndUpdateUI = (value = 0, id) => {
+      this.validateValue(value, id);
+      this.updateUI({ value: this.state.value });
+    };
+    const handleUpdateArgs = (args) => {
+      if (typeof args[0] === "number") {
+        validateAndUpdateUI(args[0]);
+      }
+    };
+    this.on("preInit", () => {
+      this.inlets = 1;
+      this.outlets = 1;
+      validateAndUpdateUI(this.args[0] || 0);
+    });
+    this.on("updateArgs", handleUpdateArgs);
+    this.on("inlet", ({ data, inlet }) => {
+      if (inlet === 0) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+          let number = +data;
+          if (number !== 0)
+            number = 1;
+          if (number != this.state.value) {
+            validateAndUpdateUI(+data);
+            this.outlet(0, this.state.value);
+          }
+        } else {
+          this.state.value = this.state.value === 0 ? 1 : 0;
+          this.updateUI({ value: this.state.value });
+          this.outlet(0, this.state.value);
+        }
+      }
+    });
+    this.on("changeFromUI", ({ value }) => {
+      this.validateValue(value);
+      this.outletAll([this.state.value]);
+    });
+    this.on("updateState", ({ state: { value }, id }) => {
+      validateAndUpdateUI(value, id);
+      this.outletAll([this.state.value]);
+    });
+  }
+}
+LiveToggle.description = "Toggle";
+LiveToggle.inlets = [{
+  isHot: true,
+  type: "anything",
+  description: "Set the value with 1 or 0, or toggle with a bang."
+}];
+LiveToggle.outlets = [{
+  type: "number",
+  description: "Number value"
+}];
+LiveToggle.args = [{
+  type: "number",
+  optional: true,
+  default: 0,
+  description: "Initial value"
+}];
+LiveToggle.props = {
+  max: {
+    type: "number",
+    default: 1,
+    description: "Maximum value",
+    isUIState: true
+  },
+  bgColor: {
+    type: "color",
+    default: "rgba(90, 90, 90, 1)",
+    description: "Background color (inactive)",
+    isUIState: true
+  },
+  activeBgColor: {
+    type: "color",
+    default: "rgba(195, 195, 195, 1)",
+    description: "Background color (active)",
+    isUIState: true
+  },
+  bgOnColor: {
+    type: "color",
+    default: "rgba(195, 195, 195, 1)",
+    description: "Background color (on / inactive)",
+    isUIState: true
+  },
+  activeBgOnColor: {
+    type: "color",
+    default: "rgba(109, 215, 255, 1)",
+    description: "Background color (on / active)",
+    isUIState: true
+  },
+  borderColor: {
+    type: "color",
+    default: "rgba(80, 80, 80, 1)",
+    description: "Border color (unfocus)",
+    isUIState: true
+  },
+  focusBorderColor: {
+    type: "color",
+    default: "rgba(80, 80, 80, 1)",
+    description: "Border color (focus)",
+    isUIState: true
+  }
+};
+LiveToggle.UI = _ui_toggle__WEBPACK_IMPORTED_MODULE_1__["default"];
+
+
+/***/ }),
+
 /***/ "./src/package-info.ts":
 /*!*****************************!*\
   !*** ./src/package-info.ts ***!
@@ -1897,6 +2295,283 @@ const {
   Utils,
   getReactMonacoEditor
 } = sdk;
+
+
+/***/ }),
+
+/***/ "./src/ui/base-live.tsx":
+/*!******************************!*\
+  !*** ./src/ui/base-live.tsx ***!
+  \******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "getDisplayValue": () => (/* binding */ getDisplayValue),
+/* harmony export */   "default": () => (/* binding */ LiveObjectUI)
+/* harmony export */ });
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../sdk */ "./src/sdk.ts");
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+
+const getDisplayValue = (value, type, unitstyle, units, enums) => {
+  if (type === "enum")
+    return enums[value];
+  if (unitstyle === "int")
+    return value.toFixed(0);
+  if (unitstyle === "float")
+    return value.toFixed(2);
+  if (unitstyle === "time")
+    return value.toFixed(type === "int" ? 0 : 2) + " ms";
+  if (unitstyle === "hertz")
+    return value.toFixed(type === "int" ? 0 : 2) + " Hz";
+  if (unitstyle === "decibel")
+    return value.toFixed(type === "int" ? 0 : 2) + " dB";
+  if (unitstyle === "%")
+    return value.toFixed(type === "int" ? 0 : 2) + " %";
+  if (unitstyle === "pan")
+    return value === 0 ? "C" : (type === "int" ? Math.abs(value) : Math.abs(value).toFixed(2)) + (value < 0 ? " L" : " R");
+  if (unitstyle === "semitones")
+    return value.toFixed(type === "int" ? 0 : 2) + " st";
+  if (unitstyle === "midi")
+    return _sdk__WEBPACK_IMPORTED_MODULE_0__.MathUtils.toMIDI(value);
+  if (unitstyle === "custom")
+    return value.toFixed(type === "int" ? 0 : 2) + " " + units;
+  if (unitstyle === "native")
+    return value.toFixed(type === "int" ? 0 : 2);
+  return "N/A";
+};
+class LiveObjectUI extends _sdk__WEBPACK_IMPORTED_MODULE_0__.CanvasUI {
+  constructor() {
+    super(...arguments);
+    this.$changeTimer = -1;
+    this.state = __spreadProps(__spreadValues({}, this.state), {
+      value: this.object.state.value
+    });
+    this.handleKeyDown = (e) => {
+    };
+    this.handleKeyUp = (e) => {
+    };
+    this.handleTouchStart = (e) => {
+      this.canvas.focus();
+      const rect = this.canvas.getBoundingClientRect();
+      let prevX = e.touches[0].clientX;
+      let prevY = e.touches[0].clientY;
+      const fromX = prevX - rect.left;
+      const fromY = prevY - rect.top;
+      const prevValue = this.state.value;
+      this.handlePointerDown({ x: fromX, y: fromY, originalEvent: e });
+      const handleTouchMove = (e2) => {
+        e2.preventDefault();
+        const clientX = e2.changedTouches[0].clientX;
+        const clientY = e2.changedTouches[0].clientY;
+        const movementX = clientX - prevX;
+        const movementY = clientY - prevY;
+        prevX = clientX;
+        prevY = clientY;
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+        this.handlePointerDrag({ prevValue, x, y, fromX, fromY, movementX, movementY, originalEvent: e2 });
+      };
+      const handleTouchEnd = (e2) => {
+        e2.preventDefault();
+        const x = e2.changedTouches[0].clientX - rect.left;
+        const y = e2.changedTouches[0].clientY - rect.top;
+        this.handlePointerUp({ x, y, originalEvent: e2 });
+        document.removeEventListener("touchmove", handleTouchMove);
+        document.removeEventListener("touchend", handleTouchEnd);
+      };
+      document.addEventListener("touchmove", handleTouchMove, { passive: false });
+      document.addEventListener("touchend", handleTouchEnd, { passive: false });
+    };
+    this.handleWheel = (e) => {
+    };
+    this.handleClick = (e) => {
+    };
+    this.handleMouseDown = (e) => {
+      e.preventDefault();
+      this.canvas.focus();
+      const rect = this.canvas.getBoundingClientRect();
+      const fromX = e.clientX - rect.left;
+      const fromY = e.clientY - rect.top;
+      const prevValue = this.state.value;
+      this.handlePointerDown({ x: fromX, y: fromY, originalEvent: e });
+      const handleMouseMove = (e2) => {
+        e2.preventDefault();
+        const x = e2.clientX - rect.left;
+        const y = e2.clientY - rect.top;
+        this.handlePointerDrag({ prevValue, x, y, fromX, fromY, movementX: e2.movementX, movementY: e2.movementY, originalEvent: e2 });
+      };
+      const handleMouseUp = (e2) => {
+        e2.preventDefault();
+        const x = e2.clientX - rect.left;
+        const y = e2.clientY - rect.top;
+        this.handlePointerUp({ x, y, originalEvent: e2 });
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
+      };
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+    };
+    this.handleMouseOver = (e) => {
+    };
+    this.handleMouseOut = (e) => {
+    };
+    this.handleContextMenu = (e) => {
+    };
+    this.handlePointerDown = (e) => {
+    };
+    this.handlePointerDrag = (e) => {
+    };
+    this.handlePointerUp = (e) => {
+    };
+    this.handleFocusIn = (e) => this.setState({ focus: true });
+    this.handleFocusOut = (e) => this.setState({ focus: false });
+    this.changeCallback = () => {
+      this.props.object.onChangeFromUI({ value: this.state.value, displayValue: this.displayValue });
+      this.$changeTimer = -1;
+    };
+  }
+  get distance() {
+    return LiveObjectUI.getDistance(this.state);
+  }
+  static getDistance(state) {
+    const { type, max, min, value, exponent, enums } = state;
+    const normalized = type === "enum" ? Math.max(0, Math.min(enums.length - 1, value)) / (enums.length - 1) : (Math.max(min, Math.min(max, value)) - min) / (max - min);
+    return _sdk__WEBPACK_IMPORTED_MODULE_0__.MathUtils.iNormExp(normalized || 0, exponent);
+  }
+  get stepsCount() {
+    const { type, max, min, step, enums } = this.state;
+    if (type === "enum")
+      return enums.length - 1;
+    if (type === "float")
+      return Math.min(Number.MAX_SAFE_INTEGER, Math.floor((max - min) / step));
+    return Math.min(Math.floor((max - min) / (Math.round(step) || 1)), max - min);
+  }
+  get displayValue() {
+    const { value, type, unitStyle, units, enums } = this.state;
+    return getDisplayValue(value, type, unitStyle, units, enums);
+  }
+  setValueToOutput(value) {
+    this.setState({ value });
+    this.scheduleChangeHandler();
+  }
+  scheduleChangeHandler() {
+    if (this.$changeTimer === -1)
+      this.$changeTimer = window.setTimeout(this.changeCallback, this.state.speedLim);
+  }
+  paint() {
+  }
+  render() {
+    return /* @__PURE__ */ _sdk__WEBPACK_IMPORTED_MODULE_0__.React.createElement(_sdk__WEBPACK_IMPORTED_MODULE_0__.BaseUI, __spreadValues({}, this.props), /* @__PURE__ */ _sdk__WEBPACK_IMPORTED_MODULE_0__.React.createElement("canvas", __spreadValues({
+      ref: this.refCanvas,
+      className: ["live-component", this.className].join(" "),
+      style: { position: "absolute", display: "inline-block", width: "100%", height: "100%" },
+      tabIndex: 1,
+      onKeyDown: this.handleKeyDown,
+      onKeyUp: this.handleKeyUp,
+      onTouchStart: this.handleTouchStart,
+      onWheel: this.handleWheel,
+      onClick: this.handleClick,
+      onMouseDown: this.handleMouseDown,
+      onMouseOver: this.handleMouseOver,
+      onMouseOut: this.handleMouseOut,
+      onContextMenu: this.handleContextMenu,
+      onFocus: this.handleFocusIn,
+      onBlur: this.handleFocusOut
+    }, this.props.canvasProps)));
+  }
+}
+
+
+/***/ }),
+
+/***/ "./src/ui/button-live.tsx":
+/*!********************************!*\
+  !*** ./src/ui/button-live.tsx ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ LiveButtonUI)
+/* harmony export */ });
+/* harmony import */ var _ui_base_live__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../ui/base-live */ "./src/ui/base-live.tsx");
+
+class LiveButtonUI extends _ui_base_live__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    super(...arguments);
+    this.className = "live-button";
+    this.inTouch = false;
+    this.$resetTimer = -1;
+    this.resetCallback = () => {
+      this.setValueToOutput(0);
+      this.$resetTimer = -1;
+    };
+    this.handlePointerDown = () => {
+      this.inTouch = true;
+      this.setValueToOutput(1);
+    };
+    this.handlePointerUp = () => {
+      this.inTouch = false;
+      this.setValueToOutput(0);
+    };
+  }
+  paint() {
+    if (this.$resetTimer !== -1) {
+      window.clearTimeout(this.$resetTimer);
+      this.resetCallback();
+    }
+    const {
+      active,
+      focus,
+      bgColor,
+      activeBgColor,
+      bgOnColor,
+      activeBgOnColor,
+      borderColor,
+      focusBorderColor,
+      value
+    } = this.state;
+    const ctx = this.ctx;
+    if (!ctx)
+      return;
+    const borderWidth = 1;
+    const [width, height] = this.fullSize();
+    ctx.clearRect(0, 0, width, height);
+    ctx.lineWidth = borderWidth;
+    const buttonBgColor = active ? value ? activeBgOnColor : activeBgColor : value ? bgOnColor : bgColor;
+    const buttonBorderColor = focus ? focusBorderColor : borderColor;
+    ctx.fillStyle = buttonBgColor;
+    ctx.beginPath();
+    ctx.ellipse(width * 0.5, height * 0.5, width * 0.5 - 2 * borderWidth, height * 0.5 - 2 * borderWidth, 0, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.strokeStyle = buttonBorderColor;
+    ctx.stroke();
+    if (value && !this.inTouch)
+      this.$resetTimer = window.setTimeout(this.resetCallback, 100);
+  }
+}
+LiveButtonUI.defaultSize = [30, 30];
 
 
 /***/ }),
@@ -2540,6 +3215,61 @@ SpectroscopeUI.defaultSize = [120, 60];
 
 /***/ }),
 
+/***/ "./src/ui/toggle.tsx":
+/*!***************************!*\
+  !*** ./src/ui/toggle.tsx ***!
+  \***************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ LiveToggleUI)
+/* harmony export */ });
+/* harmony import */ var _base_live__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./base-live */ "./src/ui/base-live.tsx");
+
+class LiveToggleUI extends _base_live__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    super(...arguments);
+    this.className = "live-toggle";
+    this.handlePointerDown = () => {
+      this.setValueToOutput(1 - +!!this.state.value);
+    };
+  }
+  paint() {
+    const {
+      active,
+      focus,
+      bgColor,
+      activeBgColor,
+      bgOnColor,
+      activeBgOnColor,
+      borderColor,
+      focusBorderColor,
+      value
+    } = this.state;
+    const ctx = this.ctx;
+    if (!ctx)
+      return;
+    const borderWidth = 1;
+    const [width, height] = this.fullSize();
+    ctx.clearRect(0, 0, width, height);
+    ctx.lineWidth = borderWidth;
+    const buttonBgColor = active ? value ? activeBgOnColor : activeBgColor : value ? bgOnColor : bgColor;
+    const buttonBorderColor = focus ? focusBorderColor : borderColor;
+    ctx.fillStyle = buttonBgColor;
+    ctx.beginPath();
+    ctx.roundRect(borderWidth, borderWidth, width - 2 * borderWidth, height - 2 * borderWidth, 0.2 * (width - 2 * borderWidth));
+    ctx.fill();
+    ctx.strokeStyle = buttonBorderColor;
+    ctx.stroke();
+  }
+}
+LiveToggleUI.defaultSize = [30, 30];
+
+
+/***/ }),
+
 /***/ "./src/ui/ui.scss":
 /*!************************!*\
   !*** ./src/ui/ui.scss ***!
@@ -3031,7 +3761,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _objects_scope__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./objects/scope */ "./src/objects/scope.ts");
 /* harmony import */ var _objects_spectrogram__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./objects/spectrogram */ "./src/objects/spectrogram.ts");
 /* harmony import */ var _objects_spectroscope__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./objects/spectroscope */ "./src/objects/spectroscope.ts");
-/* harmony import */ var _ui_ui_scss__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./ui/ui.scss */ "./src/ui/ui.scss");
+/* harmony import */ var _objects_button_live__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./objects/button-live */ "./src/objects/button-live.ts");
+/* harmony import */ var _objects_toggle__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./objects/toggle */ "./src/objects/toggle.ts");
+/* harmony import */ var _ui_ui_scss__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./ui/ui.scss */ "./src/ui/ui.scss");
+
+
 
 
 
@@ -3041,7 +3775,9 @@ __webpack_require__.r(__webpack_exports__);
   message: _objects_message__WEBPACK_IMPORTED_MODULE_0__["default"],
   "scope~": _objects_scope__WEBPACK_IMPORTED_MODULE_1__["default"],
   "spectrogram~": _objects_spectrogram__WEBPACK_IMPORTED_MODULE_2__["default"],
-  "spectroscope~": _objects_spectroscope__WEBPACK_IMPORTED_MODULE_3__["default"]
+  "spectroscope~": _objects_spectroscope__WEBPACK_IMPORTED_MODULE_3__["default"],
+  "button": _objects_button_live__WEBPACK_IMPORTED_MODULE_4__["default"],
+  "toggle": _objects_toggle__WEBPACK_IMPORTED_MODULE_5__["default"]
 }));
 
 })();

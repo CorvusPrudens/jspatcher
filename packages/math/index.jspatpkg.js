@@ -1315,7 +1315,7 @@ const unary_functions = {
   "~": { f: (a) => ~a, n: "Invert" }
 };
 for (const key in unary_functions) {
-  UnaryObjects[key] = class extends Binary {
+  UnaryObjects[key] = class extends Unary {
     constructor() {
       super(...arguments);
       this.execute = unary_functions[key].f;

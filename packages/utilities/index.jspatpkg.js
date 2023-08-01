@@ -1020,6 +1020,102 @@ Iter.args = [
 
 /***/ }),
 
+/***/ "./src/objects/block/loadbang.ts":
+/*!***************************************!*\
+  !*** ./src/objects/block/loadbang.ts ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Loadbang)
+/* harmony export */ });
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+
+
+class Loadbang extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+  subscribe() {
+    super.subscribe();
+    this.on("preInit", () => {
+      this.inlets = 1;
+      this.outlets = 1;
+      this.patcher.on("postInited", () => this.outlet(0, new _sdk__WEBPACK_IMPORTED_MODULE_0__.Bang()));
+    });
+    this.on("inlet", ({ inlet }) => {
+      if (inlet === 0)
+        this.outlet(0, new _sdk__WEBPACK_IMPORTED_MODULE_0__.Bang());
+    });
+  }
+}
+Loadbang.description = "Bang on patcher load.";
+Loadbang.inlets = [{
+  isHot: true,
+  type: "anything",
+  description: "Anything to transform to a bang."
+}];
+Loadbang.outlets = [{
+  type: "bang",
+  description: "Bang on patcher load or inlet."
+}];
+
+
+/***/ }),
+
+/***/ "./src/objects/block/loadmess.ts":
+/*!***************************************!*\
+  !*** ./src/objects/block/loadmess.ts ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Loadmess)
+/* harmony export */ });
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+
+
+class Loadmess extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+  subscribe() {
+    super.subscribe();
+    this.on("preInit", () => {
+      this.inlets = 1;
+      this.outlets = 1;
+      if (this.args.length < 1) {
+        this.error("No message to output on patcher load.");
+        return;
+      }
+      this.patcher.on("postInited", () => this.outlet(0, this.args[0]));
+    });
+    this.on("inlet", ({ inlet }) => {
+      if (inlet === 0) {
+        if (this.args.length < 1) {
+          this.error("No message to output on patcher load.");
+          return;
+        }
+        this.outlet(0, this.args[0]);
+      }
+    });
+  }
+}
+Loadmess.description = "Output the given message on patcher load.";
+Loadmess.inlets = [{
+  isHot: true,
+  type: "anything",
+  description: "Trigger the message output."
+}];
+Loadmess.outlets = [{
+  type: "anything",
+  description: "Sent out on patcher load or inlet."
+}];
+Loadmess.args = [{
+  type: "anything",
+  optional: false,
+  description: "Message to output on patcher load."
+}];
+
+
+/***/ }),
+
 /***/ "./src/objects/block/mtof.ts":
 /*!***********************************!*\
   !*** ./src/objects/block/mtof.ts ***!
@@ -2150,6 +2246,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _objects_dsp_scale_audio__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./objects/dsp/scale_audio */ "./src/objects/dsp/scale_audio.ts");
 /* harmony import */ var _objects_dsp_scalec_audio__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./objects/dsp/scalec_audio */ "./src/objects/dsp/scalec_audio.ts");
 /* harmony import */ var _common_web_scaleFunction__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ../../../common/web/scaleFunction */ "../../common/web/scaleFunction.ts");
+/* harmony import */ var _objects_block_loadbang__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./objects/block/loadbang */ "./src/objects/block/loadbang.ts");
+/* harmony import */ var _objects_block_loadmess__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./objects/block/loadmess */ "./src/objects/block/loadmess.ts");
+
+
 
 
 
@@ -2189,7 +2289,9 @@ __webpack_require__.r(__webpack_exports__);
   "scalec": _objects_block_scalec__WEBPACK_IMPORTED_MODULE_16__["default"],
   "mtof~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_14__.generateObject)(_objects_dsp_mtof_audio__WEBPACK_IMPORTED_MODULE_13__["default"], "mtof~"),
   "scale~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_14__.generateObject)(_objects_dsp_scale_audio__WEBPACK_IMPORTED_MODULE_17__["default"], "scale~", [_common_web_scaleFunction__WEBPACK_IMPORTED_MODULE_19__.scale]),
-  "scalec~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_14__.generateObject)(_objects_dsp_scalec_audio__WEBPACK_IMPORTED_MODULE_18__["default"], "scalec~", [_common_web_scaleFunction__WEBPACK_IMPORTED_MODULE_19__.scale])
+  "scalec~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_14__.generateObject)(_objects_dsp_scalec_audio__WEBPACK_IMPORTED_MODULE_18__["default"], "scalec~", [_common_web_scaleFunction__WEBPACK_IMPORTED_MODULE_19__.scale]),
+  "loadbang": _objects_block_loadbang__WEBPACK_IMPORTED_MODULE_20__["default"],
+  "loadmess": _objects_block_loadmess__WEBPACK_IMPORTED_MODULE_21__["default"]
 }));
 
 })();

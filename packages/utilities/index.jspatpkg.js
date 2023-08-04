@@ -904,6 +904,86 @@ Ftom.docs = "utilities/docs/ftom.html";
 
 /***/ }),
 
+/***/ "./src/objects/block/gate.ts":
+/*!***********************************!*\
+  !*** ./src/objects/block/gate.ts ***!
+  \***********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Gate)
+/* harmony export */ });
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+
+
+class Gate extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+  constructor() {
+    super(...arguments);
+    this._ = { selection: 0, data: 0 };
+  }
+  handleUpdateArgs(args) {
+    if (args.length !== 1) {
+      this.error("Outlet count required");
+      return;
+    }
+    const outlets = +args[0];
+    this.outlets = outlets;
+    this.setMeta({
+      outlets: [
+        ...new Array(outlets).fill({
+          type: "anything",
+          description: "The value in the right inlet if the index matches"
+        })
+      ]
+    });
+  }
+  subscribe() {
+    super.subscribe();
+    this.on("preInit", () => {
+      this.handleUpdateArgs(this.args);
+      this.inlets = 2;
+    });
+    this.on("updateArgs", (args) => {
+      this.handleUpdateArgs(args);
+    });
+    this.on("inlet", ({ data, inlet }) => {
+      if (inlet === 0) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+          const clamped = Math.min(Math.abs(Math.floor(+data)), this.inlets - 1);
+          this._.selection = clamped;
+        }
+      } else if (inlet === 1) {
+        if (this._.selection != 0) {
+          this.outlet(this._.selection - 1, data);
+        }
+      }
+    });
+  }
+}
+Gate.description = "Route an inlet to multiple outlets";
+Gate.inlets = [
+  {
+    isHot: false,
+    type: "number",
+    description: "Which outlet to send the input to"
+  },
+  {
+    isHot: true,
+    type: "anything",
+    description: "The value to send out selected outlet"
+  }
+];
+Gate.args = [{
+  type: "number",
+  optional: false,
+  default: 2,
+  description: "The number of outlets to select from"
+}];
+
+
+/***/ }),
+
 /***/ "./src/objects/block/iter.ts":
 /*!***********************************!*\
   !*** ./src/objects/block/iter.ts ***!
@@ -1689,57 +1769,75 @@ __webpack_require__.r(__webpack_exports__);
 class Select extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
   constructor() {
     super(...arguments);
-    this._ = { right: void 0 };
+    this._ = { selectors: [] };
+  }
+  handleUpdateArgs(args) {
+    if (args.length == 0) {
+      this.error("No value to compare against");
+      return;
+    }
+    this._.selectors = args;
+    this.setMeta({
+      inlets: [
+        {
+          isHot: true,
+          type: "anything",
+          description: "The input to evaluate"
+        },
+        ...new Array(args.length).fill({
+          isHot: false,
+          type: "anything",
+          description: "The value to compare against for this index"
+        })
+      ],
+      outlets: [
+        ...new Array(args.length).fill({
+          type: "bang",
+          description: "Bangs when the input matches the selector at this index"
+        }),
+        {
+          type: "anything",
+          description: "Any input that did not match"
+        }
+      ]
+    });
+    this.inlets = args.length + 1;
+    this.outlets = args.length + 1;
   }
   subscribe() {
     super.subscribe();
     this.on("preInit", () => {
-      this.inlets = 1;
-      this.outlets = 1;
-      if (this.args.length) {
-        this._.right = this.args[0];
-      }
+      this.handleUpdateArgs(this.args);
     });
     this.on("argsUpdated", ({ args }) => {
-      if (this.args.length) {
-        this._.right = args[0];
-      }
+      this.handleUpdateArgs(args);
     });
     this.on("inlet", ({ data: rawData, inlet }) => {
       if (inlet === 0) {
-        let data = rawData;
-        if (!(this._.right instanceof Array)) {
-          data = (0,_jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_1__.extractFirst)(rawData);
+        for (let i = 0; i < this._.selectors.length; i++) {
+          let data = rawData;
+          if (!(this._.selectors[i] instanceof Array)) {
+            data = (0,_jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_1__.extractFirst)(rawData);
+          }
+          if (data === this._.selectors[i]) {
+            this.outlet(i, new _sdk__WEBPACK_IMPORTED_MODULE_0__.Bang());
+            return;
+          }
         }
-        if (data === this._.right) {
-          this.outlet(0, new _sdk__WEBPACK_IMPORTED_MODULE_0__.Bang());
-        } else {
-          this.outlet(1, data);
-        }
-      } else if (inlet === 1) {
-        this._.right = rawData;
+        this.outlet(this._.selectors.length, rawData);
+      } else if (inlet > 0 && inlet <= this._.selectors.length) {
+        this._.selectors[inlet - 1] = rawData;
       }
     });
   }
 }
 Select.description = "Output a bang when the value matches";
-Select.inlets = [
-  {
-    isHot: true,
-    type: "anything",
-    description: "The input to evaluate"
-  },
-  {
-    isHot: false,
-    type: "anything",
-    description: "The value to compare against"
-  }
-];
+Select.inlets = [{
+  isHot: true,
+  type: "anything",
+  description: "The input to evaluate"
+}];
 Select.outlets = [
-  {
-    type: "bang",
-    description: "Bangs when the value matches"
-  },
   {
     type: "anything",
     description: "Any input that did not match"
@@ -1747,7 +1845,7 @@ Select.outlets = [
 ];
 Select.args = [{
   type: "anything",
-  optional: true,
+  optional: false,
   description: "The value to compare against"
 }];
 
@@ -1831,6 +1929,93 @@ Swap.args = [{
   optional: true,
   default: 0,
   description: "Initial value to send out the first inlet"
+}];
+
+
+/***/ }),
+
+/***/ "./src/objects/block/switch.ts":
+/*!*************************************!*\
+  !*** ./src/objects/block/switch.ts ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Switch)
+/* harmony export */ });
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+
+
+class Switch extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+  constructor() {
+    super(...arguments);
+    this._ = { selection: 0, data: 0 };
+  }
+  handleUpdateArgs(args) {
+    if (args.length !== 1) {
+      this.error("Inlet count required");
+      return;
+    }
+    const inlets = +args[0];
+    this.inlets = inlets + 1;
+    this.setMeta({
+      inlets: [
+        {
+          isHot: false,
+          type: "number",
+          description: "Which inlet to route to the output"
+        },
+        ...new Array(inlets).fill({
+          isHot: true,
+          type: "anything",
+          description: "The value to output on the first outlet"
+        })
+      ]
+    });
+  }
+  subscribe() {
+    super.subscribe();
+    this.on("preInit", () => {
+      this.handleUpdateArgs(this.args);
+      this.outlets = 1;
+    });
+    this.on("updateArgs", (args) => {
+      this.handleUpdateArgs(args);
+    });
+    this.on("inlet", ({ data, inlet }) => {
+      if (inlet === 0) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+          const clamped = Math.min(Math.abs(Math.floor(+data)), this.inlets - 1);
+          this._.selection = clamped;
+        }
+      } else {
+        if (inlet === this._.selection) {
+          this.outlet(0, data);
+        }
+      }
+    });
+  }
+}
+Switch.description = "Route multiple inlets to a single outlet";
+Switch.inlets = [
+  {
+    isHot: false,
+    type: "number",
+    description: "Which inlet to route to the output"
+  }
+];
+Switch.outlets = [
+  {
+    type: "anything",
+    description: "The value from the selected inlet"
+  }
+];
+Switch.args = [{
+  type: "number",
+  optional: false,
+  default: 2,
+  description: "The number of inlets to select from"
 }];
 
 
@@ -2248,6 +2433,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _common_web_scaleFunction__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ../../../common/web/scaleFunction */ "../../common/web/scaleFunction.ts");
 /* harmony import */ var _objects_block_loadbang__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./objects/block/loadbang */ "./src/objects/block/loadbang.ts");
 /* harmony import */ var _objects_block_loadmess__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./objects/block/loadmess */ "./src/objects/block/loadmess.ts");
+/* harmony import */ var _objects_block_switch__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./objects/block/switch */ "./src/objects/block/switch.ts");
+/* harmony import */ var _objects_block_gate__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ./objects/block/gate */ "./src/objects/block/gate.ts");
+
+
 
 
 
@@ -2291,7 +2480,9 @@ __webpack_require__.r(__webpack_exports__);
   "scale~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_14__.generateObject)(_objects_dsp_scale_audio__WEBPACK_IMPORTED_MODULE_17__["default"], "scale~", [_common_web_scaleFunction__WEBPACK_IMPORTED_MODULE_19__.scale]),
   "scalec~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_14__.generateObject)(_objects_dsp_scalec_audio__WEBPACK_IMPORTED_MODULE_18__["default"], "scalec~", [_common_web_scaleFunction__WEBPACK_IMPORTED_MODULE_19__.scale]),
   "loadbang": _objects_block_loadbang__WEBPACK_IMPORTED_MODULE_20__["default"],
-  "loadmess": _objects_block_loadmess__WEBPACK_IMPORTED_MODULE_21__["default"]
+  "loadmess": _objects_block_loadmess__WEBPACK_IMPORTED_MODULE_21__["default"],
+  "switch": _objects_block_switch__WEBPACK_IMPORTED_MODULE_22__["default"],
+  "gate": _objects_block_gate__WEBPACK_IMPORTED_MODULE_23__["default"]
 }));
 
 })();

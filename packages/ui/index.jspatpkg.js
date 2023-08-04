@@ -1619,6 +1619,205 @@ message.UI = _ui_message__WEBPACK_IMPORTED_MODULE_3__["default"];
 
 /***/ }),
 
+/***/ "./src/objects/number.ts":
+/*!*******************************!*\
+  !*** ./src/objects/number.ts ***!
+  \*******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ NumberBox)
+/* harmony export */ });
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../sdk */ "./src/sdk.ts");
+/* harmony import */ var _ui_number__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../ui/number */ "./src/ui/number.tsx");
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./base */ "./src/objects/base.ts");
+/* harmony import */ var _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jspatcher/jspatcher/src/core/message */ "../../../frontend/src/core/message.ts");
+
+
+
+
+class NumberBox extends _base__WEBPACK_IMPORTED_MODULE_2__["default"] {
+  constructor() {
+    super(...arguments);
+    this.state = { value: 0 };
+  }
+  toValidValue(valueIn) {
+    const min = this.getProp("minimum");
+    const max = this.getProp("maximum");
+    const format = this.getProp("format");
+    let value = valueIn || 0;
+    if (format !== "Decimal (Floating-Point)")
+      value = Math.round(value);
+    if (!isNaN(min))
+      value = Math.max(min, value);
+    if (!isNaN(max))
+      value = Math.min(max, value);
+    return value;
+  }
+  validateValue(valueIn, id) {
+    const value = this.toValidValue(valueIn);
+    if (value === this.state.value)
+      return;
+    this.setState({ value }, id);
+  }
+  onChangeFromUI({ value }) {
+    this.setState({ value });
+    this.outlet(0, value);
+  }
+  subscribe() {
+    super.subscribe();
+    this.on("preInit", () => {
+      this.inlets = 1;
+      this.outlets = 1;
+    });
+    this.on("postInit", () => {
+      this.validateValue(this.state.value);
+      this.updateUI({ value: this.state.value });
+    });
+    this.on("inlet", ({ data, inlet }) => {
+      if (inlet === 0) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+          let value;
+          if (data instanceof Array || data instanceof _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_3__.Message) {
+            value = +(0,_jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_3__.extractFirst)(data);
+          } else {
+            value = +data;
+          }
+          this.validateValue(value);
+          this.updateUI({ value: this.state.value });
+        }
+        this.outlet(0, this.state.value);
+      }
+    });
+    this.on("propsUpdated", () => {
+      this.validateValue(this.state.value);
+      this.updateUI({ value: this.state.value });
+    });
+    this.on("updateState", ({ state: { value }, id }) => {
+      this.validateValue(value, id);
+      this.updateUI({ value: this.state.value });
+      this.outlet(0, this.state.value);
+    });
+  }
+}
+NumberBox.description = "Display and output a number";
+NumberBox.inlets = [{
+  type: "anything",
+  isHot: true,
+  description: "Set Displayed Number and Repeat to Output"
+}];
+NumberBox.outlets = [{
+  type: "number",
+  description: "Output Incoming or Entered Number"
+}];
+NumberBox.props = {
+  format: {
+    type: "enum",
+    enums: ["Decimal (Floating-Point)", "Decimal (Integer)", "Hex", "Roland Octal", "Binary", "MIDI", "MIDI (C4)"],
+    default: "Decimal (Floating-Point)",
+    description: "Sets characteristics of the appearance and behavior of the number box.",
+    isUIState: true
+  },
+  triangle: {
+    type: "boolean",
+    default: true,
+    description: "Toggles the drawing of a triangular arrow pointing to the number in the number box.",
+    isUIState: true
+  },
+  numDecimalPlaces: {
+    type: "number",
+    default: 0,
+    description: "Number of Decimal Places",
+    isUIState: true
+  },
+  triScale: {
+    type: "number",
+    default: 1,
+    description: "Scales the size of the triangle drawn in the number box.",
+    isUIState: true
+  },
+  bgColor: {
+    type: "color",
+    default: "rgb(51, 51, 51)",
+    description: "Sets the color for the number box object's displayed/unclicked background.",
+    isUIState: true
+  },
+  hTriColor: {
+    type: "color",
+    default: "rgb(237, 237, 90)",
+    description: "Sets the highlight color for the triangle inside the number box object that indicates that the contents are editable.",
+    isUIState: true
+  },
+  textColor: {
+    type: "color",
+    default: "rgb(247, 247, 247)",
+    description: "Sets the color for the number box object's displayed/unclicked number values.",
+    isUIState: true
+  },
+  triColor: {
+    type: "color",
+    default: "rgb(125, 127, 132)",
+    description: "Sets the color for the triangle inside the number box object that indicates that the contents are editable.",
+    isUIState: true
+  },
+  fontFamily: {
+    type: "enum",
+    enums: ["Lato", "Georgia", "Times New Roman", "Arial", "Tahoma", "Verdana", "Courier New"],
+    default: "Lato",
+    description: "Font family",
+    isUIState: true
+  },
+  fontSize: {
+    type: "number",
+    default: 11,
+    description: "Text font size",
+    isUIState: true
+  },
+  fontFace: {
+    type: "enum",
+    enums: ["regular", "bold", "italic", "bold italic"],
+    default: "regular",
+    description: "Text style",
+    isUIState: true
+  },
+  cantChange: {
+    type: "boolean",
+    default: false,
+    description: "Toggles the ability to disallow changes with the mouse or the computer keyboard.",
+    isUIState: true
+  },
+  outputOnClick: {
+    type: "boolean",
+    default: false,
+    description: "Toggles sending the current value when you click on the number box.",
+    isUIState: true
+  },
+  mouseFilter: {
+    type: "boolean",
+    default: false,
+    description: "Send Value on Mouse Up",
+    isUIState: true
+  },
+  minimum: {
+    type: "number",
+    default: void 0,
+    description: "Sets the minimum value that can be displayed or sent out by the number box.",
+    isUIState: true
+  },
+  maximum: {
+    type: "number",
+    default: void 0,
+    description: "Sets the maximum value that can be displayed or sent out by the number box.",
+    isUIState: true
+  }
+};
+NumberBox.UI = _ui_number__WEBPACK_IMPORTED_MODULE_1__["default"];
+
+
+/***/ }),
+
 /***/ "./src/objects/scope.ts":
 /*!******************************!*\
   !*** ./src/objects/scope.ts ***!
@@ -2719,6 +2918,357 @@ MessageUI.editableOnUnlock = true;
 
 /***/ }),
 
+/***/ "./src/ui/number.tsx":
+/*!***************************!*\
+  !*** ./src/ui/number.tsx ***!
+  \***************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ NumberBoxUI)
+/* harmony export */ });
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../sdk */ "./src/sdk.ts");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils */ "./src/utils.ts");
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+
+
+const _NumberBoxUI = class extends _sdk__WEBPACK_IMPORTED_MODULE_0__.CanvasUI {
+  constructor() {
+    super(...arguments);
+    this.refCanvasUI = _sdk__WEBPACK_IMPORTED_MODULE_0__.React.createRef();
+    this.state = __spreadProps(__spreadValues({}, this.state), {
+      value: this.object.state.value,
+      focus: false,
+      inTouch: false,
+      inputBuffer: ""
+    });
+    this.multiplier = 1;
+    this.handleKeyDown = (e) => {
+      if (this.state.cantChange)
+        return;
+      if (!this.state.inputBuffer) {
+        let addStep = 0;
+        if (e.key === "ArrowUp" || e.key === "ArrowRight")
+          addStep = 1;
+        if (e.key === "ArrowDown" || e.key === "ArrowLeft")
+          addStep = -1;
+        if (addStep !== 0) {
+          const newValue = this.object.toValidValue(this.state.value + addStep);
+          if (newValue !== this.state.value)
+            this.setValueToOutput(newValue);
+        }
+      }
+      if (e.key.match(/[0-9.-]/)) {
+        this.setState({ inputBuffer: this.state.inputBuffer + e.key });
+        return;
+      }
+      if (e.key === "Backspace") {
+        this.setState({ inputBuffer: this.state.inputBuffer.slice(0, -1) });
+        return;
+      }
+      if (e.key === "Enter") {
+        const newValue = this.object.toValidValue(+this.state.inputBuffer);
+        this.setState({ inputBuffer: "" });
+        if (newValue !== this.state.value)
+          this.setValueToOutput(newValue);
+      }
+    };
+    this.handleKeyUp = (e) => {
+    };
+    this.handleTouchStart = (e) => {
+      e.currentTarget.focus();
+      const rect = e.currentTarget.getBoundingClientRect();
+      let prevX = e.touches[0].clientX;
+      let prevY = e.touches[0].clientY;
+      const fromX = prevX - rect.left;
+      const fromY = prevY - rect.top;
+      const prevValue = this.state.value;
+      this.handlePointerDown({ x: fromX, y: fromY, originalEvent: e });
+      const handleTouchMove = (e2) => {
+        e2.preventDefault();
+        const clientX = e2.changedTouches[0].clientX;
+        const clientY = e2.changedTouches[0].clientY;
+        const movementX = clientX - prevX;
+        const movementY = clientY - prevY;
+        prevX = clientX;
+        prevY = clientY;
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+        this.handlePointerDrag({ prevValue, x, y, fromX, fromY, movementX, movementY, originalEvent: e2 });
+      };
+      const handleTouchEnd = (e2) => {
+        e2.preventDefault();
+        const x = e2.changedTouches[0].clientX - rect.left;
+        const y = e2.changedTouches[0].clientY - rect.top;
+        this.handlePointerUp({ x, y, originalEvent: e2 });
+        document.removeEventListener("touchmove", handleTouchMove);
+        document.removeEventListener("touchend", handleTouchEnd);
+      };
+      document.addEventListener("touchmove", handleTouchMove, { passive: false });
+      document.addEventListener("touchend", handleTouchEnd, { passive: false });
+    };
+    this.handleWheel = (e) => {
+    };
+    this.handleClick = (e) => {
+    };
+    this.handleMouseDown = (e) => {
+      e.preventDefault();
+      e.currentTarget.focus();
+      const rect = e.currentTarget.getBoundingClientRect();
+      const fromX = e.clientX - rect.left;
+      const fromY = e.clientY - rect.top;
+      const prevValue = this.state.value;
+      this.handlePointerDown({ x: fromX, y: fromY, originalEvent: e });
+      const handleMouseMove = (e2) => {
+        e2.preventDefault();
+        const x = e2.clientX - rect.left;
+        const y = e2.clientY - rect.top;
+        this.handlePointerDrag({ prevValue, x, y, fromX, fromY, movementX: e2.movementX, movementY: e2.movementY, originalEvent: e2 });
+      };
+      const handleMouseUp = (e2) => {
+        e2.preventDefault();
+        const x = e2.clientX - rect.left;
+        const y = e2.clientY - rect.top;
+        this.handlePointerUp({ x, y, originalEvent: e2 });
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
+      };
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+    };
+    this.handleMouseOver = (e) => {
+    };
+    this.handleMouseOut = (e) => {
+    };
+    this.handleContextMenu = (e) => {
+    };
+    this.mouseDownValue = this.state.value;
+    this.handlePointerDown = (e) => {
+      const { ctx } = this.refCanvasUI.current;
+      if (!ctx)
+        return;
+      let { value, numDecimalPlaces, fontFamily, fontFace, fontSize, format, cantChange, outputOnClick, triangle, triScale } = this.state;
+      if (cantChange)
+        return;
+      if (outputOnClick)
+        this.setValueToOutput(this.state.value);
+      this.mouseDownValue = this.state.value;
+      const { width } = e.originalEvent.currentTarget.getBoundingClientRect();
+      if (numDecimalPlaces === 0)
+        numDecimalPlaces = 6;
+      ctx.font = `${fontFace === "regular" ? "" : fontFace} ${fontSize}px ${fontFamily}, sans-serif`;
+      const { PADDING, LEFT_TEXT_OFFSET } = _NumberBoxUI;
+      const stringValue = value.toFixed(numDecimalPlaces);
+      const decimalArray = stringValue.split(".");
+      const leftTextOffset = LEFT_TEXT_OFFSET * triScale;
+      const textStart = +triangle * leftTextOffset + 3 * PADDING / 2;
+      if (format === "Decimal (Floating-Point)") {
+        for (let i = -1; i < numDecimalPlaces; i++) {
+          let numberText;
+          if (i === -1) {
+            numberText = decimalArray[0] + ".";
+          } else {
+            numberText = decimalArray[0] + "." + decimalArray[1].substring(0, i + 1);
+          }
+          const textWidth = ctx.measureText(numberText).width;
+          if (e.x < textWidth + textStart) {
+            this.multiplier = Math.pow(10, -(i + 1));
+            break;
+          } else {
+            this.multiplier = Math.pow(10, -numDecimalPlaces);
+          }
+        }
+      }
+      this.setState({ inTouch: true });
+    };
+    this.handlePointerDrag = (e) => {
+      const { value, cantChange, format } = this.state;
+      if (cantChange)
+        return;
+      const multiplier = format === "Decimal (Floating-Point)" ? this.multiplier : 1;
+      const decimals = -Math.log10(multiplier);
+      let newValue = this.toFixedTruncate(value, decimals);
+      newValue = newValue - e.movementY * multiplier;
+      newValue = this.object.toValidValue(newValue);
+      newValue = Math.round(newValue * 10 ** decimals) / 10 ** decimals;
+      this.setState({ value: newValue });
+      if (!this.state.mouseFilter && newValue !== value)
+        this.setValueToOutput(newValue);
+    };
+    this.handlePointerUp = (e) => {
+      const { value, cantChange } = this.state;
+      if (cantChange)
+        return;
+      if (this.state.mouseFilter && this.mouseDownValue !== value)
+        this.setValueToOutput(this.state.value);
+      this.setState({ inTouch: false });
+    };
+    this.handleFocusIn = (e) => this.setState({ focus: true });
+    this.handleFocusOut = () => {
+      if (this.state.inputBuffer) {
+        const newValue = this.object.toValidValue(+this.state.inputBuffer);
+        this.setState({ inputBuffer: "" });
+        if (newValue !== this.state.value)
+          this.setValueToOutput(newValue);
+      }
+      this.setState({ focus: false });
+    };
+    this.onPaint = (ctx) => {
+      if (!ctx)
+        return;
+      const {
+        fontSize,
+        fontFamily,
+        fontFace,
+        bgColor,
+        textColor,
+        triangle,
+        triColor,
+        triScale,
+        hTriColor,
+        inTouch
+      } = this.state;
+      const { PADDING, TRIANGLE_BASE, TRIANGLE_HEIGHT, LEFT_TEXT_OFFSET } = _NumberBoxUI;
+      const triangleBase = TRIANGLE_BASE * triScale;
+      const triangleHeight = TRIANGLE_HEIGHT * triScale;
+      const leftTextOffset = LEFT_TEXT_OFFSET * triScale;
+      const valueStr = this.state.inputBuffer || this._formatValue(this.state.value);
+      const [width, height] = this.refCanvasUI.current.fullSize();
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, width, height);
+      ctx.font = `${fontFace === "regular" ? "" : fontFace} ${fontSize}px ${fontFamily}, sans-serif`;
+      ctx.fillStyle = textColor;
+      ctx.textBaseline = "middle";
+      if (triangle) {
+        (0,_utils__WEBPACK_IMPORTED_MODULE_1__.fillTextLine)(ctx, valueStr, leftTextOffset + 3 * PADDING / 2, height / 2, width - leftTextOffset - (PADDING + 2));
+        ctx.fillStyle = inTouch ? hTriColor : triColor;
+        ctx.beginPath();
+        ctx.moveTo(PADDING, height / 2 - triangleBase / 2);
+        ctx.lineTo(PADDING, height / 2 + triangleBase / 2);
+        ctx.lineTo(PADDING + triangleHeight, height / 2);
+        ctx.fill();
+      } else {
+        (0,_utils__WEBPACK_IMPORTED_MODULE_1__.fillTextLine)(ctx, valueStr, 3 * PADDING / 2, height / 2, width - (PADDING + 2));
+      }
+    };
+  }
+  toFixedTruncate(num, fixed) {
+    const re = new RegExp(`^-?\\d+(?:.\\d{0,${fixed || -1}})?`);
+    return parseFloat(num.toString().match(re)[0]);
+  }
+  _formatValue(value = this.state.value) {
+    const {
+      format,
+      numDecimalPlaces
+    } = this.state;
+    let retStr;
+    switch (format) {
+      case "Decimal (Integer)":
+        retStr = Math.round(value).toString();
+        break;
+      case "Decimal (Floating-Point)":
+        if (value % 1 === 0 && numDecimalPlaces === 0) {
+          retStr = value + ".";
+        } else {
+          if (numDecimalPlaces === 0) {
+            retStr = parseFloat(value.toFixed(_NumberBoxUI.MAX_NUM_DECIMAL_PLACES)).toString();
+          } else {
+            retStr = value.toFixed(numDecimalPlaces);
+          }
+        }
+        break;
+      case "MIDI":
+      case "MIDI (C4)": {
+        const noteArray = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+        let base = 2;
+        if (format === "MIDI (C4)")
+          base = 1;
+        const note = noteArray[value % 12] + (Math.floor(value / 12) - base).toString();
+        if (value <= 127 && value >= 0) {
+          retStr = note;
+        } else if (value < 0) {
+          retStr = "-";
+        } else if (value > 127) {
+          retStr = "+";
+        }
+        break;
+      }
+      case "Binary":
+        retStr = (value >>> 0).toString(2);
+        break;
+      case "Hex":
+        retStr = (value >>> 0).toString(16).toUpperCase();
+        break;
+      case "Roland Octal": {
+        let dec1 = (value >> 3) + 1;
+        let dec2 = (value & 7) + 1;
+        retStr = dec1.toString() + dec2.toString();
+        break;
+      }
+      default:
+        retStr = value.toString();
+        break;
+    }
+    return retStr;
+  }
+  setValueToOutput(value) {
+    this.setState({ value });
+    this.props.object.onChangeFromUI({ value });
+  }
+  render() {
+    return /* @__PURE__ */ _sdk__WEBPACK_IMPORTED_MODULE_0__.React.createElement(_sdk__WEBPACK_IMPORTED_MODULE_0__.CanvasUI, __spreadProps(__spreadValues({
+      ref: this.refCanvasUI,
+      onPaint: this.onPaint
+    }, this.props), {
+      canvasProps: {
+        tabIndex: 1,
+        onKeyDown: this.handleKeyDown,
+        onKeyUp: this.handleKeyUp,
+        onTouchStart: this.handleTouchStart,
+        onWheel: this.handleWheel,
+        onClick: this.handleClick,
+        onMouseDown: this.handleMouseDown,
+        onMouseOver: this.handleMouseOver,
+        onMouseOut: this.handleMouseOut,
+        onContextMenu: this.handleContextMenu,
+        onFocus: this.handleFocusIn,
+        onBlur: this.handleFocusOut
+      }
+    }));
+  }
+};
+let NumberBoxUI = _NumberBoxUI;
+NumberBoxUI.MAX_NUM_DECIMAL_PLACES = 6;
+NumberBoxUI.PADDING = 4;
+NumberBoxUI.TRIANGLE_BASE = 12;
+NumberBoxUI.TRIANGLE_HEIGHT = 6;
+NumberBoxUI.LEFT_TEXT_OFFSET = _NumberBoxUI.TRIANGLE_HEIGHT;
+
+
+
+/***/ }),
+
 /***/ "./src/ui/scope.tsx":
 /*!**************************!*\
   !*** ./src/ui/scope.tsx ***!
@@ -3270,6 +3820,60 @@ LiveToggleUI.defaultSize = [30, 30];
 
 /***/ }),
 
+/***/ "./src/utils.ts":
+/*!**********************!*\
+  !*** ./src/utils.ts ***!
+  \**********************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "fillTextLine": () => (/* binding */ fillTextLine),
+/* harmony export */   "fillTextLines": () => (/* binding */ fillTextLines)
+/* harmony export */ });
+const fillTextLine = (ctx, textIn, x, y, width) => {
+  const ellipsis = "\u2026";
+  let textWidth = ctx.measureText(textIn).width;
+  let text = textIn;
+  if (textWidth > width) {
+    let str = textIn.toString();
+    let len = str.length;
+    while (textWidth >= width && len-- > 1) {
+      str = str.substring(0, len);
+      textWidth = ctx.measureText(str + ellipsis).width;
+    }
+    if (textWidth <= width) {
+      text = str + ellipsis;
+    } else {
+      text = str;
+    }
+  }
+  ctx.fillText(text, x, y, width);
+  return;
+};
+const fillTextLines = (ctx, textIn, x, y, width) => {
+  let textWidth = ctx.measureText(textIn).width;
+  let text = textIn;
+  if (textWidth > width) {
+    const str = textIn.toString().split("");
+    const len = str.length;
+    const newString = [];
+    for (let i = 0; i < len; i++) {
+      if (ctx.measureText(newString.join("").split("\n").pop() + str[i]).width > width) {
+        newString.push("\n");
+      }
+      newString.push(str[i]);
+      text = newString.join("");
+    }
+  }
+  ctx.fillText(text, x, y, width);
+  return text;
+};
+
+
+/***/ }),
+
 /***/ "./src/ui/ui.scss":
 /*!************************!*\
   !*** ./src/ui/ui.scss ***!
@@ -3763,7 +4367,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _objects_spectroscope__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./objects/spectroscope */ "./src/objects/spectroscope.ts");
 /* harmony import */ var _objects_button_live__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./objects/button-live */ "./src/objects/button-live.ts");
 /* harmony import */ var _objects_toggle__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./objects/toggle */ "./src/objects/toggle.ts");
-/* harmony import */ var _ui_ui_scss__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./ui/ui.scss */ "./src/ui/ui.scss");
+/* harmony import */ var _objects_number__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./objects/number */ "./src/objects/number.ts");
+/* harmony import */ var _ui_ui_scss__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./ui/ui.scss */ "./src/ui/ui.scss");
+
 
 
 
@@ -3773,6 +4379,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (async () => ({
   message: _objects_message__WEBPACK_IMPORTED_MODULE_0__["default"],
+  number: _objects_number__WEBPACK_IMPORTED_MODULE_6__["default"],
   "scope~": _objects_scope__WEBPACK_IMPORTED_MODULE_1__["default"],
   "spectrogram~": _objects_spectrogram__WEBPACK_IMPORTED_MODULE_2__["default"],
   "spectroscope~": _objects_spectroscope__WEBPACK_IMPORTED_MODULE_3__["default"],

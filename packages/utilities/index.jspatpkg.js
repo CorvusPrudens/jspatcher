@@ -285,7 +285,7 @@ JsDspProcessor.args = [];
 JsDspProcessor.props = {
   smoothInput: {
     type: "number",
-    default: 0.05,
+    default: 267e-5,
     description: "Linear interpolation coefficient to block-rate input values in seconds"
   }
 };

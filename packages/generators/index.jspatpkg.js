@@ -278,7 +278,7 @@ JsDspProcessor.args = [];
 JsDspProcessor.props = {
   smoothInput: {
     type: "number",
-    default: 0.05,
+    default: 267e-5,
     description: "Linear interpolation coefficient to block-rate input values in seconds"
   }
 };
@@ -737,6 +737,245 @@ Metro.props = {
 
 /***/ }),
 
+/***/ "./src/objects/dsp/adsr.ts":
+/*!*********************************!*\
+  !*** ./src/objects/dsp/adsr.ts ***!
+  \*********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "ADSR_SEG": () => (/* binding */ ADSR_SEG),
+/* harmony export */   "Adsr": () => (/* binding */ Adsr)
+/* harmony export */ });
+var ADSR_SEG = /* @__PURE__ */ ((ADSR_SEG2) => {
+  ADSR_SEG2[ADSR_SEG2["IDLE"] = 0] = "IDLE";
+  ADSR_SEG2[ADSR_SEG2["ATTACK"] = 1] = "ATTACK";
+  ADSR_SEG2[ADSR_SEG2["DECAY"] = 2] = "DECAY";
+  ADSR_SEG2[ADSR_SEG2["RELEASE"] = 4] = "RELEASE";
+  return ADSR_SEG2;
+})(ADSR_SEG || {});
+class Adsr {
+  constructor(sample_rate, blockSize = 1) {
+    this.sample_rate_ = sample_rate / blockSize;
+    this.attackShape_ = -1;
+    this.attackTarget_ = 0;
+    this.attackTime_ = -1;
+    this.decayTime_ = -1;
+    this.releaseTime_ = -1;
+    this.sus_level_ = 0.7;
+    this.x_ = 0;
+    this.gate_ = false;
+    this.mode_ = 0 /* IDLE */;
+    this.SetTime(1 /* ATTACK */, 0.1);
+    this.SetTime(2 /* DECAY */, 0.1);
+    this.SetTime(4 /* RELEASE */, 0.1);
+  }
+  Retrigger(hard) {
+    this.mode_ = 1 /* ATTACK */;
+    if (hard)
+      this.x_ = 0;
+  }
+  SetTime(seg, time) {
+    switch (seg) {
+      case 1 /* ATTACK */:
+        this.SetAttackTime(time, 0);
+        break;
+      case 2 /* DECAY */:
+        [this.decayTime_, this.decayD0_] = this.SetTimeConstant(time, this.decayTime_, this.decayD0_);
+        break;
+      case 4 /* RELEASE */:
+        [this.releaseTime_, this.releaseD0_] = this.SetTimeConstant(time, this.releaseTime_, this.releaseD0_);
+        break;
+      default:
+        return;
+    }
+  }
+  SetAttackTime(timeInS, shape) {
+    if (timeInS != this.attackTime_ || shape != this.attackShape_) {
+      this.attackTime_ = timeInS;
+      this.attackShape_ = shape;
+      if (timeInS > 0) {
+        let x = shape;
+        let target = 9 * Math.pow(x, 10) + 0.3 * x + 1.01;
+        this.attackTarget_ = target;
+        let logTarget = Math.log(1 - 1 / target);
+        this.attackD0_ = 1 - Math.exp(logTarget / (timeInS * this.sample_rate_));
+      } else
+        this.attackD0_ = 1;
+    }
+  }
+  SetDecayTime(timeInS) {
+    [this.decayTime_, this.decayD0_] = this.SetTimeConstant(timeInS, this.decayTime_, this.decayD0_);
+  }
+  SetReleaseTime(timeInS) {
+    [this.releaseTime_, this.releaseD0_] = this.SetTimeConstant(timeInS, this.releaseTime_, this.releaseD0_);
+  }
+  SetTimeConstant(timeInS, time, coeff) {
+    if (timeInS != time) {
+      time = timeInS;
+      if (time > 0) {
+        const target = Math.log(1 / Math.E);
+        coeff = 1 - Math.exp(target / (time * this.sample_rate_));
+      } else
+        coeff = 1;
+    }
+    return [time, coeff];
+  }
+  SetSustainLevel(sus_level) {
+    sus_level = sus_level <= 0 ? -0.01 : sus_level > 1 ? 1 : sus_level;
+    this.sus_level_ = sus_level;
+  }
+  GetCurrentSegment() {
+    return this.mode_;
+  }
+  IsRunning() {
+    return this.mode_ != 0 /* IDLE */;
+  }
+  Process(gate) {
+    let out = 0;
+    if (gate && !this.gate_)
+      this.mode_ = 1 /* ATTACK */;
+    else if (!gate && this.gate_)
+      this.mode_ = 4 /* RELEASE */;
+    this.gate_ = gate;
+    let D0 = this.attackD0_;
+    if (this.mode_ == 2 /* DECAY */)
+      D0 = this.decayD0_;
+    else if (this.mode_ == 4 /* RELEASE */)
+      D0 = this.releaseD0_;
+    let target = this.mode_ == 2 /* DECAY */ ? this.sus_level_ : -0.01;
+    switch (this.mode_) {
+      case 0 /* IDLE */:
+        out = 0;
+        break;
+      case 1 /* ATTACK */:
+        this.x_ += D0 * (this.attackTarget_ - this.x_);
+        out = this.x_;
+        if (out > 1) {
+          this.x_ = out = 1;
+          this.mode_ = 2 /* DECAY */;
+        }
+        break;
+      case 2 /* DECAY */:
+      case 4 /* RELEASE */:
+        this.x_ += D0 * (target - this.x_);
+        out = this.x_;
+        if (out < 0) {
+          this.x_ = out = 0;
+          this.mode_ = 0 /* IDLE */;
+        }
+      default:
+        break;
+    }
+    return out;
+  }
+}
+
+
+/***/ }),
+
+/***/ "./src/objects/dsp/adsrObject.ts":
+/*!***************************************!*\
+  !*** ./src/objects/dsp/adsrObject.ts ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ AdsrObject)
+/* harmony export */ });
+/* harmony import */ var _adsr__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./adsr */ "./src/objects/dsp/adsr.ts");
+/* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+
+
+class AdsrObject extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_1__["default"] {
+  process(inputs, outputs, parameters) {
+    const gate = inputs[0][0];
+    const attackTime = inputs[0][1];
+    const decayTime = inputs[0][2];
+    const sustainLevel = inputs[0][3];
+    const releaseTime = inputs[0][4];
+    const outputStream = outputs[0][0];
+    for (let i = 0; i < outputStream.length; i++) {
+      this.adsr.SetTime(_adsr__WEBPACK_IMPORTED_MODULE_0__.ADSR_SEG.ATTACK, attackTime[i] / 1e3);
+      this.adsr.SetTime(_adsr__WEBPACK_IMPORTED_MODULE_0__.ADSR_SEG.DECAY, decayTime[i] / 1e3);
+      this.adsr.SetTime(_adsr__WEBPACK_IMPORTED_MODULE_0__.ADSR_SEG.RELEASE, releaseTime[i] / 1e3);
+      this.adsr.SetSustainLevel(sustainLevel[i]);
+      outputStream[i] = this.adsr.Process(gate[i] > 0);
+    }
+    return true;
+  }
+  init(sampleRate) {
+    this.adsr = new _adsr__WEBPACK_IMPORTED_MODULE_0__.Adsr(sampleRate);
+  }
+}
+AdsrObject.description = "ADSR Envelope";
+AdsrObject.inlets = [
+  {
+    isHot: true,
+    type: "signal",
+    description: "gate input"
+  },
+  {
+    isHot: true,
+    type: "signal",
+    description: "attack time in milliseconds"
+  },
+  {
+    isHot: true,
+    type: "signal",
+    description: "decay time in milliseconds"
+  },
+  {
+    isHot: true,
+    type: "signal",
+    description: "sustain level"
+  },
+  {
+    isHot: true,
+    type: "signal",
+    description: "release time in milliseconds"
+  }
+];
+AdsrObject.outlets = [
+  {
+    type: "signal",
+    description: "envelope output",
+    varLength: true
+  }
+];
+AdsrObject.args = [
+  {
+    type: "number",
+    optional: true,
+    description: "attack time in milliseconds",
+    default: 250
+  },
+  {
+    type: "number",
+    optional: true,
+    description: "decay time in milliseconds",
+    default: 500
+  },
+  {
+    type: "number",
+    optional: true,
+    description: "sustain level",
+    default: 1
+  },
+  {
+    type: "number",
+    optional: true,
+    description: "release time in milliseconds",
+    default: 500
+  }
+];
+AdsrObject.argsOffset = 1;
+
+
+/***/ }),
+
 /***/ "./src/objects/dsp/cycle.ts":
 /*!**********************************!*\
   !*** ./src/objects/dsp/cycle.ts ***!
@@ -836,7 +1075,7 @@ var Waveform = /* @__PURE__ */ ((Waveform2) => {
 class Oscillator {
   constructor(sampleRate) {
     this.srRecip = 1 / sampleRate;
-    this.nyquist = sampleRate * 0.5;
+    this.nyquist = sampleRate / 2;
     this.freq = 100;
     this.amp = 0.5;
     this.pw = 0.5;
@@ -848,7 +1087,7 @@ class Oscillator {
     this.lastOut = 0;
   }
   SetFreq(f) {
-    const clamped = this.fclamp(f, -this.nyquist, this.nyquist);
+    const clamped = this.fclamp(f, 0, this.nyquist);
     this.freq = clamped;
     this.phaseInc = this.CalcPhaseInc(clamped);
   }
@@ -1054,8 +1293,8 @@ class PureRamp extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["
     let frequency = inputs[0][0];
     let outputStream = outputs[0][0];
     for (let i = 0; i < outputStream.length; i++) {
-      this.osc.SetFreq(frequency[i] * -1);
-      outputStream[i] = this.osc.Process();
+      this.osc.SetFreq(frequency[i]);
+      outputStream[i] = this.osc.Process() * -1;
     }
     return true;
   }
@@ -1303,8 +1542,8 @@ class Ramp extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["defa
     let frequency = inputs[0][0];
     let outputStream = outputs[0][0];
     for (let i = 0; i < outputStream.length; i++) {
-      this.osc.SetFreq(frequency[i] * -1);
-      outputStream[i] = this.osc.Process();
+      this.osc.SetFreq(frequency[i]);
+      outputStream[i] = this.osc.Process() * -1;
     }
     return true;
   }
@@ -1411,6 +1650,80 @@ Rect.args = [
   }
 ];
 Rect.argsOffset = 0;
+
+
+/***/ }),
+
+/***/ "./src/objects/dsp/sah.ts":
+/*!********************************!*\
+  !*** ./src/objects/dsp/sah.ts ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ SampleAndHoldObject)
+/* harmony export */ });
+/* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+
+var Mode = /* @__PURE__ */ ((Mode2) => {
+  Mode2[Mode2["MODE_SAMPLE_HOLD"] = 0] = "MODE_SAMPLE_HOLD";
+  Mode2[Mode2["MODE_TRACK_HOLD"] = 1] = "MODE_TRACK_HOLD";
+  Mode2[Mode2["MODE_LAST"] = 2] = "MODE_LAST";
+  return Mode2;
+})(Mode || {});
+class SampleAndHoldObject extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    super(...arguments);
+    this.track_ = 0;
+    this.sample_ = 0;
+    this.previous_ = false;
+  }
+  process(inputs, outputs, parameters) {
+    const signalInput = inputs[0][0];
+    const triggerInput = inputs[0][1];
+    const outputStream = outputs[0][0];
+    for (let i = 0; i < outputStream.length; i++) {
+      this.update(triggerInput[i] > 0, signalInput[i]);
+      outputStream[i] = this.sample_;
+    }
+    return true;
+  }
+  update(trigger, input) {
+    if (trigger) {
+      if (!this.previous_) {
+        this.sample_ = input;
+      }
+      this.track_ = input;
+    }
+    this.previous_ = trigger;
+  }
+  init(sampleRate) {
+    this.track_ = 0;
+    this.sample_ = 0;
+    this.previous_ = false;
+  }
+}
+SampleAndHoldObject.description = "Sample and Hold";
+SampleAndHoldObject.inlets = [
+  {
+    isHot: true,
+    type: "signal",
+    description: "Signal to be sampled/tracked and held"
+  },
+  {
+    isHot: true,
+    type: "signal",
+    description: "Trigger input"
+  }
+];
+SampleAndHoldObject.outlets = [
+  {
+    type: "signal",
+    description: "Sample and hold output"
+  }
+];
+SampleAndHoldObject.argsOffset = 0;
 
 
 /***/ }),
@@ -1529,6 +1842,43 @@ Tri.args = [
   }
 ];
 Tri.argsOffset = 0;
+
+
+/***/ }),
+
+/***/ "./src/objects/dsp/whitenoiseObject.ts":
+/*!*********************************************!*\
+  !*** ./src/objects/dsp/whitenoiseObject.ts ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ WhiteNoiseObject)
+/* harmony export */ });
+/* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+
+class WhiteNoiseObject extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  process(inputs, outputs, parameters) {
+    let outputStream = outputs[0][0];
+    for (let i = 0; i < outputStream.length; i++) {
+      outputStream[i] = Math.random() * 2 - 1;
+    }
+    return true;
+  }
+  init(sampleRate) {
+  }
+}
+WhiteNoiseObject.description = "Simple pseudo-random white noise";
+WhiteNoiseObject.inlets = [];
+WhiteNoiseObject.outlets = [
+  {
+    type: "signal",
+    description: "white noise"
+  }
+];
+WhiteNoiseObject.args = [];
+WhiteNoiseObject.argsOffset = 0;
 
 
 /***/ }),
@@ -1699,6 +2049,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _objects_dsp_psaw__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./objects/dsp/psaw */ "./src/objects/dsp/psaw.ts");
 /* harmony import */ var _objects_dsp_ptri__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./objects/dsp/ptri */ "./src/objects/dsp/ptri.ts");
 /* harmony import */ var _objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./objects/dsp/oscillator */ "./src/objects/dsp/oscillator.ts");
+/* harmony import */ var _objects_dsp_adsr__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./objects/dsp/adsr */ "./src/objects/dsp/adsr.ts");
+/* harmony import */ var _objects_dsp_adsrObject__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./objects/dsp/adsrObject */ "./src/objects/dsp/adsrObject.ts");
+/* harmony import */ var _objects_dsp_whitenoiseObject__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./objects/dsp/whitenoiseObject */ "./src/objects/dsp/whitenoiseObject.ts");
+/* harmony import */ var _objects_dsp_sah__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./objects/dsp/sah */ "./src/objects/dsp/sah.ts");
+
+
+
+
 
 
 
@@ -1716,6 +2074,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (async () => ({
   "cycle~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__.generateObject)(_objects_dsp_cycle__WEBPACK_IMPORTED_MODULE_0__["default"], "cycle~"),
   "phasor~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__.generateObject)(_objects_dsp_phasor__WEBPACK_IMPORTED_MODULE_1__["default"], "phasor~"),
+  "adsr~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__.generateObject)(_objects_dsp_adsrObject__WEBPACK_IMPORTED_MODULE_15__["default"], "adsr~", [_objects_dsp_adsr__WEBPACK_IMPORTED_MODULE_14__.Adsr], [{ name: "ADSR_SEG", item: _objects_dsp_adsr__WEBPACK_IMPORTED_MODULE_14__.ADSR_SEG }]),
   "saw~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__.generateObject)(_objects_dsp_saw__WEBPACK_IMPORTED_MODULE_5__["default"], "saw~", [_objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Oscillator], [{ name: "Waveform", item: _objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Waveform }]),
   "tri~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__.generateObject)(_objects_dsp_tri__WEBPACK_IMPORTED_MODULE_6__["default"], "tri~", [_objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Oscillator], [{ name: "Waveform", item: _objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Waveform }]),
   "rect~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__.generateObject)(_objects_dsp_rect__WEBPACK_IMPORTED_MODULE_7__["default"], "rect~", [_objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Oscillator], [{ name: "Waveform", item: _objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Waveform }]),
@@ -1724,8 +2083,10 @@ __webpack_require__.r(__webpack_exports__);
   "prect~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__.generateObject)(_objects_dsp_prect__WEBPACK_IMPORTED_MODULE_10__["default"], "prect~", [_objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Oscillator], [{ name: "Waveform", item: _objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Waveform }]),
   "psaw~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__.generateObject)(_objects_dsp_psaw__WEBPACK_IMPORTED_MODULE_11__["default"], "psaw~", [_objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Oscillator], [{ name: "Waveform", item: _objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Waveform }]),
   "ptri~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__.generateObject)(_objects_dsp_ptri__WEBPACK_IMPORTED_MODULE_12__["default"], "ptri~", [_objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Oscillator], [{ name: "Waveform", item: _objects_dsp_oscillator__WEBPACK_IMPORTED_MODULE_13__.Waveform }]),
+  "noise~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__.generateObject)(_objects_dsp_whitenoiseObject__WEBPACK_IMPORTED_MODULE_16__["default"], "noise~"),
   "line": _objects_block_line__WEBPACK_IMPORTED_MODULE_2__["default"],
-  "metro": _objects_block_metro__WEBPACK_IMPORTED_MODULE_3__["default"]
+  "metro": _objects_block_metro__WEBPACK_IMPORTED_MODULE_3__["default"],
+  "sah~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_4__.generateObject)(_objects_dsp_sah__WEBPACK_IMPORTED_MODULE_17__["default"], "sah~")
 }));
 
 })();

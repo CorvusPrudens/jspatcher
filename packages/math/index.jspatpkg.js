@@ -2,6 +2,67 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "../../../frontend/src/core/message.ts":
+/*!*********************************************!*\
+  !*** ../../../frontend/src/core/message.ts ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Message": () => (/* binding */ Message),
+/* harmony export */   "extractFirst": () => (/* binding */ extractFirst),
+/* harmony export */   "isMessage": () => (/* binding */ isMessage)
+/* harmony export */ });
+class Message extends Array {
+  static from(tokens) {
+    const newArr = new Message();
+    for (let i = 0; i < tokens.length; i++) {
+      newArr[i] = tokens[i];
+    }
+    return newArr;
+  }
+  startsWith(value) {
+    if (this.length) {
+      return this[0] === value;
+    }
+    return false;
+  }
+  endsWith(value) {
+    if (this.length) {
+      return this[this.length - 1] === value;
+    }
+    return false;
+  }
+  arithmetic(op) {
+    return (other) => {
+      const result = new Message();
+      const minLength = Math.min(this.length, other.length);
+      for (let i = 0; i < minLength; i++) {
+        if (typeof this[i] === "number" && typeof other[i] === "number") {
+          result.push(op(this[i], other[i]));
+        } else {
+          result.push(this[i]);
+        }
+      }
+      return result;
+    };
+  }
+}
+function isMessage(value) {
+  return value instanceof Message;
+}
+function extractFirst(data) {
+  if (data instanceof Message || data instanceof Array) {
+    return data[0];
+  } else {
+    return data;
+  }
+}
+
+
+/***/ }),
+
 /***/ "../../common/web/index.ts":
 /*!*********************************!*\
   !*** ../../common/web/index.ts ***!
@@ -137,7 +198,21 @@ function generateObject(Processor, name, dependencies, enums) {
         const { dspId, constants, merger, splitter, argsOffset } = this._;
         const url = (0,_workletCreator__WEBPACK_IMPORTED_MODULE_2__["default"])(Processor, dspId, this.audioCtx.sampleRate, dependencies, enums);
         await JsWorkletManager.addModule(this.audioCtx, dspId, url);
-        const node = new AudioWorkletNode(this.audioCtx, dspId);
+        let attempts = 0;
+        let node;
+        while (true) {
+          try {
+            node = new AudioWorkletNode(this.audioCtx, dspId);
+            break;
+          } catch (e) {
+            attempts++;
+            await new Promise((r) => setTimeout(r, 10));
+            if (attempts >= 10) {
+              this.error(`Failed to create AudioWorkletNode for ${dspId}`);
+              return;
+            }
+          }
+        }
         this._.node = node;
         this.checkAndFillUnconnected();
         merger == null ? void 0 : merger.connect(node);
@@ -153,7 +228,7 @@ function generateObject(Processor, name, dependencies, enums) {
       this.on("argsUpdated", () => {
         this._.constants.forEach((constant, i) => {
           var _a2;
-          const argValue = this.args[i - this._.argsOffset];
+          const argValue = +this.args[i - this._.argsOffset];
           if (!this._.constantsConnected[i])
             constant.offset.value = typeof argValue === "number" ? +argValue : (_a2 = this._.defaultInputs[i]) != null ? _a2 : 0;
         });
@@ -423,6 +498,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
 /* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./base */ "./src/objects/block/base.ts");
+/* harmony import */ var _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jspatcher/jspatcher/src/core/message */ "../../../frontend/src/core/message.ts");
+
 
 
 class Binary extends _base__WEBPACK_IMPORTED_MODULE_1__["default"] {
@@ -430,24 +507,37 @@ class Binary extends _base__WEBPACK_IMPORTED_MODULE_1__["default"] {
     super(...arguments);
     this._ = { arg: this.args[0], result: void 0 };
   }
+  prepareInput(input) {
+    const forceInt = this.getProp("forceInt");
+    if (input instanceof Array && input.length == 1) {
+      const first = +(0,_jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_2__.extractFirst)(input);
+      return forceInt ? Math.floor(first) : first;
+    }
+    return forceInt ? Math.floor(+input) : +input;
+  }
+  handleUpdateArgs(args) {
+    this._.arg = void 0;
+    this._.result = void 0;
+    if (!args || args.length === 0)
+      return;
+    this._.arg = this.prepareInput(args[0]);
+  }
   subscribe() {
     super.subscribe();
     this.on("preInit", () => {
       this.inlets = 2;
       this.outlets = 1;
+      this.handleUpdateArgs(this.args);
     });
     this.on("updateArgs", (args) => {
-      this._.arg = void 0;
-      this._.result = void 0;
-      if (!args || args.length === 0)
-        return;
-      this._.arg = args[0];
+      this.handleUpdateArgs(args);
     });
     this.on("inlet", ({ data, inlet }) => {
       if (inlet === 0) {
         if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
           try {
-            this._.result = this.execute(data, this._.arg);
+            const result = this.execute(this.prepareInput(data), this._.arg);
+            this._.result = this.prepareInput(result);
           } catch (e) {
             this.error(e);
             return;
@@ -455,7 +545,7 @@ class Binary extends _base__WEBPACK_IMPORTED_MODULE_1__["default"] {
         }
         this.outlet(0, this._.result);
       } else if (inlet === 1) {
-        this._.arg = data;
+        this._.arg = this.prepareInput(data);
       }
     });
   }
@@ -480,6 +570,13 @@ Binary.args = [{
   default: 0,
   description: "Initial second element"
 }];
+Binary.props = {
+  forceInt: {
+    type: "boolean",
+    default: false,
+    description: "Convert inputs and outputs to integers"
+  }
+};
 
 
 /***/ }),
@@ -494,14 +591,24 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ Unary)
 /* harmony export */ });
-/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
-/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./base */ "./src/objects/block/base.ts");
+/* harmony import */ var _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jspatcher/jspatcher/src/core/message */ "../../../frontend/src/core/message.ts");
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./base */ "./src/objects/block/base.ts");
 
 
-class Unary extends _base__WEBPACK_IMPORTED_MODULE_1__["default"] {
+
+class Unary extends _base__WEBPACK_IMPORTED_MODULE_2__["default"] {
   constructor() {
     super(...arguments);
     this._ = { result: void 0 };
+  }
+  prepareInput(input) {
+    const forceInt = this.getProp("forceInt");
+    if (input instanceof Array && input.length == 1) {
+      const first = +(0,_jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.extractFirst)(input);
+      return forceInt ? Math.floor(first) : first;
+    }
+    return forceInt ? Math.floor(+input) : +input;
   }
   subscribe() {
     super.subscribe();
@@ -511,9 +618,9 @@ class Unary extends _base__WEBPACK_IMPORTED_MODULE_1__["default"] {
     });
     this.on("inlet", ({ data, inlet }) => {
       if (inlet === 0) {
-        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_1__.isBang)(data)) {
           try {
-            this._.result = this.execute(data);
+            this._.result = this.prepareInput(this.execute(this.prepareInput(data)));
           } catch (e) {
             this.error(e);
             return;
@@ -534,6 +641,13 @@ Unary.outlets = [{
   type: "anything",
   description: "Result"
 }];
+Unary.props = {
+  forceInt: {
+    type: "boolean",
+    default: false,
+    description: "Convert inputs and outputs to integers"
+  }
+};
 
 
 /***/ }),

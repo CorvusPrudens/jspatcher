@@ -204,7 +204,21 @@ function generateObject(Processor, name, dependencies, enums) {
         const { dspId, constants, merger, splitter, argsOffset } = this._;
         const url = (0,_workletCreator__WEBPACK_IMPORTED_MODULE_2__["default"])(Processor, dspId, this.audioCtx.sampleRate, dependencies, enums);
         await JsWorkletManager.addModule(this.audioCtx, dspId, url);
-        const node = new AudioWorkletNode(this.audioCtx, dspId);
+        let attempts = 0;
+        let node;
+        while (true) {
+          try {
+            node = new AudioWorkletNode(this.audioCtx, dspId);
+            break;
+          } catch (e) {
+            attempts++;
+            await new Promise((r) => setTimeout(r, 10));
+            if (attempts >= 10) {
+              this.error(`Failed to create AudioWorkletNode for ${dspId}`);
+              return;
+            }
+          }
+        }
         this._.node = node;
         this.checkAndFillUnconnected();
         merger == null ? void 0 : merger.connect(node);
@@ -220,7 +234,7 @@ function generateObject(Processor, name, dependencies, enums) {
       this.on("argsUpdated", () => {
         this._.constants.forEach((constant, i) => {
           var _a2;
-          const argValue = this.args[i - this._.argsOffset];
+          const argValue = +this.args[i - this._.argsOffset];
           if (!this._.constantsConnected[i])
             constant.offset.value = typeof argValue === "number" ? +argValue : (_a2 = this._.defaultInputs[i]) != null ? _a2 : 0;
         });

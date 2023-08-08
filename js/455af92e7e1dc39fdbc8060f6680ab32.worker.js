@@ -3093,7 +3093,7 @@ const win32 = {
                 // absolute path, get cwd for that drive, or the process cwd if
                 // the drive cwd is not available. We're sure the device is not
                 // a UNC path at this points, because UNC paths are always absolute.
-                path = ({"NODE_ENV":"development","WS_DOMAIN":"wss://bell.electro-smith.com"})[`=${resolvedDevice}`] || _process_js__WEBPACK_IMPORTED_MODULE_0__.cwd();
+                path = ({"NODE_ENV":"development","WS_DOMAIN":"wss://bell.electro-smith.com","API_DOMAIN":"https://bell.electro-smith.com"})[`=${resolvedDevice}`] || _process_js__WEBPACK_IMPORTED_MODULE_0__.cwd();
                 // Verify that a cwd was found and that it actually points
                 // to our drive. If not, default to the drive's root.
                 if (path === undefined ||
@@ -4503,8 +4503,8 @@ if (typeof _platform_js__WEBPACK_IMPORTED_MODULE_0__.globals.vscode !== 'undefin
 else if (typeof process !== 'undefined') {
     safeProcess = {
         get platform() { return ({}); },
-        get env() { return ({"NODE_ENV":"development","WS_DOMAIN":"wss://bell.electro-smith.com"}); },
-        cwd() { return ({"NODE_ENV":"development","WS_DOMAIN":"wss://bell.electro-smith.com"})['VSCODE_CWD'] || process.cwd(); },
+        get env() { return ({"NODE_ENV":"development","WS_DOMAIN":"wss://bell.electro-smith.com","API_DOMAIN":"https://bell.electro-smith.com"}); },
+        cwd() { return ({"NODE_ENV":"development","WS_DOMAIN":"wss://bell.electro-smith.com","API_DOMAIN":"https://bell.electro-smith.com"})['VSCODE_CWD'] || process.cwd(); },
         nextTick(callback) { return process.nextTick(callback); }
     };
 }

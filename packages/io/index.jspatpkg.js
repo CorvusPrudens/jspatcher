@@ -1135,8 +1135,8 @@ const supportSetSinkId = window.MediaStreamAudioDestinationNode && HTMLMediaElem
 const _AudioOut = class extends _base__WEBPACK_IMPORTED_MODULE_1__["default"] {
   constructor() {
     super(...arguments);
-    this._ = supportSetSinkId ? { node: this.audioCtx.destination, msadn: this.audioCtx.createMediaStreamDestination(), audio: new Audio(), search: void 0 } : { node: this.audioCtx.destination };
-    this.inletAudioConnections = [{ node: this.node, index: 0 }];
+    this._ = supportSetSinkId ? { merger: void 0, node: this.audioCtx.destination, msadn: this.audioCtx.createMediaStreamDestination(), audio: new Audio(), search: void 0 } : { node: this.audioCtx.destination };
+    this.inletAudioConnections = [];
     this.handleDeviceChange = async () => {
       const devices = await navigator.mediaDevices.enumerateDevices();
       const enums = devices.filter((d) => d.kind === "audiooutput").map((d) => d.label || d.deviceId);
@@ -1170,8 +1170,23 @@ const _AudioOut = class extends _base__WEBPACK_IMPORTED_MODULE_1__["default"] {
   subscribe() {
     super.subscribe();
     this.on("preInit", () => {
-      this.inlets = 1;
+      this.inlets = this.getProp("channelCount") || 2;
       this.outlets = 1;
+      this.setMeta({
+        inlets: [
+          {
+            isHot: true,
+            type: "signal",
+            description: "Node connection, string to fetch device name or ID, bang to output Node"
+          },
+          ...Array.from({ length: this.inlets - 1 }, () => ({
+            isHot: true,
+            type: "signal",
+            description: "Node connection"
+          }))
+        ]
+      });
+      this._.merger = this.audioCtx.createChannelMerger(this.inlets);
     });
     this.on("postInit", () => {
       this.node.channelInterpretation = "discrete";
@@ -1204,7 +1219,7 @@ const _AudioOut = class extends _base__WEBPACK_IMPORTED_MODULE_1__["default"] {
           await this.newSearch(data);
         }
         if (this.node)
-          this.outlet(1, this.node);
+          this.outlet(0, this.node);
       }
     });
   }
@@ -1221,30 +1236,25 @@ const _AudioOut = class extends _base__WEBPACK_IMPORTED_MODULE_1__["default"] {
     };
   }
   resetNode(msadn) {
+    var _a;
+    this.disconnectAudio();
     if (msadn) {
       if (this.node !== this._.msadn) {
-        this.disconnectAudio();
         this.node = this._.msadn;
-        this.inletAudioConnections[0] = { node: this.node, index: 0 };
-        this.connectAudio();
       }
     } else {
       if (this.node !== this.audioCtx.destination) {
-        this.disconnectAudio();
         this.node = this.audioCtx.destination;
-        this.inletAudioConnections[0] = { node: this.node, index: 0 };
-        this.connectAudio();
       }
     }
+    this.inletAudioConnections = Array(this.inlets).fill(null).map((_, i) => ({ node: this._.merger, index: i }));
+    (_a = this._.merger) == null ? void 0 : _a.connect(this.node);
+    this.connectAudio();
   }
 };
 let AudioOut = _AudioOut;
 AudioOut.description = "Get Audio output from device name or ID (if supported)";
-AudioOut.inlets = [{
-  isHot: true,
-  type: "signal",
-  description: "Node connection, string to fetch device name or ID, bang to output Node"
-}];
+AudioOut.inlets = [];
 AudioOut.outlets = [{
   type: "object",
   description: `Instance: ${supportSetSinkId ? "MediaStreamAudioDestinationNode | " : ""}AudioDestinationNode`

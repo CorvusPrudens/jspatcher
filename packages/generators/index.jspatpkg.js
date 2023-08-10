@@ -113,6 +113,7 @@ const { author, license, keywords, version, description, jspatcher } = _package_
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "JsWorkletManager": () => (/* binding */ JsWorkletManager),
 /* harmony export */   "generateObject": () => (/* binding */ generateObject)
 /* harmony export */ });
 /* harmony import */ var _index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./index */ "../../common/web/index.ts");
@@ -174,6 +175,7 @@ function generateObject(Processor, name, dependencies, enums) {
     subscribe() {
       super.subscribe();
       this.on("preInit", () => {
+        var _a2;
         const { inputs, outputs } = { inputs: Processor.inlets.length, outputs: Processor.outlets.length };
         if (inputs) {
           const merger = this.audioCtx.createChannelMerger(inputs);
@@ -193,6 +195,16 @@ function generateObject(Processor, name, dependencies, enums) {
         this.inletAudioConnections = this._.constants.map((node) => ({ node: node.offset, index: 0 }));
         this.outletAudioConnections = new Array(outputs).fill(null).map((v, i) => ({ node: splitter, index: i }));
         this.connectAudio();
+        for (let i = 0; i < this.inlets; i++) {
+          if (i >= this._.argsOffset) {
+            const arg = this.meta.args[i - this._.argsOffset];
+            if (arg) {
+              this._.defaultInputs[i] = (_a2 = arg.default) != null ? _a2 : 0;
+            }
+          } else {
+            this._.defaultInputs[i] = 0;
+          }
+        }
       });
       this.on("postInit", async () => {
         const { dspId, constants, merger, splitter, argsOffset } = this._;

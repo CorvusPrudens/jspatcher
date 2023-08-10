@@ -2716,7 +2716,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _ui_base_live__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../ui/base-live */ "./src/ui/base-live.tsx");
 
-class LiveButtonUI extends _ui_base_live__WEBPACK_IMPORTED_MODULE_0__["default"] {
+const _LiveButtonUI = class extends _ui_base_live__WEBPACK_IMPORTED_MODULE_0__["default"] {
   constructor() {
     super(...arguments);
     this.className = "live-button";
@@ -2734,6 +2734,11 @@ class LiveButtonUI extends _ui_base_live__WEBPACK_IMPORTED_MODULE_0__["default"]
       this.inTouch = false;
       this.setValueToOutput(0);
     };
+  }
+  componentDidMount() {
+    super.componentDidMount();
+    this.box.setWidth(_LiveButtonUI.defaultSize[0]);
+    this.box.setHeight(_LiveButtonUI.defaultSize[1]);
   }
   paint() {
     if (this.$resetTimer !== -1) {
@@ -2769,8 +2774,10 @@ class LiveButtonUI extends _ui_base_live__WEBPACK_IMPORTED_MODULE_0__["default"]
     if (value && !this.inTouch)
       this.$resetTimer = window.setTimeout(this.resetCallback, 100);
   }
-}
+};
+let LiveButtonUI = _LiveButtonUI;
 LiveButtonUI.defaultSize = [30, 30];
+
 
 
 /***/ }),

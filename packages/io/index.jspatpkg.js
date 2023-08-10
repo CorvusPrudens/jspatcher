@@ -859,6 +859,10 @@ class SliderUI extends _sdk__WEBPACK_IMPORTED_MODULE_0__.CanvasUI {
       }
     };
   }
+  componentDidMount() {
+    super.componentDidMount();
+    this.box.setWidth(90);
+  }
   _handlePointerEvent(e, isPointerDown = false) {
     const { ctx } = this.refCanvasUI.current;
     if (!ctx)
@@ -916,6 +920,7 @@ class SliderUI extends _sdk__WEBPACK_IMPORTED_MODULE_0__.CanvasUI {
     );
   }
 }
+SliderUI.defaultSize = [90, 20];
 
 
 /***/ }),
@@ -1310,7 +1315,7 @@ class WebAudioObject extends _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultObject {
   }
 }
 WebAudioObject.package = _index__WEBPACK_IMPORTED_MODULE_0__.name;
-WebAudioObject.icon = "volume up";
+// static icon = "volume up";
 WebAudioObject.author = _index__WEBPACK_IMPORTED_MODULE_0__.author;
 WebAudioObject.version = _index__WEBPACK_IMPORTED_MODULE_0__.version;
 WebAudioObject.description = _index__WEBPACK_IMPORTED_MODULE_0__.description;

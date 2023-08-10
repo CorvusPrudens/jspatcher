@@ -118,6 +118,7 @@ const { author, license, keywords, version, description, jspatcher } = _package_
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "JsWorkletManager": () => (/* binding */ JsWorkletManager),
 /* harmony export */   "generateObject": () => (/* binding */ generateObject)
 /* harmony export */ });
 /* harmony import */ var _index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./index */ "../../common/web/index.ts");
@@ -180,6 +181,7 @@ function generateObject(Processor, name, dependencies, enums) {
     subscribe() {
       super.subscribe();
       this.on("preInit", () => {
+        var _a2;
         const { inputs, outputs } = { inputs: Processor.inlets.length, outputs: Processor.outlets.length };
         if (inputs) {
           const merger = this.audioCtx.createChannelMerger(inputs);
@@ -199,6 +201,16 @@ function generateObject(Processor, name, dependencies, enums) {
         this.inletAudioConnections = this._.constants.map((node) => ({ node: node.offset, index: 0 }));
         this.outletAudioConnections = new Array(outputs).fill(null).map((v, i) => ({ node: splitter, index: i }));
         this.connectAudio();
+        for (let i = 0; i < this.inlets; i++) {
+          if (i >= this._.argsOffset) {
+            const arg = this.meta.args[i - this._.argsOffset];
+            if (arg) {
+              this._.defaultInputs[i] = (_a2 = arg.default) != null ? _a2 : 0;
+            }
+          } else {
+            this._.defaultInputs[i] = 0;
+          }
+        }
       });
       this.on("postInit", async () => {
         const { dspId, constants, merger, splitter, argsOffset } = this._;
@@ -2272,6 +2284,214 @@ ScaleClampedAudio.argsOffset = 1;
 
 /***/ }),
 
+/***/ "./src/objects/dsp/snapshot.ts":
+/*!*************************************!*\
+  !*** ./src/objects/dsp/snapshot.ts ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ SnapshotObject)
+/* harmony export */ });
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+/* harmony import */ var _common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../../../common/web/jsDspObject */ "../../common/web/jsDspObject.ts");
+
+
+
+const SnapshotModule = `
+    class JsWorkletProcessor extends AudioWorkletProcessor {
+
+        interval;
+        accumulator;
+        increment;
+
+        constructor(options) {
+            super(options);
+
+            this.interval = 0.02;
+            this.accumulator = 0;
+            this.increment = 1 / sampleRate;
+
+            this.port.onmessage = (e) => {
+                this.interval = e.data / 1000;
+            }
+        }
+
+        process(inputs, outputs, parameters) {
+            const input = inputs[0][0];
+
+            for (let i = 0; i < input.length; i++) {
+                const level = input[i];
+                this.accumulator += this.increment;
+                if (this.accumulator >= this.interval) {
+                    this.port.postMessage(level);
+                    this.accumulator -= this.interval;
+                }
+            }
+
+            return true;
+        }
+
+        // static get parameterDescriptors() {
+        //     return ProcessorClass.parameterDescriptors;
+        // }
+    }
+
+    registerProcessor("snapshot~", JsWorkletProcessor);
+`;
+const _SnapshotObject = class extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+  constructor() {
+    super(...arguments);
+    this._ = {
+      dspId: "snapshot~",
+      defaultInputs: [],
+      constants: [],
+      constantsConnected: [],
+      argsOffset: 0
+    };
+  }
+  get audioConnections() {
+    return this.inletLines.map((set) => [...set].find((l) => !l.disabled && l.isConnectableByAudio)).map((l) => !!l);
+  }
+  checkAndFillUnconnected() {
+    const { audioConnections } = this;
+    const { constants, constantsConnected } = this._;
+    if (!this.inlets)
+      return;
+    for (let i = 0; i < this.inlets; i++) {
+      if (audioConnections[i] === constantsConnected[i])
+        continue;
+      const constant = constants[i];
+      if (audioConnections[i]) {
+        constant.offset.value = 0;
+      } else if (!audioConnections[i] && !constantsConnected[i]) {
+        constant.offset.value = this._.defaultInputs[i] || 0;
+      }
+      constantsConnected[i] = audioConnections[i];
+    }
+  }
+  handleUpdateArgs(args) {
+    if (this._.node && args.length > 0) {
+      this._.node.port.postMessage(+args[0]);
+    }
+  }
+  subscribe() {
+    super.subscribe();
+    this.on("preInit", () => {
+      const { inputs, outputs } = { inputs: _SnapshotObject.inlets.length, outputs: _SnapshotObject.outlets.length };
+      if (inputs) {
+        const merger = this.audioCtx.createChannelMerger(inputs);
+        this._.merger = merger;
+        for (let i = 0; i < inputs; i++) {
+          const constant = this.audioCtx.createConstantSource();
+          this._.constants[i] = constant;
+          constant.connect(merger, 0, i);
+          this._.constantsConnected[i] = false;
+        }
+      }
+      this.inlets = inputs;
+      this.outlets = outputs;
+      this.disconnectAudio();
+      this.inletAudioConnections = this._.constants.map((node) => ({ node: node.offset, index: 0 }));
+      this.connectAudio();
+    });
+    this.on("postInit", async () => {
+      const { dspId, constants, merger, argsOffset } = this._;
+      const url = URL.createObjectURL(new Blob([SnapshotModule], { type: "text/javascript" }));
+      await _common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_1__.JsWorkletManager.addModule(this.audioCtx, dspId, url);
+      let attempts = 0;
+      let node;
+      while (true) {
+        try {
+          node = new AudioWorkletNode(this.audioCtx, dspId);
+          break;
+        } catch (e) {
+          attempts++;
+          await new Promise((r) => setTimeout(r, 10));
+          if (attempts >= 10) {
+            this.error(`Failed to create AudioWorkletNode for ${dspId}`);
+            return;
+          }
+        }
+      }
+      this._.node = node;
+      this.checkAndFillUnconnected();
+      merger == null ? void 0 : merger.connect(node);
+      constants.forEach((constant, i) => {
+        var _a;
+        const argValue = this.args[i - argsOffset];
+        if (!this._.constantsConnected[i])
+          constant.offset.value = typeof argValue === "number" ? +argValue : (_a = this._.defaultInputs[i]) != null ? _a : 0;
+        constant.start();
+      });
+      this.handleUpdateArgs(this.args);
+      this._.node.port.onmessage = (e) => {
+        this.outlet(0, e.data);
+      };
+    });
+    this.on("argsUpdated", ({ args }) => {
+      this._.constants.forEach((constant, i) => {
+        var _a;
+        const argValue = +this.args[i - this._.argsOffset];
+        if (!this._.constantsConnected[i])
+          constant.offset.value = typeof argValue === "number" ? +argValue : (_a = this._.defaultInputs[i]) != null ? _a : 0;
+      });
+      this.handleUpdateArgs(args);
+    });
+    this.on("inlet", ({ inlet, data }) => {
+      var _a;
+      if (inlet === 1) {
+        (_a = this._.node) == null ? void 0 : _a.port.postMessage(+data);
+      }
+    });
+    this.on("connectedInlet", () => this.checkAndFillUnconnected());
+    this.on("disconnectedInlet", () => this.checkAndFillUnconnected());
+    this.on("destroy", () => {
+      const { constants, merger, node } = this._;
+      constants.forEach((constant) => constant == null ? void 0 : constant.disconnect());
+      merger == null ? void 0 : merger.disconnect();
+      node == null ? void 0 : node.disconnect();
+    });
+  }
+};
+let SnapshotObject = _SnapshotObject;
+// static package = package_name;
+SnapshotObject.author = "Corvus Prudens";
+SnapshotObject.version = "1.0.0";
+SnapshotObject.description = "Take a snapshot of a signal";
+SnapshotObject.inlets = [
+  {
+    isHot: true,
+    type: "signal",
+    description: "Input signal"
+  },
+  {
+    isHot: false,
+    type: "number",
+    description: "Sampling interval in milliseconds"
+  }
+];
+SnapshotObject.outlets = [
+  {
+    type: "number",
+    description: "Signal value at the point of the trigger"
+  }
+];
+SnapshotObject.args = [
+  {
+    type: "number",
+    optional: true,
+    description: "Sampling interval in milliseconds",
+    default: 20
+  }
+];
+SnapshotObject.UI = _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultUI;
+
+
+
+/***/ }),
+
 /***/ "./src/sdk.ts":
 /*!********************!*\
   !*** ./src/sdk.ts ***!
@@ -2449,6 +2669,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _objects_block_loadmess__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./objects/block/loadmess */ "./src/objects/block/loadmess.ts");
 /* harmony import */ var _objects_block_switch__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./objects/block/switch */ "./src/objects/block/switch.ts");
 /* harmony import */ var _objects_block_gate__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ./objects/block/gate */ "./src/objects/block/gate.ts");
+/* harmony import */ var _objects_dsp_snapshot__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! ./objects/dsp/snapshot */ "./src/objects/dsp/snapshot.ts");
+
 
 
 
@@ -2496,7 +2718,8 @@ __webpack_require__.r(__webpack_exports__);
   "loadbang": _objects_block_loadbang__WEBPACK_IMPORTED_MODULE_20__["default"],
   "loadmess": _objects_block_loadmess__WEBPACK_IMPORTED_MODULE_21__["default"],
   "switch": _objects_block_switch__WEBPACK_IMPORTED_MODULE_22__["default"],
-  "gate": _objects_block_gate__WEBPACK_IMPORTED_MODULE_23__["default"]
+  "gate": _objects_block_gate__WEBPACK_IMPORTED_MODULE_23__["default"],
+  "snapshot~": _objects_dsp_snapshot__WEBPACK_IMPORTED_MODULE_24__["default"]
 }));
 
 })();

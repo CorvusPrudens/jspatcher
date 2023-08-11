@@ -1427,6 +1427,7 @@ PureRect.args = [
   }
 ];
 PureRect.argsOffset = 0;
+PureRect.docs = "generators/docs/prect.html";
 
 
 /***/ }),

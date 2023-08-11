@@ -440,11 +440,11 @@ const getJsWorkletProcessor = (processor, dspId, sampleRate, dependencies, enums
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ Counter)
+/* harmony export */   "default": () => (/* binding */ Line)
 /* harmony export */ });
 /* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
 
-class Counter extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+class Line extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
   constructor() {
     super(...arguments);
     this._ = {
@@ -557,7 +557,7 @@ class Counter extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
           this.outlet(0, this._.start);
           return;
         } else {
-          const input_points = data.length / 2;
+          const input_points = Math.floor(data.length / 2);
           const max_points = input_points > this._.points.length ? this._.points.length : input_points;
           for (let i = 0; i < max_points; i++) {
             const index = i * 2;
@@ -589,11 +589,11 @@ class Counter extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
     });
   }
 }
-Counter.package = "electrosmith";
-Counter.author = "Corvus Prudens";
-Counter.version = "1.0";
-Counter.description = "Generates linear sequences of numbers given a set of points.";
-Counter.inlets = [
+Line.package = "electrosmith";
+Line.author = "Corvus Prudens";
+Line.version = "1.0";
+Line.description = "Generates linear sequences of numbers given a set of points.";
+Line.inlets = [
   {
     isHot: true,
     type: "anything",
@@ -605,7 +605,7 @@ Counter.inlets = [
     description: "The output rate in milliseconds"
   }
 ];
-Counter.outlets = [
+Line.outlets = [
   {
     type: "number",
     description: "The current value in the sequence"
@@ -615,7 +615,7 @@ Counter.outlets = [
     description: "Bang when the sequence is complete"
   }
 ];
-Counter.args = [
+Line.args = [
   {
     type: "number",
     description: "The initial value",
@@ -627,13 +627,15 @@ Counter.args = [
     optional: true
   }
 ];
-Counter.props = {
+Line.props = {
   maxpoints: {
     type: "number",
     default: 32,
-    description: "The maximum number of points in the sequence"
+    description: "The maximum number of points in the sequence",
+    alwaysSerialize: true
   }
 };
+Line.docs = "generators/docs/line.html";
 
 
 /***/ }),
@@ -759,6 +761,7 @@ Metro.props = {
     description: "Globally activate or deactivate the metronome"
   }
 };
+Metro.docs = "generators/docs/metro.html";
 
 
 /***/ }),
@@ -937,6 +940,7 @@ class AdsrObject extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_1__
   }
 }
 AdsrObject.description = "ADSR Envelope";
+AdsrObject.docs = "generators/docs/adsrObject.html";
 AdsrObject.inlets = [
   {
     isHot: true,
@@ -1020,17 +1024,18 @@ class Cycle extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["def
     let phase = inputs[0][1];
     let outputStream = outputs[0][0];
     for (let i = 0; i < outputStream.length; i++) {
-      let step = frequency[i] / this.sample_rate_;
+      let step = Math.max(0, Math.min(frequency[i], this.nyquist_)) / this.sample_rate_;
       let phase_offset = Math.min(Math.max(phase[i], 0), 1);
       this.phase_ += step;
       if (this.phase_ >= 1)
         this.phase_ -= 1;
-      outputStream[i] = Math.sin((this.phase_ + phase_offset) * 2 * Math.PI);
+      outputStream[i] = Math.cos((this.phase_ + phase_offset) * 2 * Math.PI);
     }
     return true;
   }
   init(sampleRate) {
     this.sample_rate_ = sampleRate;
+    this.nyquist_ = sampleRate / 2;
     this.phase_ = 0;
   }
 }
@@ -1071,6 +1076,7 @@ Cycle.args = [
   }
 ];
 Cycle.argsOffset = 0;
+Cycle.docs = "generators/docs/cycle.html";
 
 
 /***/ }),
@@ -1355,6 +1361,7 @@ PureRamp.args = [
   }
 ];
 PureRamp.argsOffset = 0;
+PureRamp.docs = "generators/docs/pramp.html";
 
 
 /***/ }),
@@ -1487,6 +1494,7 @@ PureSaw.args = [
   }
 ];
 PureSaw.argsOffset = 0;
+PureSaw.docs = "generators/docs/psaw.html";
 
 
 /***/ }),
@@ -1546,6 +1554,7 @@ PureTri.args = [
   }
 ];
 PureTri.argsOffset = 0;
+PureTri.docs = "generators/docs/ptri.html";
 
 
 /***/ }),
@@ -1605,6 +1614,7 @@ Ramp.args = [
   }
 ];
 Ramp.argsOffset = 0;
+Ramp.docs = "generators/docs/ramp.html";
 
 
 /***/ }),
@@ -1677,6 +1687,7 @@ Rect.args = [
   }
 ];
 Rect.argsOffset = 0;
+Rect.docs = "generators/docs/rect.html";
 
 
 /***/ }),
@@ -1750,6 +1761,7 @@ SampleAndHoldObject.outlets = [
     description: "Sample and hold output"
   }
 ];
+SampleAndHoldObject.docs = "generators/docs/sah.html";
 SampleAndHoldObject.argsOffset = 0;
 
 
@@ -1810,6 +1822,7 @@ Saw.args = [
   }
 ];
 Saw.argsOffset = 0;
+Saw.docs = "generators/docs/saw.html";
 
 
 /***/ }),
@@ -1869,6 +1882,7 @@ Tri.args = [
   }
 ];
 Tri.argsOffset = 0;
+Tri.docs = "generators/docs/tri.html";
 
 
 /***/ }),
@@ -1906,6 +1920,7 @@ WhiteNoiseObject.outlets = [
 ];
 WhiteNoiseObject.args = [];
 WhiteNoiseObject.argsOffset = 0;
+WhiteNoiseObject.docs = "generators/docs/noise.html";
 
 
 /***/ }),

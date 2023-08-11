@@ -1428,6 +1428,7 @@ LiveButton.props = {
     isUIState: true
   }
 };
+LiveButton.docs = "ui/docs/button.html";
 LiveButton.UI = _ui_button_live__WEBPACK_IMPORTED_MODULE_1__["default"];
 
 
@@ -1613,6 +1614,7 @@ message.outlets = [{
   type: "anything",
   description: "Message to send"
 }];
+message.docs = "ui/docs/message.html";
 message.UI = _ui_message__WEBPACK_IMPORTED_MODULE_3__["default"];
 
 
@@ -1813,6 +1815,7 @@ NumberBox.props = {
     isUIState: true
   }
 };
+NumberBox.docs = "ui/docs/number.html";
 NumberBox.UI = _ui_number__WEBPACK_IMPORTED_MODULE_1__["default"];
 
 
@@ -1883,7 +1886,8 @@ class Oscilloscope extends _base__WEBPACK_IMPORTED_MODULE_0__["default"] {
     });
   }
 }
-Oscilloscope.description = "Oscilloscope";
+Oscilloscope.description = "Oscilloscope visualizer";
+Oscilloscope.docs = "ui/docs/scope.html";
 Oscilloscope.inlets = [{
   isHot: true,
   type: "signal",
@@ -2060,7 +2064,8 @@ class Spectrogram extends _base__WEBPACK_IMPORTED_MODULE_0__["default"] {
     });
   }
 }
-Spectrogram.description = "Spectroscope";
+Spectrogram.description = "Spectrogram visualizer";
+Spectrogram.docs = "ui/docs/spectrogram.html";
 Spectrogram.inlets = [{
   isHot: true,
   type: "signal",
@@ -2189,7 +2194,8 @@ class Spectroscope extends _base__WEBPACK_IMPORTED_MODULE_0__["default"] {
     });
   }
 }
-Spectroscope.description = "Spectroscope";
+Spectroscope.description = "Spectroscope visualizer";
+Spectroscope.docs = "ui/docs/spectroscope.html";
 Spectroscope.inlets = [{
   isHot: true,
   type: "signal",
@@ -2387,6 +2393,7 @@ LiveToggle.props = {
     isUIState: true
   }
 };
+LiveToggle.docs = "ui/docs/toggle.html";
 LiveToggle.UI = _ui_toggle__WEBPACK_IMPORTED_MODULE_1__["default"];
 
 

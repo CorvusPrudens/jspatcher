@@ -318,7 +318,7 @@ class Print extends _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultObject {
 Print.package = "Example Package";
 Print.author = "Your Name";
 Print.version = "1.0";
-Print.description = "Addition operation";
+Print.description = "Prints the incoming data to the console";
 Print.inlets = [
   {
     isHot: true,
@@ -332,6 +332,7 @@ Print.args = [{
   default: "Print",
   description: "Title"
 }];
+Print.docs = "io/docs/print.html";
 
 
 /***/ }),
@@ -531,6 +532,7 @@ slider.props = {
     isUIState: true
   }
 };
+slider.docs = "io/docs/slider_object.html";
 slider.UI = _slider_ui__WEBPACK_IMPORTED_MODULE_1__["default"];
 
 
@@ -1057,6 +1059,7 @@ AudioIn.args = [{
   optional: false,
   description: "Device name or ID"
 }];
+AudioIn.docs = "io/docs/AudioIn.html";
 AudioIn.props = {
   autoGainControl: {
     type: "boolean",
@@ -1266,6 +1269,7 @@ AudioOut.outlets = [{
 }];
 AudioOut.args = supportSetSinkId ? _AudioIn__WEBPACK_IMPORTED_MODULE_2__["default"].args : [];
 AudioOut.props = supportSetSinkId ? _AudioIn__WEBPACK_IMPORTED_MODULE_2__["default"].props : {};
+AudioOut.docs = "io/docs/AudioOut.html";
 AudioOut.UI = supportSetSinkId ? class AudioOutUI extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultUI {
   constructor() {
     super(...arguments);

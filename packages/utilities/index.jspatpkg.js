@@ -552,6 +552,7 @@ Append.args = [{
   optional: true,
   description: "The item to append"
 }];
+Append.docs = "utilities/docs/append.html";
 
 
 /***/ }),
@@ -609,6 +610,7 @@ Change.outlets = [{
   type: "anything",
   description: "A value that has changed"
 }];
+Change.docs = "utilities/docs/change.html";
 
 
 /***/ }),
@@ -733,6 +735,7 @@ Counter.args = [
     optional: true
   }
 ];
+Counter.docs = "utilities/docs/counter.html";
 
 
 /***/ }),
@@ -1006,6 +1009,7 @@ Gate.args = [{
   default: 2,
   description: "The number of outlets to select from"
 }];
+Gate.docs = "utilities/docs/gate.html";
 
 
 /***/ }),
@@ -1122,6 +1126,7 @@ Iter.args = [
     optional: true
   }
 ];
+Iter.docs = "utilities/docs/iter.html";
 
 
 /***/ }),
@@ -1163,6 +1168,7 @@ Loadbang.outlets = [{
   type: "bang",
   description: "Bang on patcher load or inlet."
 }];
+Loadbang.docs = "utilities/docs/loadbang.html";
 
 
 /***/ }),
@@ -1218,6 +1224,7 @@ Loadmess.args = [{
   optional: false,
   description: "Message to output on patcher load."
 }];
+Loadmess.docs = "utilities/docs/loadmess.html";
 
 
 /***/ }),
@@ -1444,6 +1451,7 @@ Prepend.args = [{
   optional: true,
   description: "The item to prepend"
 }];
+Prepend.docs = "utilities/docs/prepend.html";
 
 
 /***/ }),
@@ -1534,7 +1542,6 @@ class Scale extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
     super(...arguments);
     this._ = { output: void 0, inputLow: void 0, inputHigh: void 0, outputLow: void 0, outputHigh: void 0 };
   }
-  // static docs: string = "utilities/docs/mtof.html";
   updateRange(args) {
     this._.inputLow = args[0] || 0;
     this._.inputHigh = args[1] || 0;
@@ -1641,6 +1648,7 @@ Scale.args = [
     description: "Output range maximum"
   }
 ];
+Scale.docs = "utilities/docs/scale.html";
 
 
 /***/ }),
@@ -1665,7 +1673,6 @@ class ScaleClamped extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
     super(...arguments);
     this._ = { output: void 0, inputLow: void 0, inputHigh: void 0, outputLow: void 0, outputHigh: void 0 };
   }
-  // static docs: string = "utilities/docs/mtof.html";
   updateRange(args) {
     this._.inputLow = args[0] || 0;
     this._.inputHigh = args[1] || 0;
@@ -1773,6 +1780,7 @@ ScaleClamped.args = [
     description: "Output range maximum"
   }
 ];
+ScaleClamped.docs = "utilities/docs/scalec.html";
 
 
 /***/ }),
@@ -1874,6 +1882,7 @@ Select.args = [{
   optional: false,
   description: "The value to compare against"
 }];
+Select.docs = "utilities/docs/select.html";
 
 
 /***/ }),
@@ -1956,6 +1965,7 @@ Swap.args = [{
   default: 0,
   description: "Initial value to send out the first inlet"
 }];
+Swap.docs = "utilities/docs/swap.html";
 
 
 /***/ }),
@@ -2043,6 +2053,7 @@ Switch.args = [{
   default: 2,
   description: "The number of inlets to select from"
 }];
+Switch.docs = "utilities/docs/switch.html";
 
 
 /***/ }),
@@ -2090,7 +2101,7 @@ MtofAudio.outlets = [{
   description: "Frequency"
 }];
 MtofAudio.argsOffset = 0;
-MtofAudio.docs = "utilities/docs/mtof.html";
+MtofAudio.docs = "utilities/docs/mtof_audio.html";
 
 
 /***/ }),
@@ -2111,7 +2122,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class ScaleAudio extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
-  // static docs: string = "utilities/docs/mtof.html";
   process(inputs, outputs, parameters) {
     const inputStream = inputs[0][0];
     const inputLow = inputs[0][1];
@@ -2185,6 +2195,7 @@ ScaleAudio.args = [
   }
 ];
 ScaleAudio.argsOffset = 1;
+ScaleAudio.docs = "utilities/docs/scale_audio.html";
 
 
 /***/ }),
@@ -2205,7 +2216,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class ScaleClampedAudio extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
-  // static docs: string = "utilities/docs/mtof.html";
   process(inputs, outputs, parameters) {
     const inputStream = inputs[0][0];
     const inputLow = inputs[0][1];
@@ -2280,6 +2290,7 @@ ScaleClampedAudio.args = [
   }
 ];
 ScaleClampedAudio.argsOffset = 1;
+ScaleClampedAudio.docs = "utilities/docs/scalec_audio.html";
 
 
 /***/ }),
@@ -2486,6 +2497,7 @@ SnapshotObject.args = [
     default: 20
   }
 ];
+SnapshotObject.docs = "utilities/docs/snapshot.html";
 SnapshotObject.UI = _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultUI;
 
 

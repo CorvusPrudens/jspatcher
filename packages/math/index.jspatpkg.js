@@ -721,6 +721,129 @@ Add.argsOffset = 1;
 
 /***/ }),
 
+/***/ "./src/objects/dsp/bp.ts":
+/*!*******************************!*\
+  !*** ./src/objects/dsp/bp.ts ***!
+  \*******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Bp)
+/* harmony export */ });
+/* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+
+class Bp extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  process(inputs, outputs, parameters) {
+    let inputStream = inputs[0][0];
+    let centerFrequency = inputs[0][1];
+    let q = inputs[0][2];
+    let outputStream = outputs[0][0];
+    for (let i = 0; i < inputStream.length; i++) {
+      let r = 0;
+      let oneminusr = 0;
+      let omega = 0;
+      let qcos = 0;
+      if (centerFrequency[i] < 1e-3) {
+        centerFrequency[i] = 10;
+      }
+      if (q[i] < 0) {
+        q[i] = 0;
+      }
+      this.freq_ = centerFrequency[i];
+      this.q_ = q[i];
+      omega = centerFrequency[i] * (2 * Math.PI) / this.sample_rate_;
+      if (q[i] < 1e-3) {
+        oneminusr = 1;
+      } else {
+        oneminusr = omega / q[i];
+      }
+      if (oneminusr > 1) {
+        oneminusr = 1;
+      }
+      r = 1 - oneminusr;
+      if (omega >= -(0.5 * Math.PI) && omega <= 0.5 * Math.PI) {
+        let g = omega * omega;
+        qcos = g * g * g * (-1 / 720) + g * g * (1 / 24) - g * 0.5 + 1;
+      } else {
+        qcos = 0;
+      }
+      this.coef1_ = 2 * qcos * r;
+      this.coef2_ = -r * r;
+      this.gain_ = 2 * oneminusr * (oneminusr + r * omega);
+      let last = this.x1_;
+      let prev = this.x2_;
+      let coef1 = this.coef1_;
+      let coef2 = this.coef2_;
+      let gain = this.gain_;
+      let output = inputStream[i] + coef1 * last + coef2 * prev;
+      outputStream[i] = gain * output;
+      prev = last;
+      last = output;
+      this.x1_ = last;
+      this.x2_ = prev;
+    }
+    return true;
+  }
+  init(sampleRate) {
+    this.sample_rate_ = sampleRate;
+    this.x1_ = 0;
+    this.x2_ = 0;
+    this.coef1_ = 0;
+    this.coef2_ = 0;
+    this.gain_ = 0;
+    this.q_ = 0;
+    this.freq_ = 0;
+    this.f_ = 0;
+  }
+}
+Bp.inlets = [
+  {
+    isHot: true,
+    type: "signal",
+    description: "audio signal",
+    varLength: true
+  },
+  {
+    isHot: true,
+    type: "signal",
+    description: "center frequency",
+    varLength: true
+  },
+  {
+    isHot: true,
+    type: "signal",
+    description: "Q (controls bandwidth)",
+    varLength: true
+  }
+];
+Bp.outlets = [
+  {
+    type: "signal",
+    description: "output",
+    varLength: true
+  }
+];
+Bp.args = [
+  {
+    type: "number",
+    optional: true,
+    description: "initial center frequency",
+    default: 1e3
+  },
+  {
+    type: "number",
+    optional: true,
+    description: "initial q",
+    default: 0
+  }
+];
+Bp.argsOffset = 1;
+Bp.docs = "math/docs/bp.html";
+
+
+/***/ }),
+
 /***/ "./src/objects/dsp/div.ts":
 /*!********************************!*\
   !*** ./src/objects/dsp/div.ts ***!
@@ -1372,6 +1495,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _objects_dsp_rev_sub__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./objects/dsp/rev_sub */ "./src/objects/dsp/rev_sub.ts");
 /* harmony import */ var _objects_dsp_hip__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./objects/dsp/hip */ "./src/objects/dsp/hip.ts");
 /* harmony import */ var _objects_dsp_lop__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./objects/dsp/lop */ "./src/objects/dsp/lop.ts");
+/* harmony import */ var _objects_dsp_bp__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./objects/dsp/bp */ "./src/objects/dsp/bp.ts");
 var __defProp = Object.defineProperty;
 var __getOwnPropSymbols = Object.getOwnPropertySymbols;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
@@ -1388,6 +1512,7 @@ var __spreadValues = (a, b) => {
     }
   return a;
 };
+
 
 
 
@@ -1461,7 +1586,8 @@ const BinaryAudioObjects = {
 };
 const FilterAudioObjects = {
   "hip~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_hip__WEBPACK_IMPORTED_MODULE_10__["default"], "Hip"),
-  "lop~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_lop__WEBPACK_IMPORTED_MODULE_11__["default"], "Lop")
+  "lop~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_lop__WEBPACK_IMPORTED_MODULE_11__["default"], "Lop"),
+  "bp~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_bp__WEBPACK_IMPORTED_MODULE_12__["default"], "Bp")
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (async () => __spreadValues(__spreadValues(__spreadValues(__spreadValues({}, BinaryObjects), UnaryObjects), BinaryAudioObjects), FilterAudioObjects));
 

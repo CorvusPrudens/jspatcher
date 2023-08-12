@@ -836,7 +836,7 @@ Bp.args = [
     type: "number",
     optional: true,
     description: "initial q",
-    default: 0
+    default: 1
   }
 ];
 Bp.argsOffset = 1;

@@ -310,7 +310,7 @@ define(['./workbox-43d32f61'], (function (workbox) { 'use strict';
     "revision": "9e95a1bcac6cc2001d1c06c86e235f2f"
   }, {
     "url": "index.js",
-    "revision": "173fb88911d76d6736d42c8f3c6d7dda"
+    "revision": "4ed3ff982acfe28c27d4c7f6d39c119e"
   }, {
     "url": "js/071ab575215dd56539a2.worklet.js",
     "revision": null
@@ -384,10 +384,10 @@ define(['./workbox-43d32f61'], (function (workbox) { 'use strict';
     "url": "js/957d04d22e1721655f74.js",
     "revision": null
   }, {
-    "url": "js/a6fa38d33de48f57b2cf.js",
+    "url": "js/a47c855870cc1dd56ab9.worklet.js",
     "revision": null
   }, {
-    "url": "js/ac5d8bdf677b25b819d5.worklet.js",
+    "url": "js/a6fa38d33de48f57b2cf.js",
     "revision": null
   }, {
     "url": "js/b48e24c12d2496127b6583b54fc55dfe.worker.js",
@@ -462,34 +462,34 @@ define(['./workbox-43d32f61'], (function (workbox) { 'use strict';
     "url": "packages/utilities/index.jspatpkg.js",
     "revision": "2fe608c29e6134a06b527fa3fd35f73e"
   }, {
-    "url": "src_core_audio_AudioEditor_ts-src_core_audio_AudioRecorder_ts-src_core_audio_PatcherAudio_ts.js/ac5d8bdf677b25b819d5.worklet.js",
+    "url": "src_core_audio_AudioEditor_ts-src_core_audio_AudioRecorder_ts-src_core_audio_PatcherAudio_ts.js/a47c855870cc1dd56ab9.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_hardware_HardwareEditor_ts.js/ac5d8bdf677b25b819d5.worklet.js",
+    "url": "src_core_hardware_HardwareEditor_ts.js/a47c855870cc1dd56ab9.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_hardware_Patcher_ts.js/ac5d8bdf677b25b819d5.worklet.js",
+    "url": "src_core_hardware_Patcher_ts.js/a47c855870cc1dd56ab9.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_image_ImageEditor_ts.js/ac5d8bdf677b25b819d5.worklet.js",
+    "url": "src_core_image_ImageEditor_ts.js/a47c855870cc1dd56ab9.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_image_PatcherImage_ts.js/ac5d8bdf677b25b819d5.worklet.js",
+    "url": "src_core_image_PatcherImage_ts.js/a47c855870cc1dd56ab9.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_text_PatcherText_ts.js/ac5d8bdf677b25b819d5.worklet.js",
+    "url": "src_core_text_PatcherText_ts.js/a47c855870cc1dd56ab9.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_text_TextEditor_ts.js/ac5d8bdf677b25b819d5.worklet.js",
+    "url": "src_core_text_TextEditor_ts.js/a47c855870cc1dd56ab9.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_video_PatcherVideo_ts.js/ac5d8bdf677b25b819d5.worklet.js",
+    "url": "src_core_video_PatcherVideo_ts.js/a47c855870cc1dd56ab9.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_video_VideoEditor_ts.js/ac5d8bdf677b25b819d5.worklet.js",
+    "url": "src_core_video_VideoEditor_ts.js/a47c855870cc1dd56ab9.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_worklets_PatcherNode_ts.js/ac5d8bdf677b25b819d5.worklet.js",
+    "url": "src_core_worklets_PatcherNode_ts.js/a47c855870cc1dd56ab9.worklet.js",
     "revision": null
   }], {});
   workbox.cleanupOutdatedCaches();

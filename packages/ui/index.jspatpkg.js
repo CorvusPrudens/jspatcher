@@ -1720,7 +1720,8 @@ NumberBox.props = {
     enums: ["Decimal (Floating-Point)", "Decimal (Integer)", "Hex", "Roland Octal", "Binary", "MIDI", "MIDI (C4)"],
     default: "Decimal (Floating-Point)",
     description: "Sets characteristics of the appearance and behavior of the number box.",
-    isUIState: true
+    isUIState: true,
+    alwaysSerialize: true
   },
   triangle: {
     type: "boolean",

@@ -717,6 +717,7 @@ Add.args = [
   }
 ];
 Add.argsOffset = 1;
+Add.docs = "math/docs/add~.html";
 
 
 /***/ }),
@@ -897,6 +898,7 @@ Div.args = [
   }
 ];
 Div.argsOffset = 1;
+Div.docs = "math/docs/div~.html";
 
 
 /***/ }),
@@ -1128,6 +1130,7 @@ Mul.args = [
   }
 ];
 Mul.argsOffset = 1;
+Mul.docs = "math/docs/mul~.html";
 
 
 /***/ }),
@@ -1299,6 +1302,7 @@ Sub.args = [
   }
 ];
 Sub.argsOffset = 1;
+Sub.docs = "math/docs/sub~.html";
 
 
 /***/ }),
@@ -1512,6 +1516,7 @@ var __spreadValues = (a, b) => {
     }
   return a;
 };
+var _a;
 
 
 
@@ -1529,28 +1534,28 @@ const Binary = (0,_sdk__WEBPACK_IMPORTED_MODULE_2__.generateDefaultObject)(_obje
 const Unary = (0,_sdk__WEBPACK_IMPORTED_MODULE_2__.generateDefaultObject)(_objects_block_unary__WEBPACK_IMPORTED_MODULE_1__["default"]);
 const BinaryObjects = {};
 const binary_functions = {
-  "+": { f: (a, b) => a + b, n: "Add" },
-  "-": { f: (a, b) => a - b, n: "Sub" },
-  "!-": { f: (a, b) => b - a, n: "Reverse Sub" },
-  "*": { f: (a, b) => a * b, n: "Mul" },
-  "/": { f: (a, b) => a / b, n: "Div" },
-  "!/": { f: (a, b) => b / a, n: "Reverse Div" },
-  "==": { f: (a, b) => a == b, n: "Equal" },
-  "!=": { f: (a, b) => a != b, n: "Not equal" },
-  ">": { f: (a, b) => a > b, n: "Greater" },
-  ">=": { f: (a, b) => a >= b, n: "Greater or equal" },
-  "<": { f: (a, b) => a < b, n: "Less" },
-  "<=": { f: (a, b) => a <= b, n: "Less or equal" },
-  "&&": { f: (a, b) => a && b, n: "Boolean AND" },
-  "||": { f: (a, b) => a || b, n: "Boolean OR" },
-  "max": { f: (a, b) => a > b ? a : b, n: "Max" },
-  "min": { f: (a, b) => a < b ? a : b, n: "Min" },
-  "pow": { f: (a, b) => a ** b, n: "Power" },
-  "%": { f: (a, b) => a % b, n: "Mod" },
-  "!%": { f: (a, b) => b % a, n: "Reverse Mod" }
+  "+": { f: (a, b) => a + b, n: "Add", d: "math/docs/add.html" },
+  "-": { f: (a, b) => a - b, n: "Sub", d: "math/docs/sub.html" },
+  "!-": { f: (a, b) => b - a, n: "Reverse Sub", d: "" },
+  "*": { f: (a, b) => a * b, n: "Mul", d: "math/docs/mul.html" },
+  "/": { f: (a, b) => a / b, n: "Div", d: "math/docs/div.html" },
+  "!/": { f: (a, b) => b / a, n: "Reverse Div", d: "" },
+  "==": { f: (a, b) => a == b, n: "Equal", d: "math/docs/equal.html" },
+  "!=": { f: (a, b) => a != b, n: "Not equal", d: "math/docs/notequal.html" },
+  ">": { f: (a, b) => a > b, n: "Greater", d: "math/docs/greaterthan.html" },
+  ">=": { f: (a, b) => a >= b, n: "Greater or equal", d: "math/docs/greaterthanorequal.html" },
+  "<": { f: (a, b) => a < b, n: "Less", d: "math/docs/lessthan.html" },
+  "<=": { f: (a, b) => a <= b, n: "Less or equal", d: "math/docs/lessthanorequal.html" },
+  "&&": { f: (a, b) => a && b, n: "Boolean AND", d: "math/docs/andlogical.html" },
+  "||": { f: (a, b) => a || b, n: "Boolean OR", d: "math/docs/orlogical.html" },
+  "max": { f: (a, b) => a > b ? a : b, n: "Max", d: "math/docs/max.html" },
+  "min": { f: (a, b) => a < b ? a : b, n: "Min", d: "math/docs/min.html" },
+  "pow": { f: (a, b) => a ** b, n: "Power", d: "" },
+  "%": { f: (a, b) => a % b, n: "Mod", d: "math/docs/mod.html" },
+  "!%": { f: (a, b) => b % a, n: "Reverse Mod", d: "" }
 };
 for (const key in binary_functions) {
-  BinaryObjects[key] = class extends Binary {
+  BinaryObjects[key] = (_a = class extends Binary {
     constructor() {
       super(...arguments);
       this.execute = binary_functions[key].f;
@@ -1558,7 +1563,7 @@ for (const key in binary_functions) {
     static get _name() {
       return binary_functions[key].n;
     }
-  };
+  }, _a.description = binary_functions[key].n, _a.docs = binary_functions[key].d, _a);
 }
 const UnaryObjects = {};
 const unary_functions = {

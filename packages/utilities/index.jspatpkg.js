@@ -573,13 +573,17 @@ __webpack_require__.r(__webpack_exports__);
 class Change extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
   constructor() {
     super(...arguments);
-    this._ = { result: void 0 };
+    this._ = { result: this.args[0] || void 0 };
   }
   subscribe() {
     super.subscribe();
     this.on("preInit", () => {
       this.inlets = 1;
       this.outlets = 1;
+    });
+    this.on("argsUpdated", ({ args }) => {
+      if (args.length > 0)
+        this._.result = args[0];
     });
     this.on("inlet", ({ data, inlet }) => {
       if (inlet === 0) {
@@ -610,7 +614,13 @@ Change.outlets = [{
   type: "anything",
   description: "A value that has changed"
 }];
+Change.args = [{
+  type: "anything",
+  optional: true,
+  description: "An initial value to compare against"
+}];
 Change.docs = "utilities/docs/change.html";
+Change.helpFiles = ["utilities/help/change.bell"];
 
 
 /***/ }),
@@ -979,11 +989,11 @@ class Gate extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
     this.on("inlet", ({ data, inlet }) => {
       if (inlet === 0) {
         if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
-          const clamped = Math.min(Math.abs(Math.floor(+data)), this.inlets - 1);
+          const clamped = Math.min(Math.abs(Math.floor(+data)), this.outlets);
           this._.selection = clamped;
         }
       } else if (inlet === 1) {
-        if (this._.selection != 0) {
+        if (this._.selection > 0) {
           this.outlet(this._.selection - 1, data);
         }
       }
@@ -1909,7 +1919,7 @@ class Swap extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
     super.subscribe();
     this.on("preInit", () => {
       this.inlets = 2;
-      this.outlets = 1;
+      this.outlets = 2;
     });
     this.on("updateArgs", (args) => {
       this._.arg = void 0;

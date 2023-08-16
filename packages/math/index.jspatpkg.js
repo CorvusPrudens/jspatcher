@@ -664,6 +664,49 @@ Unary.props = {
 
 /***/ }),
 
+/***/ "./src/objects/dsp/abs.ts":
+/*!********************************!*\
+  !*** ./src/objects/dsp/abs.ts ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Abs)
+/* harmony export */ });
+/* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+
+class Abs extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  process(inputs, outputs, parameters) {
+    let in1 = inputs[0][0];
+    let outputStream = outputs[0][0];
+    for (let i = 0; i < in1.length; i++) {
+      outputStream[i] = Math.abs(in1[i]);
+    }
+    return true;
+  }
+}
+Abs.inlets = [
+  {
+    isHot: true,
+    type: "signal",
+    description: "audio input connection 1",
+    varLength: true
+  }
+];
+Abs.outlets = [
+  {
+    type: "signal",
+    description: "audio output connection",
+    varLength: true
+  }
+];
+Abs.argsOffset = 0;
+Abs.docs = "math/docs/abs~.html";
+
+
+/***/ }),
+
 /***/ "./src/objects/dsp/add.ts":
 /*!********************************!*\
   !*** ./src/objects/dsp/add.ts ***!
@@ -1500,6 +1543,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _objects_dsp_hip__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./objects/dsp/hip */ "./src/objects/dsp/hip.ts");
 /* harmony import */ var _objects_dsp_lop__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./objects/dsp/lop */ "./src/objects/dsp/lop.ts");
 /* harmony import */ var _objects_dsp_bp__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./objects/dsp/bp */ "./src/objects/dsp/bp.ts");
+/* harmony import */ var _objects_dsp_abs__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./objects/dsp/abs */ "./src/objects/dsp/abs.ts");
 var __defProp = Object.defineProperty;
 var __getOwnPropSymbols = Object.getOwnPropertySymbols;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
@@ -1516,7 +1560,8 @@ var __spreadValues = (a, b) => {
     }
   return a;
 };
-var _a;
+var _a, _b;
+
 
 
 
@@ -1565,13 +1610,16 @@ for (const key in binary_functions) {
     }
   }, _a.description = binary_functions[key].n, _a.docs = binary_functions[key].d, _a);
 }
-const UnaryObjects = {};
+const UnaryObjects = {
+  "abs~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_abs__WEBPACK_IMPORTED_MODULE_13__["default"], "Abs")
+};
 const unary_functions = {
-  "!": { f: (a) => !a, n: "Not" },
-  "~": { f: (a) => ~a, n: "Invert" }
+  "!": { f: (a) => !a, n: "Not", d: "" },
+  "~": { f: (a) => ~a, n: "Invert", d: "" },
+  "abs": { f: (a) => Math.abs(a), n: "Absolute Value", d: "math/docs/abs.html" }
 };
 for (const key in unary_functions) {
-  UnaryObjects[key] = class extends Unary {
+  UnaryObjects[key] = (_b = class extends Unary {
     constructor() {
       super(...arguments);
       this.execute = unary_functions[key].f;
@@ -1579,7 +1627,7 @@ for (const key in unary_functions) {
     static get _name() {
       return unary_functions[key].n;
     }
-  };
+  }, _b.description = unary_functions[key].n, _b.docs = unary_functions[key].d, _b);
 }
 const BinaryAudioObjects = {
   "+~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_add__WEBPACK_IMPORTED_MODULE_4__["default"], "Add"),

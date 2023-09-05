@@ -233,6 +233,78 @@ module.exports = function (item) {
 
 /***/ }),
 
+/***/ "../../../frontend/src/core/message.ts":
+/*!*********************************************!*\
+  !*** ../../../frontend/src/core/message.ts ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Message": () => (/* binding */ Message),
+/* harmony export */   "extractFirst": () => (/* binding */ extractFirst),
+/* harmony export */   "extractFirstIfSingle": () => (/* binding */ extractFirstIfSingle),
+/* harmony export */   "isMessage": () => (/* binding */ isMessage)
+/* harmony export */ });
+
+class Message extends Array {
+  static from(tokens) {
+    const newArr = new Message();
+    for (let i = 0; i < tokens.length; i++) {
+      newArr[i] = tokens[i];
+    }
+    return newArr;
+  }
+  startsWith(value) {
+    if (this.length) {
+      return this[0] === value;
+    }
+    return false;
+  }
+  endsWith(value) {
+    if (this.length) {
+      return this[this.length - 1] === value;
+    }
+    return false;
+  }
+  // Produces a function that iterates over two lists,
+  // performs the given operation on any pair of numbers,
+  // and returns the shortest collection between the two
+  arithmetic(op) {
+    return (other) => {
+      const result = new Message();
+      const minLength = Math.min(this.length, other.length);
+      for (let i = 0; i < minLength; i++) {
+        if (typeof this[i] === "number" && typeof other[i] === "number") {
+          result.push(op(this[i], other[i]));
+        } else {
+          result.push(this[i]);
+        }
+      }
+      return result;
+    };
+  }
+}
+function isMessage(value) {
+  return value instanceof Message;
+}
+function extractFirst(data) {
+  if (data instanceof Message || data instanceof Array) {
+    return data[0];
+  }
+  return data;
+}
+function extractFirstIfSingle(data) {
+  if ((data instanceof Message || data instanceof Array) && data.length === 1) {
+    return data[0];
+  }
+  return data;
+}
+
+
+/***/ }),
+
 /***/ "./src/index.ts":
 /*!**********************!*\
   !*** ./src/index.ts ***!
@@ -374,14 +446,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ slider)
 /* harmony export */ });
-/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
-/* harmony import */ var _slider_ui__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./slider_ui */ "./src/objects/ui/slider_ui.tsx");
-/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./base */ "./src/objects/ui/base.ts");
+/* harmony import */ var _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jspatcher/jspatcher/src/core/message */ "../../../frontend/src/core/message.ts");
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+/* harmony import */ var _slider_ui__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./slider_ui */ "./src/objects/ui/slider_ui.tsx");
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./base */ "./src/objects/ui/base.ts");
 
 
 
 
-class slider extends _base__WEBPACK_IMPORTED_MODULE_2__["default"] {
+
+class slider extends _base__WEBPACK_IMPORTED_MODULE_3__["default"] {
   constructor() {
     super(...arguments);
     this.state = { value: 0 };
@@ -433,8 +507,8 @@ class slider extends _base__WEBPACK_IMPORTED_MODULE_2__["default"] {
     });
     this.on("inlet", ({ data, inlet }) => {
       if (inlet === 0) {
-        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
-          const value = +data;
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_1__.isBang)(data)) {
+          const value = +(0,_jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.extractFirst)(data);
           this.validateValue(value);
           this.updateUI({ value: this.state.value });
         }
@@ -533,7 +607,7 @@ slider.props = {
   }
 };
 slider.docs = "io/docs/slider_object.html";
-slider.UI = _slider_ui__WEBPACK_IMPORTED_MODULE_1__["default"];
+slider.UI = _slider_ui__WEBPACK_IMPORTED_MODULE_2__["default"];
 
 
 /***/ }),

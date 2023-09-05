@@ -12,6 +12,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "Message": () => (/* binding */ Message),
 /* harmony export */   "extractFirst": () => (/* binding */ extractFirst),
+/* harmony export */   "extractFirstIfSingle": () => (/* binding */ extractFirstIfSingle),
 /* harmony export */   "isMessage": () => (/* binding */ isMessage)
 /* harmony export */ });
 class Message extends Array {
@@ -55,9 +56,14 @@ function isMessage(value) {
 function extractFirst(data) {
   if (data instanceof Message || data instanceof Array) {
     return data[0];
-  } else {
-    return data;
   }
+  return data;
+}
+function extractFirstIfSingle(data) {
+  if ((data instanceof Message || data instanceof Array) && data.length === 1) {
+    return data[0];
+  }
+  return data;
 }
 
 
@@ -138,6 +144,12 @@ class JsWorkletManager {
       await audioCtx.audioWorklet.addModule(url);
     }
   }
+}
+function extractFirst(data) {
+  if (data instanceof Array) {
+    return data[0];
+  }
+  return data;
 }
 function generateObject(Processor, name, dependencies, enums) {
   var _a;
@@ -246,11 +258,12 @@ function generateObject(Processor, name, dependencies, enums) {
         });
       });
       this.on("inlet", ({ inlet, data }) => {
-        if (typeof data === "number") {
+        const value = extractFirst(data);
+        if (typeof value === "number") {
           if (this._.constants[inlet] && !this._.constantsConnected[inlet]) {
             const constant = this._.constants[inlet];
             constant.offset.value = constant.offset.value;
-            constant.offset.linearRampToValueAtTime(data, this.audioCtx.currentTime + this.getProp("smoothInput"));
+            constant.offset.linearRampToValueAtTime(value, this.audioCtx.currentTime + this.getProp("smoothInput"));
           }
         }
       });

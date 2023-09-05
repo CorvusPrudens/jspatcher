@@ -12,6 +12,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "Message": () => (/* binding */ Message),
 /* harmony export */   "extractFirst": () => (/* binding */ extractFirst),
+/* harmony export */   "extractFirstIfSingle": () => (/* binding */ extractFirstIfSingle),
 /* harmony export */   "isMessage": () => (/* binding */ isMessage)
 /* harmony export */ });
 
@@ -59,9 +60,14 @@ function isMessage(value) {
 function extractFirst(data) {
   if (data instanceof Message || data instanceof Array) {
     return data[0];
-  } else {
-    return data;
   }
+  return data;
+}
+function extractFirstIfSingle(data) {
+  if ((data instanceof Message || data instanceof Array) && data.length === 1) {
+    return data[0];
+  }
+  return data;
 }
 
 
@@ -144,6 +150,12 @@ class JsWorkletManager {
       await audioCtx.audioWorklet.addModule(url);
     }
   }
+}
+function extractFirst(data) {
+  if (data instanceof Array) {
+    return data[0];
+  }
+  return data;
 }
 function generateObject(Processor, name, dependencies, enums) {
   var _a;
@@ -252,11 +264,12 @@ function generateObject(Processor, name, dependencies, enums) {
         });
       });
       this.on("inlet", ({ inlet, data }) => {
-        if (typeof data === "number") {
+        const value = extractFirst(data);
+        if (typeof value === "number") {
           if (this._.constants[inlet] && !this._.constantsConnected[inlet]) {
             const constant = this._.constants[inlet];
             constant.offset.value = constant.offset.value;
-            constant.offset.linearRampToValueAtTime(data, this.audioCtx.currentTime + this.getProp("smoothInput"));
+            constant.offset.linearRampToValueAtTime(value, this.audioCtx.currentTime + this.getProp("smoothInput"));
           }
         }
       });
@@ -635,10 +648,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ Counter)
 /* harmony export */ });
-/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+/* harmony import */ var _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jspatcher/jspatcher/src/core/message */ "../../../frontend/src/core/message.ts");
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
 
 
-class Counter extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+
+class Counter extends _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultObject {
   constructor() {
     super(...arguments);
     this._ = { start: 0, stop: 0, step: 1, current_step: 0, num_satisfied: 0 };
@@ -680,25 +695,30 @@ class Counter extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
     this.on("argsUpdated", ({ args }) => {
       this.updateRange(args);
     });
-    this.on("inlet", ({ inlet }) => {
+    this.on("inlet", ({ inlet, data }) => {
       if (inlet === 0) {
         this.outlet(0, this._.current_step);
         this._.current_step += this._.step;
         if (this._.start <= this._.stop) {
           if (this._.current_step + this._.step > this._.stop) {
             this._.num_satisfied += 1;
-            this.outlet(1, new _sdk__WEBPACK_IMPORTED_MODULE_0__.Bang());
+            this.outlet(1, new _sdk__WEBPACK_IMPORTED_MODULE_1__.Bang());
             this.outlet(2, this._.num_satisfied);
             this._.current_step = this._.start;
           }
         } else if (this._.start > this._.stop) {
           if (this._.current_step + this._.step < this._.stop) {
             this._.num_satisfied += 1;
-            this.outlet(1, new _sdk__WEBPACK_IMPORTED_MODULE_0__.Bang());
+            this.outlet(1, new _sdk__WEBPACK_IMPORTED_MODULE_1__.Bang());
             this.outlet(2, this._.num_satisfied);
             this._.current_step = this._.start;
           }
         }
+      } else if (inlet === 1) {
+        const step = (0,_jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.extractFirst)(data);
+        if (typeof step !== "number")
+          return;
+        this._.current_step = step > this._.stop ? this._.stop : step < this._.start ? this._.start : step;
       }
     });
   }
@@ -712,6 +732,11 @@ Counter.inlets = [
     isHot: true,
     type: "bang",
     description: "Advance the range one step"
+  },
+  {
+    isHot: false,
+    type: "number",
+    description: "Set the current step in the range"
   }
 ];
 Counter.outlets = [
@@ -760,10 +785,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ Dbtopow)
 /* harmony export */ });
-/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+/* harmony import */ var _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jspatcher/jspatcher/src/core/message */ "../../../frontend/src/core/message.ts");
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
 
 
-class Dbtopow extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+
+class Dbtopow extends _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultObject {
   constructor() {
     super(...arguments);
     this._ = { power: void 0 };
@@ -776,14 +803,15 @@ class Dbtopow extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
     });
     this.on("inlet", ({ data, inlet }) => {
       if (inlet === 0) {
-        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_1__.isBang)(data)) {
+          let value = (0,_jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.extractFirst)(data);
           try {
-            if (data <= 0) {
+            if (value <= 0) {
               this._.power = 0;
             } else {
-              if (data > 870)
-                data = 870;
-              this._.power = Math.exp(2.302585092994046 * 0.1 * (data - 100));
+              if (value > 870)
+                value = 870;
+              this._.power = Math.exp(2.302585092994046 * 0.1 * (value - 100));
             }
           } catch (e) {
             this.error(e);
@@ -825,10 +853,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ Dbtorms)
 /* harmony export */ });
-/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+/* harmony import */ var _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jspatcher/jspatcher/src/core/message */ "../../../frontend/src/core/message.ts");
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
 
 
-class Dbtorms extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+
+class Dbtorms extends _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultObject {
   constructor() {
     super(...arguments);
     this._ = { rms: void 0 };
@@ -841,14 +871,15 @@ class Dbtorms extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
     });
     this.on("inlet", ({ data, inlet }) => {
       if (inlet === 0) {
-        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_1__.isBang)(data)) {
+          let value = (0,_jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.extractFirst)(data);
           try {
-            if (data <= 0) {
+            if (value <= 0) {
               this._.rms = 0;
             } else {
-              if (data > 485)
-                data = 485;
-              this._.rms = Math.exp(2.302585092994046 * 0.05 * (data - 100));
+              if (value > 485)
+                value = 485;
+              this._.rms = Math.exp(2.302585092994046 * 0.05 * (value - 100));
             }
           } catch (e) {
             this.error(e);
@@ -890,10 +921,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ Ftom)
 /* harmony export */ });
-/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+/* harmony import */ var _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jspatcher/jspatcher/src/core/message */ "../../../frontend/src/core/message.ts");
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
 
 
-class Ftom extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+
+class Ftom extends _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultObject {
   constructor() {
     super(...arguments);
     this._ = { note: void 0 };
@@ -906,12 +939,13 @@ class Ftom extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
     });
     this.on("inlet", ({ data, inlet }) => {
       if (inlet === 0) {
-        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_1__.isBang)(data)) {
+          const value = (0,_jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.extractFirst)(data);
           try {
-            if (data <= 0) {
+            if (value <= 0) {
               this._.note = -1500;
             } else {
-              this._.note = 12 * Math.log(data / 220) / Math.log(2) + 57.01;
+              this._.note = 12 * Math.log(value / 220) / Math.log(2) + 57.01;
             }
           } catch (e) {
             this.error(e);
@@ -953,10 +987,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ Gate)
 /* harmony export */ });
-/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+/* harmony import */ var _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jspatcher/jspatcher/src/core/message */ "../../../frontend/src/core/message.ts");
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
 
 
-class Gate extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+
+class Gate extends _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultObject {
   constructor() {
     super(...arguments);
     this._ = { selection: 0, data: 0 };
@@ -988,9 +1024,12 @@ class Gate extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
     });
     this.on("inlet", ({ data, inlet }) => {
       if (inlet === 0) {
-        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
-          const clamped = Math.min(Math.abs(Math.floor(+data)), this.outlets);
-          this._.selection = clamped;
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_1__.isBang)(data)) {
+          const value = (0,_jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.extractFirst)(data);
+          if (typeof value === "number") {
+            const clamped = Math.min(Math.abs(Math.floor(value)), this.outlets);
+            this._.selection = clamped;
+          }
         }
       } else if (inlet === 1) {
         if (this._.selection > 0) {
@@ -1249,10 +1288,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ Mtof)
 /* harmony export */ });
-/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+/* harmony import */ var _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jspatcher/jspatcher/src/core/message */ "../../../frontend/src/core/message.ts");
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
 
 
-class Mtof extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+
+class Mtof extends _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultObject {
   constructor() {
     super(...arguments);
     this._ = { freq: void 0 };
@@ -1265,14 +1306,15 @@ class Mtof extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
     });
     this.on("inlet", ({ data, inlet }) => {
       if (inlet === 0) {
-        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_1__.isBang)(data)) {
+          const value = (0,_jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.extractFirst)(data);
           try {
-            if (data <= -1500) {
+            if (value <= -1500) {
               this._.freq = 0;
-            } else if (data > 1499) {
+            } else if (value > 1499) {
               this._.freq = 440 * Math.exp(0.0577625565 * (1499 - 69));
             } else {
-              this._.freq = 440 * Math.exp(0.0577625565 * (data - 69));
+              this._.freq = 440 * Math.exp(0.0577625565 * (value - 69));
             }
           } catch (e) {
             this.error(e);
@@ -1314,10 +1356,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ Powtodb)
 /* harmony export */ });
-/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+/* harmony import */ var _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jspatcher/jspatcher/src/core/message */ "../../../frontend/src/core/message.ts");
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
 
 
-class Powtodb extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+
+class Powtodb extends _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultObject {
   constructor() {
     super(...arguments);
     this._ = { decibels: void 0 };
@@ -1330,12 +1374,13 @@ class Powtodb extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
     });
     this.on("inlet", ({ data, inlet }) => {
       if (inlet === 0) {
-        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_1__.isBang)(data)) {
+          const value = (0,_jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.extractFirst)(data);
           try {
-            if (data <= 0) {
+            if (value <= 0) {
               this._.decibels = 0;
             } else {
-              this._.decibels = 100 + 10 / 2.302585092994046 * Math.log(data);
+              this._.decibels = 100 + 10 / 2.302585092994046 * Math.log(value);
               if (this._.decibels < 0) {
                 this._.decibels = 0;
               }
@@ -1476,10 +1521,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ Rmstodb)
 /* harmony export */ });
-/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+/* harmony import */ var _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jspatcher/jspatcher/src/core/message */ "../../../frontend/src/core/message.ts");
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
 
 
-class Rmstodb extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+
+class Rmstodb extends _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultObject {
   constructor() {
     super(...arguments);
     this._ = { decibels: void 0 };
@@ -1492,12 +1539,13 @@ class Rmstodb extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
     });
     this.on("inlet", ({ data, inlet }) => {
       if (inlet === 0) {
-        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_1__.isBang)(data)) {
+          const value = (0,_jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.extractFirst)(data);
           try {
-            if (data <= 0) {
+            if (value <= 0) {
               this._.decibels = 0;
             } else {
-              this._.decibels = 100 + 20 / 2.302585092994046 * Math.log(data);
+              this._.decibels = 100 + 20 / 2.302585092994046 * Math.log(value);
               if (this._.decibels < 0) {
                 this._.decibels = 0;
               }
@@ -1544,6 +1592,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
 /* harmony import */ var _common_web_scaleFunction__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../../../common/web/scaleFunction */ "../../common/web/scaleFunction.ts");
+/* harmony import */ var _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jspatcher/jspatcher/src/core/message */ "../../../frontend/src/core/message.ts");
+
 
 
 
@@ -1574,7 +1624,9 @@ class Scale extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
       if (inlet === 0) {
         if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
           try {
-            this._.output = (0,_common_web_scaleFunction__WEBPACK_IMPORTED_MODULE_1__.scale)(data, this._.inputLow, this._.inputHigh, this._.outputLow, this._.outputHigh);
+            const value = (0,_jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_2__.extractFirst)(data);
+            if (typeof value === "number")
+              this._.output = (0,_common_web_scaleFunction__WEBPACK_IMPORTED_MODULE_1__.scale)(value, this._.inputLow, this._.inputHigh, this._.outputLow, this._.outputHigh);
           } catch (e) {
             this.error(e);
             return;
@@ -1675,6 +1727,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
 /* harmony import */ var _common_web_scaleFunction__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../../../common/web/scaleFunction */ "../../common/web/scaleFunction.ts");
+/* harmony import */ var _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jspatcher/jspatcher/src/core/message */ "../../../frontend/src/core/message.ts");
+
 
 
 
@@ -1705,8 +1759,11 @@ class ScaleClamped extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
       if (inlet === 0) {
         if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
           try {
-            const clamped = Math.min(Math.max(data, this._.inputLow), this._.inputHigh);
-            this._.output = (0,_common_web_scaleFunction__WEBPACK_IMPORTED_MODULE_1__.scale)(clamped, this._.inputLow, this._.inputHigh, this._.outputLow, this._.outputHigh);
+            const value = (0,_jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_2__.extractFirst)(data);
+            if (typeof value === "number") {
+              const clamped = Math.min(Math.max(value, this._.inputLow), this._.inputHigh);
+              this._.output = (0,_common_web_scaleFunction__WEBPACK_IMPORTED_MODULE_1__.scale)(clamped, this._.inputLow, this._.inputHigh, this._.outputLow, this._.outputHigh);
+            }
           } catch (e) {
             this.error(e);
             return;
@@ -1990,10 +2047,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ Switch)
 /* harmony export */ });
-/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+/* harmony import */ var _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @jspatcher/jspatcher/src/core/message */ "../../../frontend/src/core/message.ts");
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
 
 
-class Switch extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+
+class Switch extends _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultObject {
   constructor() {
     super(...arguments);
     this._ = { selection: 0, data: 0 };
@@ -2031,9 +2090,12 @@ class Switch extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
     });
     this.on("inlet", ({ data, inlet }) => {
       if (inlet === 0) {
-        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
-          const clamped = Math.min(Math.abs(Math.floor(+data)), this.inlets - 1);
-          this._.selection = clamped;
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_1__.isBang)(data)) {
+          const value = (0,_jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.extractFirst)(data);
+          if (typeof value === "number") {
+            const clamped = Math.min(Math.abs(Math.floor(+data)), this.inlets - 1);
+            this._.selection = clamped;
+          }
         }
       } else {
         if (inlet === this._.selection) {

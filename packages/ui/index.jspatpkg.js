@@ -1043,7 +1043,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "Message": () => (/* binding */ Message),
 /* harmony export */   "isMessage": () => (/* binding */ isMessage),
-/* harmony export */   "extractFirst": () => (/* binding */ extractFirst)
+/* harmony export */   "extractFirst": () => (/* binding */ extractFirst),
+/* harmony export */   "extractFirstIfSingle": () => (/* binding */ extractFirstIfSingle)
 /* harmony export */ });
 class Message extends Array {
   static from(tokens) {
@@ -1086,9 +1087,14 @@ function isMessage(value) {
 function extractFirst(data) {
   if (data instanceof Message || data instanceof Array) {
     return data[0];
-  } else {
-    return data;
   }
+  return data;
+}
+function extractFirstIfSingle(data) {
+  if ((data instanceof Message || data instanceof Array) && data.length === 1) {
+    return data[0];
+  }
+  return data;
 }
 
 
@@ -1549,7 +1555,7 @@ const _message = class extends _base__WEBPACK_IMPORTED_MODULE_2__["default"] {
     };
     this.produceOutput = (data) => {
       if (data && !(0,_sdk__WEBPACK_IMPORTED_MODULE_1__.isBang)(data) && this._.formatters.length) {
-        if (data instanceof _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.Message) {
+        if (data instanceof _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_0__.Message || data instanceof Array) {
           for (let i = 0; i < data.length; i++)
             this.formatMessage(i + 1, (message2, pos) => this._.buffer[message2][pos] = data[i]);
         } else {
@@ -1558,7 +1564,11 @@ const _message = class extends _base__WEBPACK_IMPORTED_MODULE_2__["default"] {
           }
         }
       }
-      this._.buffer.forEach((message2) => this.outlet(0, message2));
+      if (this._.buffer.length === 1 && this._.buffer[0].length === 1) {
+        this.outlet(0, this._.buffer[0][0]);
+      } else {
+        this._.buffer.forEach((message2) => this.outlet(0, message2));
+      }
     };
   }
   subscribe() {
@@ -1681,12 +1691,7 @@ class NumberBox extends _base__WEBPACK_IMPORTED_MODULE_2__["default"] {
     this.on("inlet", ({ data, inlet }) => {
       if (inlet === 0) {
         if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
-          let value;
-          if (data instanceof Array || data instanceof _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_3__.Message) {
-            value = +(0,_jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_3__.extractFirst)(data);
-          } else {
-            value = +data;
-          }
+          const value = +(0,_jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_3__.extractFirst)(data);
           this.validateValue(value);
           this.updateUI({ value: this.state.value });
         }
@@ -2286,6 +2291,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../sdk */ "./src/sdk.ts");
 /* harmony import */ var _ui_toggle__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../ui/toggle */ "./src/ui/toggle.tsx");
 /* harmony import */ var _base_live__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./base-live */ "./src/objects/base-live.ts");
+/* harmony import */ var _jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @jspatcher/jspatcher/src/core/message */ "../../../frontend/src/core/message.ts");
+
 
 
 
@@ -2310,7 +2317,7 @@ class LiveToggle extends _base_live__WEBPACK_IMPORTED_MODULE_2__["default"] {
     this.on("inlet", ({ data, inlet }) => {
       if (inlet === 0) {
         if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
-          let number = +data;
+          let number = +(0,_jspatcher_jspatcher_src_core_message__WEBPACK_IMPORTED_MODULE_3__.extractFirst)(data);
           if (number !== 0)
             number = 1;
           if (number != this.state.value) {

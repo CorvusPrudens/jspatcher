@@ -942,6 +942,7 @@ class AdsrObject extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_1__
 }
 AdsrObject.description = "ADSR Envelope";
 AdsrObject.docs = "generators/docs/adsrObject.html";
+AdsrObject.helpFiles = ["generators/help/adsr~.bell"];
 AdsrObject.inlets = [
   {
     isHot: true,

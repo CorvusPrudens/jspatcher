@@ -310,7 +310,7 @@ define(['./workbox-43d32f61'], (function (workbox) { 'use strict';
     "revision": "9e95a1bcac6cc2001d1c06c86e235f2f"
   }, {
     "url": "index.js",
-    "revision": "8647dd306e0417ad93517d2b345ae824"
+    "revision": "c40dcc5cdac227d051e8ae0c3f0c228a"
   }, {
     "url": "js/071ab575215dd56539a2.worklet.js",
     "revision": null
@@ -349,6 +349,9 @@ define(['./workbox-43d32f61'], (function (workbox) { 'use strict';
     "revision": null
   }, {
     "url": "js/5513e8abf5c8e19bc59a.js",
+    "revision": null
+  }, {
+    "url": "js/5776f91ece1a80fd86b0.worklet.js",
     "revision": null
   }, {
     "url": "js/57cf42d62c99e9c5b0b7.js",
@@ -408,9 +411,6 @@ define(['./workbox-43d32f61'], (function (workbox) { 'use strict';
     "url": "js/cd0a55e497bb5844f136.js",
     "revision": null
   }, {
-    "url": "js/cef0376fdbe13166782f.worklet.js",
-    "revision": null
-  }, {
     "url": "js/d6b833c98d71a39ad20b.js",
     "revision": null
   }, {
@@ -433,7 +433,7 @@ define(['./workbox-43d32f61'], (function (workbox) { 'use strict';
     "revision": "e27e234eac8297a7cba68d54411523e0"
   }, {
     "url": "packages/generators/index.jspatpkg.js",
-    "revision": "ba50e881827e289c96d171c4264cf4df"
+    "revision": "9212ca1292489ee5843e17bb02163c4c"
   }, {
     "url": "packages/internal-packages.json",
     "revision": "a58b27b3464b896244d65202109e969c"
@@ -448,7 +448,7 @@ define(['./workbox-43d32f61'], (function (workbox) { 'use strict';
     "revision": "8b6e364944d070bd6f36564f78934c1d"
   }, {
     "url": "packages/math/index.jspatpkg.js",
-    "revision": "27f32273969e00f72f8b5ac1d096031c"
+    "revision": "58f0b57029800e97bece111a4a79d4ba"
   }, {
     "url": "packages/ui/index.js",
     "revision": "cdb7c48976af8e388ade5089f62375e0"
@@ -460,36 +460,36 @@ define(['./workbox-43d32f61'], (function (workbox) { 'use strict';
     "revision": "91720f7c6c9464657f9b5559ccdc54b2"
   }, {
     "url": "packages/utilities/index.jspatpkg.js",
-    "revision": "03f488b5d075d753306d85e76af98780"
+    "revision": "bd60730823a10f7041c68a4d783a0a24"
   }, {
-    "url": "src_core_audio_AudioEditor_ts-src_core_audio_AudioRecorder_ts-src_core_audio_PatcherAudio_ts.js/cef0376fdbe13166782f.worklet.js",
+    "url": "src_core_audio_AudioEditor_ts-src_core_audio_AudioRecorder_ts-src_core_audio_PatcherAudio_ts.js/5776f91ece1a80fd86b0.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_hardware_HardwareEditor_ts.js/cef0376fdbe13166782f.worklet.js",
+    "url": "src_core_hardware_HardwareEditor_ts.js/5776f91ece1a80fd86b0.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_hardware_Patcher_ts.js/cef0376fdbe13166782f.worklet.js",
+    "url": "src_core_hardware_Patcher_ts.js/5776f91ece1a80fd86b0.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_image_ImageEditor_ts.js/cef0376fdbe13166782f.worklet.js",
+    "url": "src_core_image_ImageEditor_ts.js/5776f91ece1a80fd86b0.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_image_PatcherImage_ts.js/cef0376fdbe13166782f.worklet.js",
+    "url": "src_core_image_PatcherImage_ts.js/5776f91ece1a80fd86b0.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_text_PatcherText_ts.js/cef0376fdbe13166782f.worklet.js",
+    "url": "src_core_text_PatcherText_ts.js/5776f91ece1a80fd86b0.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_text_TextEditor_ts.js/cef0376fdbe13166782f.worklet.js",
+    "url": "src_core_text_TextEditor_ts.js/5776f91ece1a80fd86b0.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_video_PatcherVideo_ts.js/cef0376fdbe13166782f.worklet.js",
+    "url": "src_core_video_PatcherVideo_ts.js/5776f91ece1a80fd86b0.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_video_VideoEditor_ts.js/cef0376fdbe13166782f.worklet.js",
+    "url": "src_core_video_VideoEditor_ts.js/5776f91ece1a80fd86b0.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_worklets_PatcherNode_ts.js/cef0376fdbe13166782f.worklet.js",
+    "url": "src_core_worklets_PatcherNode_ts.js/5776f91ece1a80fd86b0.worklet.js",
     "revision": null
   }], {});
   workbox.cleanupOutdatedCaches();

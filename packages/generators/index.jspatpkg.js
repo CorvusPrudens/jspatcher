@@ -636,6 +636,7 @@ Line.props = {
   }
 };
 Line.docs = "generators/docs/line.html";
+Line.helpFiles = ["generators/help/change.bell"];
 
 
 /***/ }),

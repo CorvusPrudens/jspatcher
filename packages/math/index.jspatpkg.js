@@ -1298,6 +1298,124 @@ Mul.docs = "math/docs/mul~.html";
 
 /***/ }),
 
+/***/ "./src/objects/dsp/ota.ts":
+/*!********************************!*\
+  !*** ./src/objects/dsp/ota.ts ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Ota)
+/* harmony export */ });
+/* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+
+class Ota extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  tanhx_div_x(x) {
+    return x == 0 ? 0 : Math.tanh(x) / x;
+  }
+  scale(input, inputMin, inputMax, outputMin, outputMax) {
+    const inputRange = inputMax - inputMin;
+    const outputRange = outputMax - outputMin;
+    if (inputRange === 0) {
+      return outputMin;
+    }
+    return (input - inputMin) * outputRange / inputRange + outputMin;
+  }
+  process(inputs, outputs, parameters) {
+    let inputStream = inputs[0][0];
+    let fc = inputs[0][1];
+    let k = inputs[0][2];
+    let outputStream = outputs[0][0];
+    for (let i = 0; i < inputStream.length; i++) {
+      const scaled_fc = this.scale(fc[i], 0, this.sample_rate_ / 2, 0, 1);
+      const clamped_fc = Math.max(0, Math.min(1, scaled_fc));
+      let wc = Math.PI / 2 * clamped_fc;
+      let kk = k[i] * this.tanhx_div_x(this.s3_);
+      let t1 = this.tanhx_div_x(inputStream[i] - kk * this.s3_ - this.s0_);
+      let t2 = this.tanhx_div_x(this.s0_ - this.s1_);
+      let t3 = this.tanhx_div_x(this.s1_ - this.s2_);
+      let t4 = this.tanhx_div_x(this.s2_ - this.s3_);
+      let a1 = wc * t1;
+      let a2 = wc * t2;
+      let a3 = wc * t3;
+      let a4 = wc * t4;
+      let b1 = 1 / (1 + a1), b2 = 1 / (1 + a2);
+      let b3 = 1 / (1 + a3), b4 = 1 / (1 + a4);
+      let ss = b1 * this.s0_;
+      ss = b2 * (a2 * ss + this.s1_);
+      ss = b3 * (a3 * ss + this.s2_);
+      ss = b4 * (a4 * ss + this.s3_);
+      let g = a1 * b1 * a2 * b2 * a3 * b3 * a4 * b4;
+      let y4 = (g * inputStream[i] + ss) / (1 + g * kk);
+      let y0 = inputStream[i] - kk * y4;
+      let y1 = b1 * (a1 * y0 + this.s0_);
+      this.s0_ += 2 * a1 * (y0 - y1);
+      let y2 = b2 * (a2 * y1 + this.s1_);
+      this.s1_ += 2 * a2 * (y1 - y2);
+      let y3 = b3 * (a3 * y2 + this.s2_);
+      this.s2_ += 2 * a3 * (y2 - y3);
+      this.s3_ += 2 * a4 * (y3 - y4);
+      outputStream[i] = y4;
+    }
+    return true;
+  }
+  init(sampleRate) {
+    this.sample_rate_ = sampleRate;
+    this.s0_ = 0;
+    this.s1_ = 0;
+    this.s2_ = 0;
+    this.s3_ = 0;
+  }
+}
+Ota.inlets = [
+  {
+    isHot: true,
+    type: "signal",
+    description: "audio signal",
+    varLength: true
+  },
+  {
+    isHot: true,
+    type: "signal",
+    description: "center frequency",
+    varLength: true
+  },
+  {
+    isHot: true,
+    type: "signal",
+    description: "K factor (resonance)",
+    varLength: true
+  }
+];
+Ota.outlets = [
+  {
+    type: "signal",
+    description: "output",
+    varLength: true
+  }
+];
+Ota.args = [
+  {
+    type: "number",
+    optional: true,
+    description: "initial center frequency",
+    default: 1e3
+  },
+  {
+    type: "number",
+    optional: true,
+    description: "initial K factor (resonance)",
+    default: 1
+  }
+];
+Ota.argsOffset = 1;
+Ota.docs = "math/docs/ota.html";
+Ota.helpFiles = ["math/help/ota~.bell"];
+
+
+/***/ }),
+
 /***/ "./src/objects/dsp/rev_div.ts":
 /*!************************************!*\
   !*** ./src/objects/dsp/rev_div.ts ***!
@@ -1710,10 +1828,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _objects_dsp_hip__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./objects/dsp/hip */ "./src/objects/dsp/hip.ts");
 /* harmony import */ var _objects_dsp_lop__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./objects/dsp/lop */ "./src/objects/dsp/lop.ts");
 /* harmony import */ var _objects_dsp_bp__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./objects/dsp/bp */ "./src/objects/dsp/bp.ts");
-/* harmony import */ var _objects_dsp_exp__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./objects/dsp/exp */ "./src/objects/dsp/exp.ts");
-/* harmony import */ var _objects_dsp_abs__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./objects/dsp/abs */ "./src/objects/dsp/abs.ts");
-/* harmony import */ var _objects_dsp_log__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./objects/dsp/log */ "./src/objects/dsp/log.ts");
-/* harmony import */ var _objects_dsp_sqrt__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./objects/dsp/sqrt */ "./src/objects/dsp/sqrt.ts");
+/* harmony import */ var _objects_dsp_ota__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./objects/dsp/ota */ "./src/objects/dsp/ota.ts");
+/* harmony import */ var _objects_dsp_exp__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./objects/dsp/exp */ "./src/objects/dsp/exp.ts");
+/* harmony import */ var _objects_dsp_abs__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./objects/dsp/abs */ "./src/objects/dsp/abs.ts");
+/* harmony import */ var _objects_dsp_log__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./objects/dsp/log */ "./src/objects/dsp/log.ts");
+/* harmony import */ var _objects_dsp_sqrt__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./objects/dsp/sqrt */ "./src/objects/dsp/sqrt.ts");
 var __defProp = Object.defineProperty;
 var __getOwnPropSymbols = Object.getOwnPropertySymbols;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
@@ -1731,6 +1850,7 @@ var __spreadValues = (a, b) => {
   return a;
 };
 var _a, _b;
+
 
 
 
@@ -1798,9 +1918,9 @@ for (const key in binary_functions) {
   }, _a.description = binary_functions[key].n, _a.docs = binary_functions[key].d, _a);
 }
 const UnaryObjects = {
-  "exp~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_exp__WEBPACK_IMPORTED_MODULE_13__["default"], "Exp"),
-  "abs~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_abs__WEBPACK_IMPORTED_MODULE_14__["default"], "Abs"),
-  "sqrt~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_sqrt__WEBPACK_IMPORTED_MODULE_16__["default"], "Sqrt")
+  "exp~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_exp__WEBPACK_IMPORTED_MODULE_14__["default"], "Exp"),
+  "abs~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_abs__WEBPACK_IMPORTED_MODULE_15__["default"], "Abs"),
+  "sqrt~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_sqrt__WEBPACK_IMPORTED_MODULE_17__["default"], "Sqrt")
 };
 const unary_functions = {
   "!": { f: (a) => !a, n: "Not", d: "" },
@@ -1831,12 +1951,13 @@ const BinaryAudioObjects = {
   "/~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_div__WEBPACK_IMPORTED_MODULE_7__["default"], "Div"),
   "!/~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_rev_div__WEBPACK_IMPORTED_MODULE_8__["default"], "Reverse Div"),
   "!-~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_rev_sub__WEBPACK_IMPORTED_MODULE_9__["default"], "Reverse Sub"),
-  "log~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_log__WEBPACK_IMPORTED_MODULE_15__["default"], "Log")
+  "log~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_log__WEBPACK_IMPORTED_MODULE_16__["default"], "Log")
 };
 const FilterAudioObjects = {
   "hip~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_hip__WEBPACK_IMPORTED_MODULE_10__["default"], "Hip"),
   "lop~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_lop__WEBPACK_IMPORTED_MODULE_11__["default"], "Lop"),
-  "bp~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_bp__WEBPACK_IMPORTED_MODULE_12__["default"], "Bp")
+  "bp~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_bp__WEBPACK_IMPORTED_MODULE_12__["default"], "Bp"),
+  "ota~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_ota__WEBPACK_IMPORTED_MODULE_13__["default"], "Ota")
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (async () => __spreadValues(__spreadValues(__spreadValues(__spreadValues({}, BinaryObjects), UnaryObjects), BinaryAudioObjects), FilterAudioObjects));
 

@@ -310,7 +310,7 @@ define(['./workbox-43d32f61'], (function (workbox) { 'use strict';
     "revision": "9e95a1bcac6cc2001d1c06c86e235f2f"
   }, {
     "url": "index.js",
-    "revision": "c40dcc5cdac227d051e8ae0c3f0c228a"
+    "revision": "02bfb79ee7f812bbfe01c4c36c74aead"
   }, {
     "url": "js/071ab575215dd56539a2.worklet.js",
     "revision": null
@@ -333,6 +333,9 @@ define(['./workbox-43d32f61'], (function (workbox) { 'use strict';
     "url": "js/3202da626a55712f7811.worker.js",
     "revision": null
   }, {
+    "url": "js/330bb772689cda697f0f.worklet.js",
+    "revision": null
+  }, {
     "url": "js/394b08eef1a0c4bed045.js",
     "revision": null
   }, {
@@ -349,9 +352,6 @@ define(['./workbox-43d32f61'], (function (workbox) { 'use strict';
     "revision": null
   }, {
     "url": "js/5513e8abf5c8e19bc59a.js",
-    "revision": null
-  }, {
-    "url": "js/5776f91ece1a80fd86b0.worklet.js",
     "revision": null
   }, {
     "url": "js/57cf42d62c99e9c5b0b7.js",
@@ -442,54 +442,54 @@ define(['./workbox-43d32f61'], (function (workbox) { 'use strict';
     "revision": "5f6481926575ebf526c56c1f4d6d2d77"
   }, {
     "url": "packages/io/index.jspatpkg.js",
-    "revision": "2747e3317722ff79ad781894f3a2ab8d"
+    "revision": "ff18ebd1eafcd3185b81b071e6822f7b"
   }, {
     "url": "packages/math/index.js",
     "revision": "8b6e364944d070bd6f36564f78934c1d"
   }, {
     "url": "packages/math/index.jspatpkg.js",
-    "revision": "58f0b57029800e97bece111a4a79d4ba"
+    "revision": "c557f0f883f1e1767fb5e1c99a0fe6d1"
   }, {
     "url": "packages/ui/index.js",
     "revision": "cdb7c48976af8e388ade5089f62375e0"
   }, {
     "url": "packages/ui/index.jspatpkg.js",
-    "revision": "e0d5bf34a7346e4539a33d95af745df0"
+    "revision": "0837219d7495167cf6d6291cdfff7759"
   }, {
     "url": "packages/utilities/index.js",
     "revision": "91720f7c6c9464657f9b5559ccdc54b2"
   }, {
     "url": "packages/utilities/index.jspatpkg.js",
-    "revision": "bd60730823a10f7041c68a4d783a0a24"
+    "revision": "1e4e3f03c98b361bfc1114366497f063"
   }, {
-    "url": "src_core_audio_AudioEditor_ts-src_core_audio_AudioRecorder_ts-src_core_audio_PatcherAudio_ts.js/5776f91ece1a80fd86b0.worklet.js",
+    "url": "src_core_audio_AudioEditor_ts-src_core_audio_AudioRecorder_ts-src_core_audio_PatcherAudio_ts.js/330bb772689cda697f0f.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_hardware_HardwareEditor_ts.js/5776f91ece1a80fd86b0.worklet.js",
+    "url": "src_core_hardware_HardwareEditor_ts.js/330bb772689cda697f0f.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_hardware_Patcher_ts.js/5776f91ece1a80fd86b0.worklet.js",
+    "url": "src_core_hardware_Patcher_ts.js/330bb772689cda697f0f.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_image_ImageEditor_ts.js/5776f91ece1a80fd86b0.worklet.js",
+    "url": "src_core_image_ImageEditor_ts.js/330bb772689cda697f0f.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_image_PatcherImage_ts.js/5776f91ece1a80fd86b0.worklet.js",
+    "url": "src_core_image_PatcherImage_ts.js/330bb772689cda697f0f.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_text_PatcherText_ts.js/5776f91ece1a80fd86b0.worklet.js",
+    "url": "src_core_text_PatcherText_ts.js/330bb772689cda697f0f.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_text_TextEditor_ts.js/5776f91ece1a80fd86b0.worklet.js",
+    "url": "src_core_text_TextEditor_ts.js/330bb772689cda697f0f.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_video_PatcherVideo_ts.js/5776f91ece1a80fd86b0.worklet.js",
+    "url": "src_core_video_PatcherVideo_ts.js/330bb772689cda697f0f.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_video_VideoEditor_ts.js/5776f91ece1a80fd86b0.worklet.js",
+    "url": "src_core_video_VideoEditor_ts.js/330bb772689cda697f0f.worklet.js",
     "revision": null
   }, {
-    "url": "src_core_worklets_PatcherNode_ts.js/5776f91ece1a80fd86b0.worklet.js",
+    "url": "src_core_worklets_PatcherNode_ts.js/330bb772689cda697f0f.worklet.js",
     "revision": null
   }], {});
   workbox.cleanupOutdatedCaches();

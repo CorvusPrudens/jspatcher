@@ -1711,6 +1711,7 @@ Scale.args = [
   }
 ];
 Scale.docs = "utilities/docs/scale.html";
+Scale.helpFiles = ["utilities/help/scale.bell"];
 
 
 /***/ }),
@@ -1848,6 +1849,7 @@ ScaleClamped.args = [
   }
 ];
 ScaleClamped.docs = "utilities/docs/scalec.html";
+ScaleClamped.helpFiles = ["utilities/help/scalec.bell"];
 
 
 /***/ }),
@@ -2033,6 +2035,7 @@ Swap.args = [{
   description: "Initial value to send out the first inlet"
 }];
 Swap.docs = "utilities/docs/swap.html";
+Swap.helpFiles = ["utilities/help/swap.bell"];
 
 
 /***/ }),
@@ -2126,6 +2129,7 @@ Switch.args = [{
   description: "The number of inlets to select from"
 }];
 Switch.docs = "utilities/docs/switch.html";
+Switch.helpFiles = ["utilities/help/switch.bell"];
 
 
 /***/ }),
@@ -2174,6 +2178,7 @@ MtofAudio.outlets = [{
 }];
 MtofAudio.argsOffset = 0;
 MtofAudio.docs = "utilities/docs/mtof_audio.html";
+MtofAudio.helpFiles = ["utilities/help/mtof~.bell"];
 
 
 /***/ }),
@@ -2363,6 +2368,7 @@ ScaleClampedAudio.args = [
 ];
 ScaleClampedAudio.argsOffset = 1;
 ScaleClampedAudio.docs = "utilities/docs/scalec_audio.html";
+ScaleClampedAudio.helpFiles = ["utilities/help/scalec_audio.bell"];
 
 
 /***/ }),
@@ -2570,6 +2576,7 @@ SnapshotObject.args = [
   }
 ];
 SnapshotObject.docs = "utilities/docs/snapshot.html";
+SnapshotObject.helpFiles = ["utilities/help/snapshot~.bell"];
 SnapshotObject.UI = _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultUI;
 
 

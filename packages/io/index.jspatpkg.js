@@ -405,6 +405,7 @@ Print.args = [{
   description: "Title"
 }];
 Print.docs = "io/docs/print.html";
+Print.helpFiles = ["io/help/print.bell"];
 
 
 /***/ }),
@@ -1130,7 +1131,7 @@ AudioIn.outlets = [{
 }];
 AudioIn.args = [{
   type: "string",
-  optional: false,
+  optional: true,
   description: "Device name or ID"
 }];
 AudioIn.docs = "io/docs/AudioIn.html";

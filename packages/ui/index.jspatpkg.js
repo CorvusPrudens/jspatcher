@@ -1661,7 +1661,7 @@ class NumberBox extends _base__WEBPACK_IMPORTED_MODULE_2__["default"] {
     const format = this.getProp("format");
     let value = valueIn || 0;
     if (format !== "Decimal (Floating-Point)")
-      value = Math.round(value);
+      value = Math.floor(value);
     if (!isNaN(min))
       value = Math.max(min, value);
     if (!isNaN(max))

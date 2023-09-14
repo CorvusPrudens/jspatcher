@@ -1435,6 +1435,7 @@ LiveButton.props = {
   }
 };
 LiveButton.docs = "ui/docs/button.html";
+LiveButton.helpFiles = ["ui/help/button.bell"];
 LiveButton.UI = _ui_button_live__WEBPACK_IMPORTED_MODULE_1__["default"];
 
 
@@ -1894,6 +1895,7 @@ class Oscilloscope extends _base__WEBPACK_IMPORTED_MODULE_0__["default"] {
 }
 Oscilloscope.description = "Oscilloscope visualizer";
 Oscilloscope.docs = "ui/docs/scope.html";
+Oscilloscope.helpFiles = ["ui/help/scope~.bell"];
 Oscilloscope.inlets = [{
   isHot: true,
   type: "signal",
@@ -2072,6 +2074,7 @@ class Spectrogram extends _base__WEBPACK_IMPORTED_MODULE_0__["default"] {
 }
 Spectrogram.description = "Spectrogram visualizer";
 Spectrogram.docs = "ui/docs/spectrogram.html";
+Spectrogram.helpFiles = ["ui/help/spectrogram~.bell"];
 Spectrogram.inlets = [{
   isHot: true,
   type: "signal",
@@ -2202,6 +2205,7 @@ class Spectroscope extends _base__WEBPACK_IMPORTED_MODULE_0__["default"] {
 }
 Spectroscope.description = "Spectroscope visualizer";
 Spectroscope.docs = "ui/docs/spectroscope.html";
+Spectroscope.helpFiles = ["ui/help/spectroscope~.bell"];
 Spectroscope.inlets = [{
   isHot: true,
   type: "signal",
@@ -2402,6 +2406,7 @@ LiveToggle.props = {
   }
 };
 LiveToggle.docs = "ui/docs/toggle.html";
+LiveToggle.helpFiles = ["ui/help/toggle.bell"];
 LiveToggle.UI = _ui_toggle__WEBPACK_IMPORTED_MODULE_1__["default"];
 
 

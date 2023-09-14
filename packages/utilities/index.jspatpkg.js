@@ -566,6 +566,7 @@ Append.args = [{
   description: "The item to append"
 }];
 Append.docs = "utilities/docs/append.html";
+Append.helpFiles = ["utilities/help/append.bell"];
 
 
 /***/ }),
@@ -1082,18 +1083,26 @@ class Iter extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
     this._ = { start: 0, stop: 0, step: 1 };
   }
   updateRange(args) {
+    const processed = args.map((arg) => Math.floor(+arg));
     if (args.length === 1) {
       this._.start = 0;
-      this._.stop = +args[0];
+      this._.stop = processed[0];
       this._.step = 1;
     } else if (args.length === 2) {
-      this._.start = +args[0];
-      this._.stop = +args[1];
+      this._.start = processed[0];
+      this._.stop = processed[1];
       this._.step = 1;
     } else {
-      this._.start = +args[0];
-      this._.stop = +args[1];
-      this._.step = +args[2];
+      this._.start = processed[0];
+      this._.stop = processed[1];
+      this._.step = processed[2];
+    }
+    if (this._.start <= this._.stop && this._.step <= 0) {
+      this.error("iteration will never terminate");
+      return;
+    } else if (this._.start > this._.stop && this._.step >= 0) {
+      this.error("iteration will never terminate");
+      return;
     }
   }
   subscribe() {
@@ -1114,18 +1123,18 @@ class Iter extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
             return;
           }
           for (let i = this._.start; i < this._.stop; i += this._.step) {
-            this.outlet(0, new _sdk__WEBPACK_IMPORTED_MODULE_0__.Bang());
             this.outlet(2, i);
+            this.outlet(0, new _sdk__WEBPACK_IMPORTED_MODULE_0__.Bang());
           }
           this.outlet(1, new _sdk__WEBPACK_IMPORTED_MODULE_0__.Bang());
-        } else if (this._.start > this._.stop) {
+        } else {
           if (this._.step >= 0) {
             this.error("iteration will never terminate");
             return;
           }
           for (let i = this._.start; i > this._.stop; i += this._.step) {
-            this.outlet(0, new _sdk__WEBPACK_IMPORTED_MODULE_0__.Bang());
             this.outlet(2, i);
+            this.outlet(0, new _sdk__WEBPACK_IMPORTED_MODULE_0__.Bang());
           }
           this.outlet(1, new _sdk__WEBPACK_IMPORTED_MODULE_0__.Bang());
         }
@@ -1176,6 +1185,7 @@ Iter.args = [
   }
 ];
 Iter.docs = "utilities/docs/iter.html";
+Iter.helpFiles = ["utilities/help/iter.bell"];
 
 
 /***/ }),
@@ -1218,6 +1228,7 @@ Loadbang.outlets = [{
   description: "Bang on patcher load or inlet."
 }];
 Loadbang.docs = "utilities/docs/loadbang.html";
+Loadbang.helpFiles = ["utilities/help/loadbang.bell"];
 
 
 /***/ }),
@@ -1274,6 +1285,7 @@ Loadmess.args = [{
   description: "Message to output on patcher load."
 }];
 Loadmess.docs = "utilities/docs/loadmess.html";
+Loadmess.helpFiles = ["utilities/help/loadmess.bell"];
 
 
 /***/ }),
@@ -1507,6 +1519,7 @@ Prepend.args = [{
   description: "The item to prepend"
 }];
 Prepend.docs = "utilities/docs/prepend.html";
+Prepend.helpFiles = ["utilities/help/prepend.bell"];
 
 
 /***/ }),
@@ -2273,6 +2286,7 @@ ScaleAudio.args = [
 ];
 ScaleAudio.argsOffset = 1;
 ScaleAudio.docs = "utilities/docs/scale_audio.html";
+ScaleAudio.helpFiles = ["utilities/help/scale_audio.bell"];
 
 
 /***/ }),

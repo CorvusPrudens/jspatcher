@@ -1092,6 +1092,7 @@ Cycle.args = [
 ];
 Cycle.argsOffset = 0;
 Cycle.docs = "generators/docs/cycle.html";
+Cycle.helpFiles = ["generators/help/cycle~.bell"];
 
 
 /***/ }),
@@ -1630,6 +1631,7 @@ Ramp.args = [
 ];
 Ramp.argsOffset = 0;
 Ramp.docs = "generators/docs/ramp.html";
+Ramp.helpFiles = ["generators/help/tri~_saw~_ramp~.bell"];
 
 
 /***/ }),
@@ -1839,6 +1841,7 @@ Saw.args = [
 ];
 Saw.argsOffset = 0;
 Saw.docs = "generators/docs/saw.html";
+Saw.helpFiles = ["generators/help/tri~_saw~_ramp~.bell"];
 
 
 /***/ }),
@@ -1899,6 +1902,7 @@ Tri.args = [
 ];
 Tri.argsOffset = 0;
 Tri.docs = "generators/docs/tri.html";
+Tri.helpFiles = ["generators/help/tri~_saw~_ramp~.bell"];
 
 
 /***/ }),
@@ -1937,6 +1941,7 @@ WhiteNoiseObject.outlets = [
 WhiteNoiseObject.args = [];
 WhiteNoiseObject.argsOffset = 0;
 WhiteNoiseObject.docs = "generators/docs/noise.html";
+WhiteNoiseObject.helpFiles = ["generators/help/noise~.bell"];
 
 
 /***/ }),

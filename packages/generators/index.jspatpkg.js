@@ -1703,6 +1703,7 @@ Rect.args = [
 ];
 Rect.argsOffset = 0;
 Rect.docs = "generators/docs/rect.html";
+Rect.helpFiles = ["generators/help/rect~.bell"];
 
 
 /***/ }),

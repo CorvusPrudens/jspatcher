@@ -134,7 +134,9 @@ export default class ContextMenuUI extends React.PureComponent<P, S> {
                 <div onContextMenu={async (e) => {
                     e.preventDefault();
 
-                    const clipboardEmpty = !Boolean(await navigator.clipboard.readText());
+                    let clipboardEmpty = true;
+                    if (navigator.clipboard.readText)
+                        clipboardEmpty = !Boolean(await navigator.clipboard.readText());
                     const selection = this.props.editor.state.selected;
 
                     let enableAddPres = false;

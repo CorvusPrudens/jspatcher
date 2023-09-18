@@ -6,6 +6,7 @@ import { TaskError, Task } from "../../core/TaskMgr";
 import PatcherBottomMenu from "./patcher/PatcherBottomMenu";
 import PatcherUI from "./patcher/PatcherUI";
 import PatcherRightMenu from "../rightmenu/PatcherRightMenu";
+import ContextMenuUI from "./ContextMenuUI";
 
 interface P {
     env: Env;
@@ -24,7 +25,7 @@ export default class PatcherEditorUI extends React.PureComponent<P, S> {
     state = {
         tasks: this.tasks,
         errors: this.errors,
-        editorReady: this.props.editor.isReady
+        editorReady: this.props.editor.isReady,
     };
     get tasks() {
         return [
@@ -71,21 +72,25 @@ export default class PatcherEditorUI extends React.PureComponent<P, S> {
             </Dimmer>;
         }
         return (
-            <div className="ui-flex-row ui-flex-full" style={{ overflow: "auto" }}>
-                <div className="ui-flex-column ui-flex-full" style={{ overflow: "auto" }}>
-                    <div className="patcher-container" data-id={this.props.editor.editorId}>
-                        {dimmer}
-                        <PatcherUI {...this.props} />
+            <>
+                <div className="ui-flex-row ui-flex-full" style={{ overflow: "auto" }}>
+                    <div className="ui-flex-column ui-flex-full" style={{ overflow: "auto" }}>
+                        <div className="patcher-container" data-id={this.props.editor.editorId}>
+                            <ContextMenuUI {...this.props}>
+                                {dimmer}
+                                <PatcherUI {...this.props} />
+                            </ContextMenuUI>
+                        </div>
+                        {this.props.runtime ? undefined : <PatcherBottomMenu {...this.props} />}
                     </div>
-                    {this.props.runtime ? undefined : <PatcherBottomMenu {...this.props} />}
+                    {this.props.runtime
+                        ? undefined
+                        : <div className="ui-right">
+                            <PatcherRightMenu {...this.props} />
+                        </div>
+                    }
                 </div>
-                {this.props.runtime
-                    ? undefined
-                    : <div className="ui-right">
-                        <PatcherRightMenu {...this.props} />
-                    </div>
-                }
-            </div>
+            </>
         );
     }
 }

@@ -1358,6 +1358,86 @@ Mtof.docs = "utilities/docs/mtof.html";
 
 /***/ }),
 
+/***/ "./src/objects/block/pack.ts":
+/*!***********************************!*\
+  !*** ./src/objects/block/pack.ts ***!
+  \***********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Pack": () => (/* binding */ Pack)
+/* harmony export */ });
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+
+
+class Pack extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+  constructor() {
+    super(...arguments);
+    //   static docs: string = "utilities/docs/append.html";
+    //   static helpFiles: string[] = ["utilities/help/append.bell"];
+    this._ = { value: void 0 };
+  }
+  resizeInlets(count) {
+    if (count < 1) {
+      this.error("Cannot pack less than 1 element");
+      return;
+    }
+    let new_meta = Array.from({ length: count }, (_, i) => {
+      return {
+        type: "anything",
+        description: `Element ${i + 1}`,
+        isHot: i === 0
+      };
+    });
+    this.setMeta({ inlets: new_meta });
+    this.inlets = count;
+    this._.value = Array.from({ length: count }, () => 0);
+  }
+  subscribe() {
+    super.subscribe();
+    this.on("preInit", () => {
+      this.outlets = 1;
+      this.resizeInlets(this.args[0]);
+    });
+    this.on("updateArgs", (args) => {
+      this.resizeInlets(args[0]);
+    });
+    this.on("inlet", ({ data, inlet }) => {
+      if (inlet < this._.value.length) {
+        this._.value[inlet] = data;
+      }
+      if (inlet === 0)
+        this.outlet(0, this._.value);
+    });
+  }
+}
+Pack.description = "Pack the inputs into a list";
+Pack.inlets = [
+  {
+    isHot: true,
+    type: "anything",
+    description: "Element 1"
+  }
+];
+Pack.outlets = [
+  {
+    type: "anything",
+    description: "The packed list"
+  }
+];
+Pack.args = [
+  {
+    type: "number",
+    optional: true,
+    default: 2,
+    description: "The number of elements to pack"
+  }
+];
+
+
+/***/ }),
+
 /***/ "./src/objects/block/powtodb.ts":
 /*!**************************************!*\
   !*** ./src/objects/block/powtodb.ts ***!
@@ -2147,6 +2227,98 @@ Switch.helpFiles = ["utilities/help/switch.bell"];
 
 /***/ }),
 
+/***/ "./src/objects/block/unpack.ts":
+/*!*************************************!*\
+  !*** ./src/objects/block/unpack.ts ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Unpack": () => (/* binding */ Unpack)
+/* harmony export */ });
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+
+
+class Unpack extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+  constructor() {
+    super(...arguments);
+    //   static docs: string = "utilities/docs/append.html";
+    //   static helpFiles: string[] = ["utilities/help/append.bell"];
+    this._ = { value: void 0 };
+  }
+  resizeOutlets(count) {
+    let new_meta = Array.from({ length: count }, (_, i) => {
+      return {
+        type: "anything",
+        description: `Element ${i + 1}`
+      };
+    });
+    this.setMeta({ outlets: new_meta });
+    this.outlets = count;
+    this._.value = Array.from({ length: count }, () => 0);
+  }
+  subscribe() {
+    super.subscribe();
+    this.on("preInit", () => {
+      this.inlets = 1;
+      this.resizeOutlets(this.args[0]);
+    });
+    this.on("updateArgs", (args) => {
+      this.resizeOutlets(args[0]);
+    });
+    this.on("inlet", ({ data, inlet }) => {
+      if (inlet === 0) {
+        if (!(0,_sdk__WEBPACK_IMPORTED_MODULE_0__.isBang)(data)) {
+          try {
+            if (data instanceof Array) {
+              this._.value = data;
+              let max_len = Math.min(data.length, this._.value.length);
+              for (let i = 0; i < max_len; i++)
+                this._.value[i] = data[i];
+            }
+          } catch (e) {
+            this.error(e);
+            return;
+          }
+        }
+        for (let i = this._.value.length - 1; i > -1; i--) {
+          this.outlet(i, this._.value[i]);
+        }
+      }
+    });
+  }
+}
+Unpack.description = "Unpack a list";
+Unpack.inlets = [
+  {
+    isHot: true,
+    type: "anything",
+    description: "The input list"
+  }
+];
+Unpack.outlets = [
+  {
+    type: "anything",
+    description: "Element 1"
+  },
+  {
+    type: "anything",
+    description: "Element 2"
+  }
+];
+Unpack.args = [
+  {
+    type: "number",
+    optional: true,
+    default: 2,
+    description: "The number of elements to unpack"
+  }
+];
+
+
+/***/ }),
+
 /***/ "./src/objects/dsp/mtof_audio.ts":
 /*!***************************************!*\
   !*** ./src/objects/dsp/mtof_audio.ts ***!
@@ -2775,6 +2947,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _objects_block_switch__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./objects/block/switch */ "./src/objects/block/switch.ts");
 /* harmony import */ var _objects_block_gate__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ./objects/block/gate */ "./src/objects/block/gate.ts");
 /* harmony import */ var _objects_dsp_snapshot__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! ./objects/dsp/snapshot */ "./src/objects/dsp/snapshot.ts");
+/* harmony import */ var _objects_block_unpack__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! ./objects/block/unpack */ "./src/objects/block/unpack.ts");
+/* harmony import */ var _objects_block_pack__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! ./objects/block/pack */ "./src/objects/block/pack.ts");
+
+
 
 
 
@@ -2802,29 +2978,31 @@ __webpack_require__.r(__webpack_exports__);
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (async () => ({
-  "change": _objects_block_change__WEBPACK_IMPORTED_MODULE_0__["default"],
-  "swap": _objects_block_swap__WEBPACK_IMPORTED_MODULE_1__["default"],
-  "mtof": _objects_block_mtof__WEBPACK_IMPORTED_MODULE_2__["default"],
-  "ftom": _objects_block_ftom__WEBPACK_IMPORTED_MODULE_3__["default"],
-  "powtodb": _objects_block_powtodb__WEBPACK_IMPORTED_MODULE_4__["default"],
-  "dbtopow": _objects_block_dbtopow__WEBPACK_IMPORTED_MODULE_5__["default"],
-  "dbtorms": _objects_block_dbtorms__WEBPACK_IMPORTED_MODULE_6__["default"],
-  "rmstodb": _objects_block_rmstodb__WEBPACK_IMPORTED_MODULE_7__["default"],
-  "iter": _objects_block_iter__WEBPACK_IMPORTED_MODULE_8__["default"],
-  "counter": _objects_block_counter__WEBPACK_IMPORTED_MODULE_9__["default"],
-  "select": _objects_block_select__WEBPACK_IMPORTED_MODULE_10__["default"],
-  "append": _objects_block_append__WEBPACK_IMPORTED_MODULE_11__.Append,
-  "prepend": _objects_block_prepend__WEBPACK_IMPORTED_MODULE_12__.Prepend,
-  "scale": _objects_block_scale__WEBPACK_IMPORTED_MODULE_15__["default"],
-  "scalec": _objects_block_scalec__WEBPACK_IMPORTED_MODULE_16__["default"],
+  change: _objects_block_change__WEBPACK_IMPORTED_MODULE_0__["default"],
+  swap: _objects_block_swap__WEBPACK_IMPORTED_MODULE_1__["default"],
+  mtof: _objects_block_mtof__WEBPACK_IMPORTED_MODULE_2__["default"],
+  ftom: _objects_block_ftom__WEBPACK_IMPORTED_MODULE_3__["default"],
+  powtodb: _objects_block_powtodb__WEBPACK_IMPORTED_MODULE_4__["default"],
+  dbtopow: _objects_block_dbtopow__WEBPACK_IMPORTED_MODULE_5__["default"],
+  dbtorms: _objects_block_dbtorms__WEBPACK_IMPORTED_MODULE_6__["default"],
+  rmstodb: _objects_block_rmstodb__WEBPACK_IMPORTED_MODULE_7__["default"],
+  iter: _objects_block_iter__WEBPACK_IMPORTED_MODULE_8__["default"],
+  counter: _objects_block_counter__WEBPACK_IMPORTED_MODULE_9__["default"],
+  select: _objects_block_select__WEBPACK_IMPORTED_MODULE_10__["default"],
+  append: _objects_block_append__WEBPACK_IMPORTED_MODULE_11__.Append,
+  prepend: _objects_block_prepend__WEBPACK_IMPORTED_MODULE_12__.Prepend,
+  scale: _objects_block_scale__WEBPACK_IMPORTED_MODULE_15__["default"],
+  scalec: _objects_block_scalec__WEBPACK_IMPORTED_MODULE_16__["default"],
   "mtof~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_14__.generateObject)(_objects_dsp_mtof_audio__WEBPACK_IMPORTED_MODULE_13__["default"], "mtof~"),
   "scale~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_14__.generateObject)(_objects_dsp_scale_audio__WEBPACK_IMPORTED_MODULE_17__["default"], "scale~", [_common_web_scaleFunction__WEBPACK_IMPORTED_MODULE_19__.scale]),
   "scalec~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_14__.generateObject)(_objects_dsp_scalec_audio__WEBPACK_IMPORTED_MODULE_18__["default"], "scalec~", [_common_web_scaleFunction__WEBPACK_IMPORTED_MODULE_19__.scale]),
-  "loadbang": _objects_block_loadbang__WEBPACK_IMPORTED_MODULE_20__["default"],
-  "loadmess": _objects_block_loadmess__WEBPACK_IMPORTED_MODULE_21__["default"],
-  "switch": _objects_block_switch__WEBPACK_IMPORTED_MODULE_22__["default"],
-  "gate": _objects_block_gate__WEBPACK_IMPORTED_MODULE_23__["default"],
-  "snapshot~": _objects_dsp_snapshot__WEBPACK_IMPORTED_MODULE_24__["default"]
+  loadbang: _objects_block_loadbang__WEBPACK_IMPORTED_MODULE_20__["default"],
+  loadmess: _objects_block_loadmess__WEBPACK_IMPORTED_MODULE_21__["default"],
+  switch: _objects_block_switch__WEBPACK_IMPORTED_MODULE_22__["default"],
+  gate: _objects_block_gate__WEBPACK_IMPORTED_MODULE_23__["default"],
+  "snapshot~": _objects_dsp_snapshot__WEBPACK_IMPORTED_MODULE_24__["default"],
+  unpack: _objects_block_unpack__WEBPACK_IMPORTED_MODULE_25__.Unpack,
+  pack: _objects_block_pack__WEBPACK_IMPORTED_MODULE_26__.Pack
 }));
 
 })();

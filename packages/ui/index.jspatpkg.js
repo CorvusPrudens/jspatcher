@@ -1441,6 +1441,224 @@ LiveButton.UI = _ui_button_live__WEBPACK_IMPORTED_MODULE_1__["default"];
 
 /***/ }),
 
+/***/ "./src/objects/menu.ts":
+/*!*****************************!*\
+  !*** ./src/objects/menu.ts ***!
+  \*****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ menu)
+/* harmony export */ });
+/* harmony import */ var _ui_menu__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../ui/menu */ "./src/ui/menu.tsx");
+/* harmony import */ var _base__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./base */ "./src/objects/base.ts");
+
+
+class menu extends _base__WEBPACK_IMPORTED_MODULE_1__["default"] {
+  subscribe() {
+    super.subscribe();
+    this.on("preInit", () => {
+      this.inlets = 2;
+      this.outlets = 1;
+    });
+    this.on("inlet", ({ data, inlet }) => {
+      if (inlet === 0) {
+        this.emit("query", data);
+      } else {
+        const options = data;
+        this.updateProps({ options });
+      }
+    });
+  }
+}
+menu.description = "Dropdown Menu";
+menu.inlets = [
+  {
+    isHot: true,
+    type: "anything",
+    description: "number or display text or array to select item(s)"
+  },
+  {
+    isHot: false,
+    type: "object",
+    description: "Array of DropdownItemProps: { key, icon, text, value, ... }"
+  }
+];
+menu.outlets = [
+  {
+    type: "anything",
+    description: "Selected value"
+  }
+];
+menu.args = [
+  {
+    type: "anything",
+    varLength: true,
+    optional: true,
+    default: void 0,
+    description: "Initial value(s)"
+  }
+];
+menu.props = {
+  clearable: {
+    type: "boolean",
+    default: false,
+    description: "Using the clearable setting will let users remove their selection",
+    isUIState: true
+  },
+  closeOnBlur: {
+    type: "boolean",
+    default: true,
+    description: "Whether or not the menu should close when the dropdown is blurred",
+    isUIState: true
+  },
+  closeOnChange: {
+    type: "boolean",
+    default: void 0,
+    description: "Whether or not the menu should close when a value is selected",
+    isUIState: true
+  },
+  closeOnEscape: {
+    type: "boolean",
+    default: true,
+    description: "Whether or not the dropdown should close when the escape key is pressed",
+    isUIState: true
+  },
+  deburr: {
+    type: "boolean",
+    default: false,
+    description: "Whether or not the dropdown should strip diacritics in options and input search",
+    isUIState: true
+  },
+  defaultOpen: {
+    type: "boolean",
+    default: false,
+    description: "Initial value of open",
+    isUIState: true
+  },
+  defaultValue: {
+    type: "anything",
+    default: void 0,
+    description: "Initial value or value array if multiple",
+    isUIState: true
+  },
+  direction: {
+    type: "enum",
+    enums: ["left", "right"],
+    default: "left",
+    description: "A dropdown menu can open to the left or to the right",
+    isUIState: true
+  },
+  disabled: {
+    type: "boolean",
+    default: false,
+    description: " A disabled dropdown menu or item does not allow user interaction",
+    isUIState: true
+  },
+  error: {
+    type: "boolean",
+    default: false,
+    description: "An errored dropdown can alert a user to a problem",
+    isUIState: true
+  },
+  lazyLoad: {
+    type: "boolean",
+    default: false,
+    description: "A dropdown can defer rendering its options until it is open",
+    isUIState: true
+  },
+  minCharacters: {
+    type: "number",
+    default: 1,
+    description: "The minimum characters for a search to begin showing results",
+    isUIState: true
+  },
+  multiple: {
+    type: "boolean",
+    default: false,
+    description: "A selection dropdown can allow multiple selections",
+    isUIState: true
+  },
+  noResultsMessage: {
+    type: "string",
+    default: "No results found",
+    description: "Message to display when there are no results",
+    isUIState: true
+  },
+  options: {
+    type: "anything",
+    default: [],
+    description: "Array of Dropdown.Item props",
+    isUIState: true
+  },
+  placeholder: {
+    type: "string",
+    default: "",
+    description: "Placeholder text",
+    isUIState: true
+  },
+  scrolling: {
+    type: "boolean",
+    default: false,
+    description: "A dropdown can have its menu scroll",
+    isUIState: true
+  },
+  search: {
+    type: "boolean",
+    default: false,
+    description: "A selection dropdown can allow a user to search through a large list of choices",
+    isUIState: true
+  },
+  selectOnBlur: {
+    type: "boolean",
+    default: true,
+    description: "Whether the highlighted item should be selected on blur",
+    isUIState: true
+  },
+  selectOnNavigation: {
+    type: "boolean",
+    default: true,
+    description: "Whether dropdown should select new option when using keyboard shortcuts.",
+    isUIState: true
+  },
+  simple: {
+    type: "boolean",
+    default: false,
+    description: "A dropdown menu can open to the left or to the right",
+    isUIState: true
+  },
+  tabIndex: {
+    type: "anything",
+    default: void 0,
+    description: "A dropdown can receive focus",
+    isUIState: true
+  },
+  text: {
+    type: "string",
+    default: void 0,
+    description: "The text displayed in the dropdown, usually for the active item",
+    isUIState: true
+  },
+  upward: {
+    type: "boolean",
+    default: false,
+    description: "Controls whether the dropdown will open upward",
+    isUIState: true
+  },
+  wrapSelection: {
+    type: "boolean",
+    default: false,
+    description: "Selection will wrap to end or start on press ArrowUp or ArrowDown",
+    isUIState: true
+  }
+};
+menu.UI = _ui_menu__WEBPACK_IMPORTED_MODULE_0__["default"];
+
+
+/***/ }),
+
 /***/ "./src/objects/message.ts":
 /*!********************************!*\
   !*** ./src/objects/message.ts ***!
@@ -2909,6 +3127,147 @@ class ButtonUI extends _sdk__WEBPACK_IMPORTED_MODULE_0__.BaseUI {
       onBlur: this.props.onEditEnd,
       suppressContentEditableWarning: true
     }, this.state.text)));
+  }
+}
+
+
+/***/ }),
+
+/***/ "./src/ui/menu.tsx":
+/*!*************************!*\
+  !*** ./src/ui/menu.tsx ***!
+  \*************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ MenuUI)
+/* harmony export */ });
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../sdk */ "./src/sdk.ts");
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+
+const { Dropdown } = _sdk__WEBPACK_IMPORTED_MODULE_0__.SemanticUI;
+class MenuUI extends _sdk__WEBPACK_IMPORTED_MODULE_0__.BaseUI {
+  constructor() {
+    super(...arguments);
+    this.state = __spreadValues({}, this.state);
+    this.handleChange = (event, data) => {
+      const { value } = data;
+      this.setState({ value });
+      this.object.outlet(0, value);
+    };
+    this.handleQuery = (query) => {
+      const { options } = this.state;
+      let value;
+      if (typeof query === "number") {
+        if (options[query]) {
+          value = options[query].value;
+        }
+      } else if (typeof query === "string") {
+        const found = options.find((o) => o.text === query);
+        if (found) {
+          value = found.value;
+        }
+      } else if (_sdk__WEBPACK_IMPORTED_MODULE_0__.Utils.isNumberArray(query)) {
+        value = query.filter((i) => !!options[i]).map((i) => options[i].value);
+      } else {
+        value = options.filter((o) => query.indexOf(o.text) !== -1).map((o) => o.value);
+      }
+      if (value) {
+        this.setState({ value });
+        this.object.outlet(0, value);
+      }
+    };
+  }
+  componentDidMount() {
+    super.componentDidMount();
+    this.object.on("query", this.handleQuery);
+  }
+  componentWillUnmount() {
+    super.componentWillUnmount();
+    this.object.off("query", this.handleQuery);
+  }
+  render() {
+    const {
+      clearable,
+      closeOnBlur,
+      closeOnChange,
+      closeOnEscape,
+      deburr,
+      defaultOpen,
+      defaultValue,
+      direction,
+      disabled,
+      error,
+      lazyLoad,
+      minCharacters,
+      multiple,
+      noResultsMessage,
+      options,
+      placeholder,
+      scrolling,
+      search,
+      selectOnBlur,
+      selectOnNavigation,
+      simple,
+      tabIndex,
+      text,
+      upward,
+      wrapSelection,
+      value
+    } = this.state;
+    const dropdownProps = {
+      clearable,
+      closeOnBlur,
+      closeOnChange,
+      closeOnEscape,
+      deburr,
+      defaultOpen,
+      defaultValue,
+      direction,
+      disabled,
+      error,
+      lazyLoad,
+      minCharacters,
+      multiple,
+      noResultsMessage,
+      options,
+      placeholder,
+      scrolling,
+      search,
+      selectOnBlur,
+      selectOnNavigation,
+      simple,
+      tabIndex,
+      text,
+      upward,
+      wrapSelection,
+      value
+    };
+    return /* @__PURE__ */ _sdk__WEBPACK_IMPORTED_MODULE_0__.React.createElement(_sdk__WEBPACK_IMPORTED_MODULE_0__.BaseUI, __spreadValues({}, this.props), /* @__PURE__ */ _sdk__WEBPACK_IMPORTED_MODULE_0__.React.createElement(Dropdown, __spreadProps(__spreadValues({}, dropdownProps), {
+      selection: true,
+      fluid: true,
+      onChange: this.handleChange
+    })));
   }
 }
 
@@ -4395,7 +4754,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _objects_button_live__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./objects/button-live */ "./src/objects/button-live.ts");
 /* harmony import */ var _objects_toggle__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./objects/toggle */ "./src/objects/toggle.ts");
 /* harmony import */ var _objects_number__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./objects/number */ "./src/objects/number.ts");
-/* harmony import */ var _ui_ui_scss__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./ui/ui.scss */ "./src/ui/ui.scss");
+/* harmony import */ var _objects_menu__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./objects/menu */ "./src/objects/menu.ts");
+/* harmony import */ var _ui_ui_scss__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./ui/ui.scss */ "./src/ui/ui.scss");
+
 
 
 
@@ -4410,8 +4771,9 @@ __webpack_require__.r(__webpack_exports__);
   "scope~": _objects_scope__WEBPACK_IMPORTED_MODULE_1__["default"],
   "spectrogram~": _objects_spectrogram__WEBPACK_IMPORTED_MODULE_2__["default"],
   "spectroscope~": _objects_spectroscope__WEBPACK_IMPORTED_MODULE_3__["default"],
-  "button": _objects_button_live__WEBPACK_IMPORTED_MODULE_4__["default"],
-  "toggle": _objects_toggle__WEBPACK_IMPORTED_MODULE_5__["default"]
+  button: _objects_button_live__WEBPACK_IMPORTED_MODULE_4__["default"],
+  toggle: _objects_toggle__WEBPACK_IMPORTED_MODULE_5__["default"],
+  menu: _objects_menu__WEBPACK_IMPORTED_MODULE_7__["default"]
 }));
 
 })();

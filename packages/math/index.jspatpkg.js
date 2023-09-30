@@ -954,7 +954,7 @@ Div.args = [
   }
 ];
 Div.argsOffset = 1;
-Div.docs = "math/docs/div~.html";
+Div.docs = "math/docs/divide~.html";
 
 
 /***/ }),
@@ -1293,7 +1293,7 @@ Mul.args = [
   }
 ];
 Mul.argsOffset = 1;
-Mul.docs = "math/docs/mul~.html";
+Mul.docs = "math/docs/multiply~.html";
 
 
 /***/ }),
@@ -1630,7 +1630,7 @@ Sub.args = [
   }
 ];
 Sub.argsOffset = 1;
-Sub.docs = "math/docs/sub~.html";
+Sub.docs = "math/docs/subtract~.html";
 
 
 /***/ }),
@@ -1873,10 +1873,10 @@ const Unary = (0,_sdk__WEBPACK_IMPORTED_MODULE_2__.generateDefaultObject)(_objec
 const BinaryObjects = {};
 const binary_functions = {
   "+": { f: (a, b) => a + b, n: "Add", d: "math/docs/add.html" },
-  "-": { f: (a, b) => a - b, n: "Sub", d: "math/docs/sub.html" },
+  "-": { f: (a, b) => a - b, n: "Sub", d: "math/docs/subtract.html" },
   "!-": { f: (a, b) => b - a, n: "Reverse Sub", d: "" },
-  "*": { f: (a, b) => a * b, n: "Mul", d: "math/docs/mul.html" },
-  "/": { f: (a, b) => a / b, n: "Div", d: "math/docs/div.html" },
+  "*": { f: (a, b) => a * b, n: "Mul", d: "math/docs/multiply.html" },
+  "/": { f: (a, b) => a / b, n: "Div", d: "math/docs/divide.html" },
   "!/": { f: (a, b) => b / a, n: "Reverse Div", d: "" },
   "==": { f: (a, b) => a == b, n: "Equal", d: "math/docs/equal.html" },
   "!=": { f: (a, b) => a != b, n: "Not equal", d: "math/docs/notequal.html" },

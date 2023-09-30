@@ -16,11 +16,14 @@ import AtariPunkConsole from "../../../examples/AtariV2.bell";
 import RandomNoteGenerator from "../../../examples/RandomNoteGenerator.bell";
 import SawSynthBp from "../../../examples/SawSynthBp.bell";
 import Seed2DFMRect from "../../../examples/s2dfm_simple.bell";
+import UsbMidi from "../../../examples/USB_MIDI.bell";
+
 
 const examples: Record<string, any> = {
     "8 Step Sequencer": [EightStepSequencer, ""],
     "Atari Punk Console": [AtariPunkConsole, ""],
     "Blink": [BlinkExample, "Seed"],
+    "USB MIDI": [UsbMidi, "Seed"],
     "Simple Rect": [Seed2DFMRect, "S2DFM Eval Euro"],
     "Random Note Generator": [RandomNoteGenerator, ""],
     "Saw Synth BP": [SawSynthBp, ""],

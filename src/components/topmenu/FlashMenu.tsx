@@ -364,8 +364,8 @@ export default class FlashMenu extends React.PureComponent<P, S> {
                     </Dropdown>
                 </div>
                 {/* {this.state.device !== null ? <div className="monitor">Connected to {this.state.device.device_.productName}</div> : <div></div>} */}
-                {this.state.building && this.state.progress === null ? <div style={loaderDivStyle}><Loader active inline size="mini"></Loader></div> : <div></div>}
-                {this.state.building && this.state.progress !== null ? <div style={{ ...loaderDivStyle, width: '250px', alignSelf: 'center', marginBottom: '0' }}><Progress size="small" inverted active percent={this.state.progress} progress='percent'></Progress></div> : <div></div>
+                {this.state.building && this.state.progress === null ? <div style={loaderDivStyle}><Loader inverted active inline size="mini"></Loader></div> : <div></div>}
+                {this.state.building && this.state.progress !== null ? <div style={{ ...loaderDivStyle, width: '250px', alignSelf: 'center', marginBottom: '0' }}><Progress size="small" active percent={this.state.progress} progress='percent'></Progress></div> : <div></div>
                 }
                 {this.state.building ? <div className="monitor">{this.state.build_message}</div> : <div></div>}
                 {this.state.build_error ? <div className="monitor"> {this.state.error_message} </div> : <div></div>}

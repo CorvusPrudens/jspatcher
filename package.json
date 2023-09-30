@@ -1,6 +1,6 @@
 {
   "name": "@jspatcher/jspatcher",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "patcher js",
   "scripts": {
     "prebuild": "node ./src/scripts/patchSemanticUICss.js",
@@ -25,6 +25,7 @@
     "@electrosmith/package-math": "file:../objects/math/web",
     "@electrosmith/package-ui": "file:../objects/ui/web",
     "@electrosmith/package-utilities": "file:../objects/utilities/web",
+    "@electrosmith/package-midi": "file:../objects/midi/web",
     "@ffmpeg/core": "^0.10.0",
     "@ffmpeg/ffmpeg": "^0.10.1",
     "@grame/libmusicxml": "^3.19.1",

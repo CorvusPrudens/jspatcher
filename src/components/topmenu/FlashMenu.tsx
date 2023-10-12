@@ -12,6 +12,7 @@ import Patcher from "../../core/patcher/Patcher";
 import { dfu } from "./dfu/dfu";
 import { fixInterfaceNames, getDFUDescriptorProperties, hexAddr8, niceSize } from "./dfu/utils";
 import { dfuse } from "./dfu/dfuse";
+import PatcherEditor from "../../core/patcher/PatcherEditor";
 
 const loaderDivStyle = {
     marginLeft: '1em'
@@ -72,10 +73,85 @@ export default class FlashMenu extends React.PureComponent<P, S> {
             )
         }
     }
+    handleClickDownload = async () => {
+        if (this.state.building)
+            return;
+
+        const data = await this.props.env.activeEditor.instance.serialize();
+        const url = `${process.env.WS_DOMAIN}/ws/download/`;
+        const webSocket = new WebSocket(url);
+
+        const filename = this.props.env.activeEditor.instance.file?.name.replace("/", "_").replace(".bell", ".zip") || "project.zip";
+
+        webSocket.onopen = (event) => {
+            this.setState({ build_message: "Building program...", building: true, build_error: false, progress: null });
+            webSocket.send(data);
+        };
+
+        webSocket.onmessage = async (event) => {
+                var saveData = (function () {
+                    var a = document.createElement("a");
+                    document.body.appendChild(a);
+
+                    a.style.display = "none";
+                    return function (data: BinaryData, fileName: string) {
+                        var blob = new Blob([data], { type: "octet/stream" });
+                        var url = window.URL.createObjectURL(blob);
+                        a.href = url;
+                        a.download = fileName;
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    };
+                }());
+
+                let data = this.handleErrorResponse(event);
+
+                if (data) {
+                    saveData(data, filename);
+                }
+
+                this.setState({ building: false });
+        };
+    }
+
+    handleErrorResponse = (event: MessageEvent<any>) => {
+        try {
+            // console.log(event.data);
+            let json = JSON.parse(event.data.toString('utf-8'));
+            this.state.build_error = true;
+            const error = json.Err;
+
+            if (typeof error === 'string') {
+                this.state.error_message = `Encountered "${error}" error!`;
+            } else {
+                const key = Object.keys(error)[0];
+
+                // Error reporting
+                if (key === 'InternalError') {
+                    const inner_key = Object.keys(error[key])[0];
+                    this.state.error_message = `Encountered internal "${inner_key}" error!`;
+                    if (inner_key === 'CompileError') {
+                        this.props.env.newLog("none", inner_key, error[key][inner_key].program.makefile);
+                        this.props.env.newLog("none", inner_key, error[key][inner_key].program.cpp);
+                        this.props.env.newLog("none", inner_key, error[key][inner_key].stderr);
+                    } else {
+                        this.props.env.newLog("none", inner_key, JSON.stringify(error[key][inner_key]));
+                    }
+                } else {
+                    this.state.error_message = `Encountered "${key}" error!`;
+                    this.props.env.newLog("none", key, JSON.stringify(error[key]));
+                }
+            }
+            return null;
+        } catch (error) {
+            return event.data;
+        }
+    }
+
     // refInstanceEditMenu = React.createRef<PatcherEditMenu & AudioEditMenu>();
     handleClickBuild = async () => {
 
-        if (this.state.locked || this.state.building)
+        if (this.state.building)
             return;
 
         if (!await this.handleClickConnect()) {
@@ -145,8 +221,9 @@ export default class FlashMenu extends React.PureComponent<P, S> {
                 await this.doDownload(buffer);
             }
 
-            this.state.building = false;
-            this.forceUpdate();
+            // this.state.building = false;
+            // this.forceUpdate();
+            this.setState({ building: false });
         };
 
         webSocket.onerror = () => {
@@ -352,6 +429,7 @@ export default class FlashMenu extends React.PureComponent<P, S> {
                         <Dropdown.Menu style={{ minWidth: "max-content" }}>
                             {/* <Dropdown.Item onClick={this.handleClickConnect} text="Connect" disabled={this.state.device !== null} /> */}
                             <Dropdown.Item onClick={this.handleClickBuild} text="Program" description={`${ctrlKey} + Shift + F`} disabled={this.state.locked || this.state.building} />
+                            <Dropdown.Item onClick={this.handleClickDownload} text="Download Project" disabled={this.state.locked || this.state.building} />
                             {/* {this.state.editor ? <Dropdown.Divider /> : undefined} */}
                             {/* {
                                 this.state.editor instanceof PatcherEditor
@@ -364,7 +442,7 @@ export default class FlashMenu extends React.PureComponent<P, S> {
                     </Dropdown>
                 </div>
                 {/* {this.state.device !== null ? <div className="monitor">Connected to {this.state.device.device_.productName}</div> : <div></div>} */}
-                {this.state.building && this.state.progress === null ? <div style={loaderDivStyle}><Loader inverted active inline size="mini"></Loader></div> : <div></div>}
+                {this.state.building && this.state.progress === null ? <div style={loaderDivStyle}><Loader active inline size="mini"></Loader></div> : <div></div>}
                 {this.state.building && this.state.progress !== null ? <div style={{ ...loaderDivStyle, width: '250px', alignSelf: 'center', marginBottom: '0' }}><Progress size="small" active percent={this.state.progress} progress='percent'></Progress></div> : <div></div>
                 }
                 {this.state.building ? <div className="monitor">{this.state.build_message}</div> : <div></div>}

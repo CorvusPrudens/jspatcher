@@ -159,6 +159,15 @@ function extractFirst(data) {
 }
 function generateObject(Processor, name, dependencies, enums) {
   var _a;
+  let props = Processor.props;
+  for (const [key, value] of Object.entries(Processor.paramDescriptors)) {
+    props[key] = {
+      type: "number",
+      default: value.defaultValue,
+      description: value.description,
+      alwaysSerialize: value.alwaysSerialize
+    };
+  }
   return _a = class extends _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultObject {
     constructor() {
       super(...arguments);
@@ -190,11 +199,24 @@ function generateObject(Processor, name, dependencies, enums) {
         constantsConnected[i] = audioConnections[i];
       }
     }
+    updateParams() {
+      const { node } = this._;
+      if (!node)
+        return;
+      for (const [name2, param] of node.parameters) {
+        const value = this.getProp(name2);
+        if (name2 in this.meta.props)
+          param.setValueAtTime(value, 0);
+      }
+    }
     subscribe() {
       super.subscribe();
       this.on("preInit", () => {
         var _a2;
-        const { inputs, outputs } = { inputs: Processor.inlets.length, outputs: Processor.outlets.length };
+        const { inputs, outputs } = {
+          inputs: Processor.inlets.length,
+          outputs: Processor.outlets.length
+        };
         if (inputs) {
           const merger = this.audioCtx.createChannelMerger(inputs);
           this._.merger = merger;
@@ -210,7 +232,10 @@ function generateObject(Processor, name, dependencies, enums) {
         this.inlets = inputs;
         this.outlets = outputs;
         this.disconnectAudio();
-        this.inletAudioConnections = this._.constants.map((node) => ({ node: node.offset, index: 0 }));
+        this.inletAudioConnections = this._.constants.map((node) => ({
+          node: node.offset,
+          index: 0
+        }));
         this.outletAudioConnections = new Array(outputs).fill(null).map((v, i) => ({ node: splitter, index: i }));
         this.connectAudio();
         for (let i = 0; i < this.inlets; i++) {
@@ -226,7 +251,13 @@ function generateObject(Processor, name, dependencies, enums) {
       });
       this.on("postInit", async () => {
         const { dspId, constants, merger, splitter, argsOffset } = this._;
-        const url = (0,_workletCreator__WEBPACK_IMPORTED_MODULE_2__["default"])(Processor, dspId, this.audioCtx.sampleRate, dependencies, enums);
+        const url = (0,_workletCreator__WEBPACK_IMPORTED_MODULE_2__["default"])(
+          Processor,
+          dspId,
+          this.audioCtx.sampleRate,
+          dependencies,
+          enums
+        );
         await JsWorkletManager.addModule(this.audioCtx, dspId, url);
         let attempts = 0;
         let node;
@@ -254,6 +285,10 @@ function generateObject(Processor, name, dependencies, enums) {
             constant.offset.value = typeof argValue === "number" ? +argValue : (_a2 = this._.defaultInputs[i]) != null ? _a2 : 0;
           constant.start();
         });
+        this.updateParams();
+      });
+      this.on("propsUpdated", () => {
+        this.updateParams();
       });
       this.on("argsUpdated", () => {
         this._.constants.forEach((constant, i) => {
@@ -269,7 +304,10 @@ function generateObject(Processor, name, dependencies, enums) {
           if (this._.constants[inlet] && !this._.constantsConnected[inlet]) {
             const constant = this._.constants[inlet];
             constant.offset.value = constant.offset.value;
-            constant.offset.linearRampToValueAtTime(value, this.audioCtx.currentTime + this.getProp("smoothInput"));
+            constant.offset.linearRampToValueAtTime(
+              value,
+              this.audioCtx.currentTime + this.getProp("smoothInput")
+            );
           }
         }
       });
@@ -283,7 +321,7 @@ function generateObject(Processor, name, dependencies, enums) {
         node == null ? void 0 : node.disconnect();
       });
     }
-  }, _a.package = _index__WEBPACK_IMPORTED_MODULE_0__.name, _a.author = _index__WEBPACK_IMPORTED_MODULE_0__.author, _a.version = _index__WEBPACK_IMPORTED_MODULE_0__.version, _a.description = Processor.description, _a.inlets = Processor.inlets, _a.outlets = Processor.outlets, _a.args = Processor.args, _a.props = Processor.props, _a.docs = Processor.docs, _a.helpFiles = Processor.helpFiles, _a.UI = _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultUI, _a;
+  }, _a.package = _index__WEBPACK_IMPORTED_MODULE_0__.name, _a.author = _index__WEBPACK_IMPORTED_MODULE_0__.author, _a.version = _index__WEBPACK_IMPORTED_MODULE_0__.version, _a.description = Processor.description, _a.inlets = Processor.inlets, _a.outlets = Processor.outlets, _a.args = Processor.args, _a.props = props, _a.docs = Processor.docs, _a.helpFiles = Processor.helpFiles, _a.UI = _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultUI, _a;
 }
 
 
@@ -304,13 +342,13 @@ __webpack_require__.r(__webpack_exports__);
 class JsParamDescriptor {
 }
 class JsDspProcessor {
-  static get parameterDescriptors() {
-    const params = [];
-    for (const name in this.paramDescriptors) {
-      params.push(this.paramDescriptors[name]);
-    }
-    return params;
-  }
+  // static get parameterDescriptors() {
+  //     const params = [] as JsParamDescriptor[];
+  //     for (const name in this.paramDescriptors) {
+  //         params.push(this.paramDescriptors[name]);
+  //     }
+  //     return params;
+  // }
   init(sampleRate) {
   }
   process(inputs, outputs, parameters) {
@@ -444,6 +482,8 @@ const getJsWorkletProcessor = (processor, dspId, sampleRate, dependencies, enums
 
         ${deps}
 
+        const ParameterDescriptors = ${JSON.stringify(processor.paramDescriptors)}
+
         const ${_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"].name} = ${_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"].toString()}
 
         const ProcessorClass = ${inherited_string}
@@ -461,7 +501,7 @@ const getJsWorkletProcessor = (processor, dspId, sampleRate, dependencies, enums
             }
 
             static get parameterDescriptors() {
-                return ProcessorClass.parameterDescriptors;
+                return Object.entries(ParameterDescriptors).map(([_, value]) => value);
             }
         }
 
@@ -470,6 +510,7 @@ const getJsWorkletProcessor = (processor, dspId, sampleRate, dependencies, enums
 
     `;
   const processorCodeCleaned = processorCode.replace(/_.+?__WEBPACK_IMPORTED_MODULE_\d+__\./g, "");
+  console.log(processorCodeCleaned);
   const url = URL.createObjectURL(new Blob([processorCodeCleaned], { type: "text/javascript" }));
   return url;
 };
@@ -1669,6 +1710,109 @@ Rmstodb.outlets = [{
   description: "Decibels"
 }];
 Rmstodb.docs = "utilities/docs/rmstodb.html";
+
+
+/***/ }),
+
+/***/ "./src/objects/block/route.ts":
+/*!************************************!*\
+  !*** ./src/objects/block/route.ts ***!
+  \************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Route)
+/* harmony export */ });
+/* harmony import */ var _sdk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../sdk */ "./src/sdk.ts");
+
+
+class Route extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
+  constructor() {
+    super(...arguments);
+    // static docs: string = "utilities/docs/gate.html";
+    this._ = { discriminants: [] };
+  }
+  handleUpdateArgs(args) {
+    if (args.length < 1) {
+      this.error("At least one discriminant required");
+      return;
+    }
+    this.outlets = args.length + 1;
+    this.inlets = args.length + 1;
+    this._.discriminants = args;
+    this.setMeta({
+      inlets: [
+        {
+          isHot: true,
+          type: "anything",
+          description: "The list to route"
+        },
+        ...args.map(
+          (_, index) => ({
+            isHot: false,
+            type: "anything",
+            description: `The discriminant ${index + 1}`
+          })
+        )
+      ],
+      outlets: [
+        ...args.map(
+          (_, index) => ({
+            type: "anything",
+            description: `The list if the first element matches discriminant ${index + 1}`
+          })
+        ),
+        {
+          type: "anything",
+          description: "The list if the first element does not match any discriminant"
+        }
+      ]
+    });
+  }
+  subscribe() {
+    super.subscribe();
+    this.on("preInit", () => {
+      this.handleUpdateArgs(this.args);
+    });
+    this.on("updateArgs", (args) => {
+      this.handleUpdateArgs(args);
+    });
+    this.on("inlet", ({ data, inlet }) => {
+      if (inlet === 0) {
+        if (data instanceof Array && data.length > 1) {
+          const discriminant = data[0];
+          const index = this._.discriminants.indexOf(discriminant);
+          if (index !== -1) {
+            this.outlet(index, data.slice(1));
+          } else {
+            this.outlet(this.outlets - 1, data);
+          }
+        } else {
+          this.outlet(this.outlets - 1, data);
+        }
+      } else if (inlet <= this._.discriminants.length) {
+        this._.discriminants[inlet - 1] = data;
+      }
+    });
+  }
+}
+Route.description = "Route a list based on the first element";
+Route.inlets = [
+  {
+    isHot: true,
+    type: "anything",
+    description: "The list to route"
+  }
+];
+Route.args = [
+  {
+    type: "anything",
+    optional: false,
+    description: "The routing discriminant"
+  }
+];
+Route.outlets = [];
 
 
 /***/ }),
@@ -2949,6 +3093,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _objects_dsp_snapshot__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! ./objects/dsp/snapshot */ "./src/objects/dsp/snapshot.ts");
 /* harmony import */ var _objects_block_unpack__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! ./objects/block/unpack */ "./src/objects/block/unpack.ts");
 /* harmony import */ var _objects_block_pack__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! ./objects/block/pack */ "./src/objects/block/pack.ts");
+/* harmony import */ var _objects_block_route__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! ./objects/block/route */ "./src/objects/block/route.ts");
+
 
 
 
@@ -3002,7 +3148,8 @@ __webpack_require__.r(__webpack_exports__);
   gate: _objects_block_gate__WEBPACK_IMPORTED_MODULE_23__["default"],
   "snapshot~": _objects_dsp_snapshot__WEBPACK_IMPORTED_MODULE_24__["default"],
   unpack: _objects_block_unpack__WEBPACK_IMPORTED_MODULE_25__.Unpack,
-  pack: _objects_block_pack__WEBPACK_IMPORTED_MODULE_26__.Pack
+  pack: _objects_block_pack__WEBPACK_IMPORTED_MODULE_26__.Pack,
+  route: _objects_block_route__WEBPACK_IMPORTED_MODULE_27__["default"]
 }));
 
 })();

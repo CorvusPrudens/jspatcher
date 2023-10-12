@@ -153,6 +153,15 @@ function extractFirst(data) {
 }
 function generateObject(Processor, name, dependencies, enums) {
   var _a;
+  let props = Processor.props;
+  for (const [key, value] of Object.entries(Processor.paramDescriptors)) {
+    props[key] = {
+      type: "number",
+      default: value.defaultValue,
+      description: value.description,
+      alwaysSerialize: value.alwaysSerialize
+    };
+  }
   return _a = class extends _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultObject {
     constructor() {
       super(...arguments);
@@ -184,11 +193,24 @@ function generateObject(Processor, name, dependencies, enums) {
         constantsConnected[i] = audioConnections[i];
       }
     }
+    updateParams() {
+      const { node } = this._;
+      if (!node)
+        return;
+      for (const [name2, param] of node.parameters) {
+        const value = this.getProp(name2);
+        if (name2 in this.meta.props)
+          param.setValueAtTime(value, 0);
+      }
+    }
     subscribe() {
       super.subscribe();
       this.on("preInit", () => {
         var _a2;
-        const { inputs, outputs } = { inputs: Processor.inlets.length, outputs: Processor.outlets.length };
+        const { inputs, outputs } = {
+          inputs: Processor.inlets.length,
+          outputs: Processor.outlets.length
+        };
         if (inputs) {
           const merger = this.audioCtx.createChannelMerger(inputs);
           this._.merger = merger;
@@ -204,7 +226,10 @@ function generateObject(Processor, name, dependencies, enums) {
         this.inlets = inputs;
         this.outlets = outputs;
         this.disconnectAudio();
-        this.inletAudioConnections = this._.constants.map((node) => ({ node: node.offset, index: 0 }));
+        this.inletAudioConnections = this._.constants.map((node) => ({
+          node: node.offset,
+          index: 0
+        }));
         this.outletAudioConnections = new Array(outputs).fill(null).map((v, i) => ({ node: splitter, index: i }));
         this.connectAudio();
         for (let i = 0; i < this.inlets; i++) {
@@ -248,6 +273,10 @@ function generateObject(Processor, name, dependencies, enums) {
             constant.offset.value = typeof argValue === "number" ? +argValue : (_a2 = this._.defaultInputs[i]) != null ? _a2 : 0;
           constant.start();
         });
+        this.updateParams();
+      });
+      this.on("propsUpdated", () => {
+        this.updateParams();
       });
       this.on("argsUpdated", () => {
         this._.constants.forEach((constant, i) => {
@@ -277,7 +306,7 @@ function generateObject(Processor, name, dependencies, enums) {
         node == null ? void 0 : node.disconnect();
       });
     }
-  }, _a.package = _index__WEBPACK_IMPORTED_MODULE_0__.name, _a.author = _index__WEBPACK_IMPORTED_MODULE_0__.author, _a.version = _index__WEBPACK_IMPORTED_MODULE_0__.version, _a.description = Processor.description, _a.inlets = Processor.inlets, _a.outlets = Processor.outlets, _a.args = Processor.args, _a.props = Processor.props, _a.docs = Processor.docs, _a.helpFiles = Processor.helpFiles, _a.UI = _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultUI, _a;
+  }, _a.package = _index__WEBPACK_IMPORTED_MODULE_0__.name, _a.author = _index__WEBPACK_IMPORTED_MODULE_0__.author, _a.version = _index__WEBPACK_IMPORTED_MODULE_0__.version, _a.description = Processor.description, _a.inlets = Processor.inlets, _a.outlets = Processor.outlets, _a.args = Processor.args, _a.props = props, _a.docs = Processor.docs, _a.helpFiles = Processor.helpFiles, _a.UI = _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultUI, _a;
 }
 
 
@@ -297,13 +326,6 @@ __webpack_require__.r(__webpack_exports__);
 class JsParamDescriptor {
 }
 class JsDspProcessor {
-  static get parameterDescriptors() {
-    const params = [];
-    for (const name in this.paramDescriptors) {
-      params.push(this.paramDescriptors[name]);
-    }
-    return params;
-  }
   init(sampleRate) {
   }
   process(inputs, outputs, parameters) {
@@ -411,6 +433,8 @@ const getJsWorkletProcessor = (processor, dspId, sampleRate, dependencies, enums
 
         ${deps}
 
+        const ParameterDescriptors = ${JSON.stringify(processor.paramDescriptors)}
+
         const ${_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"].name} = ${_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"].toString()}
 
         const ProcessorClass = ${inherited_string}
@@ -428,7 +452,7 @@ const getJsWorkletProcessor = (processor, dspId, sampleRate, dependencies, enums
             }
 
             static get parameterDescriptors() {
-                return ProcessorClass.parameterDescriptors;
+                return Object.entries(ParameterDescriptors).map(([_, value]) => value);
             }
         }
 
@@ -437,6 +461,7 @@ const getJsWorkletProcessor = (processor, dspId, sampleRate, dependencies, enums
 
     `;
   const processorCodeCleaned = processorCode.replace(/_.+?__WEBPACK_IMPORTED_MODULE_\d+__\./g, "");
+  console.log(processorCodeCleaned);
   const url = URL.createObjectURL(new Blob([processorCodeCleaned], { type: "text/javascript" }));
   return url;
 };

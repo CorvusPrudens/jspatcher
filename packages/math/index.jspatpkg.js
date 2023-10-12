@@ -153,6 +153,15 @@ function extractFirst(data) {
 }
 function generateObject(Processor, name, dependencies, enums) {
   var _a;
+  let props = Processor.props;
+  for (const [key, value] of Object.entries(Processor.paramDescriptors)) {
+    props[key] = {
+      type: "number",
+      default: value.defaultValue,
+      description: value.description,
+      alwaysSerialize: value.alwaysSerialize
+    };
+  }
   return _a = class extends _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultObject {
     constructor() {
       super(...arguments);
@@ -184,11 +193,24 @@ function generateObject(Processor, name, dependencies, enums) {
         constantsConnected[i] = audioConnections[i];
       }
     }
+    updateParams() {
+      const { node } = this._;
+      if (!node)
+        return;
+      for (const [name2, param] of node.parameters) {
+        const value = this.getProp(name2);
+        if (name2 in this.meta.props)
+          param.setValueAtTime(value, 0);
+      }
+    }
     subscribe() {
       super.subscribe();
       this.on("preInit", () => {
         var _a2;
-        const { inputs, outputs } = { inputs: Processor.inlets.length, outputs: Processor.outlets.length };
+        const { inputs, outputs } = {
+          inputs: Processor.inlets.length,
+          outputs: Processor.outlets.length
+        };
         if (inputs) {
           const merger = this.audioCtx.createChannelMerger(inputs);
           this._.merger = merger;
@@ -204,7 +226,10 @@ function generateObject(Processor, name, dependencies, enums) {
         this.inlets = inputs;
         this.outlets = outputs;
         this.disconnectAudio();
-        this.inletAudioConnections = this._.constants.map((node) => ({ node: node.offset, index: 0 }));
+        this.inletAudioConnections = this._.constants.map((node) => ({
+          node: node.offset,
+          index: 0
+        }));
         this.outletAudioConnections = new Array(outputs).fill(null).map((v, i) => ({ node: splitter, index: i }));
         this.connectAudio();
         for (let i = 0; i < this.inlets; i++) {
@@ -248,6 +273,10 @@ function generateObject(Processor, name, dependencies, enums) {
             constant.offset.value = typeof argValue === "number" ? +argValue : (_a2 = this._.defaultInputs[i]) != null ? _a2 : 0;
           constant.start();
         });
+        this.updateParams();
+      });
+      this.on("propsUpdated", () => {
+        this.updateParams();
       });
       this.on("argsUpdated", () => {
         this._.constants.forEach((constant, i) => {
@@ -277,7 +306,7 @@ function generateObject(Processor, name, dependencies, enums) {
         node == null ? void 0 : node.disconnect();
       });
     }
-  }, _a.package = _index__WEBPACK_IMPORTED_MODULE_0__.name, _a.author = _index__WEBPACK_IMPORTED_MODULE_0__.author, _a.version = _index__WEBPACK_IMPORTED_MODULE_0__.version, _a.description = Processor.description, _a.inlets = Processor.inlets, _a.outlets = Processor.outlets, _a.args = Processor.args, _a.props = Processor.props, _a.docs = Processor.docs, _a.helpFiles = Processor.helpFiles, _a.UI = _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultUI, _a;
+  }, _a.package = _index__WEBPACK_IMPORTED_MODULE_0__.name, _a.author = _index__WEBPACK_IMPORTED_MODULE_0__.author, _a.version = _index__WEBPACK_IMPORTED_MODULE_0__.version, _a.description = Processor.description, _a.inlets = Processor.inlets, _a.outlets = Processor.outlets, _a.args = Processor.args, _a.props = props, _a.docs = Processor.docs, _a.helpFiles = Processor.helpFiles, _a.UI = _sdk__WEBPACK_IMPORTED_MODULE_1__.DefaultUI, _a;
 }
 
 
@@ -297,13 +326,6 @@ __webpack_require__.r(__webpack_exports__);
 class JsParamDescriptor {
 }
 class JsDspProcessor {
-  static get parameterDescriptors() {
-    const params = [];
-    for (const name in this.paramDescriptors) {
-      params.push(this.paramDescriptors[name]);
-    }
-    return params;
-  }
   init(sampleRate) {
   }
   process(inputs, outputs, parameters) {
@@ -411,6 +433,8 @@ const getJsWorkletProcessor = (processor, dspId, sampleRate, dependencies, enums
 
         ${deps}
 
+        const ParameterDescriptors = ${JSON.stringify(processor.paramDescriptors)}
+
         const ${_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"].name} = ${_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"].toString()}
 
         const ProcessorClass = ${inherited_string}
@@ -428,7 +452,7 @@ const getJsWorkletProcessor = (processor, dspId, sampleRate, dependencies, enums
             }
 
             static get parameterDescriptors() {
-                return ProcessorClass.parameterDescriptors;
+                return Object.entries(ParameterDescriptors).map(([_, value]) => value);
             }
         }
 
@@ -437,6 +461,7 @@ const getJsWorkletProcessor = (processor, dspId, sampleRate, dependencies, enums
 
     `;
   const processorCodeCleaned = processorCode.replace(/_.+?__WEBPACK_IMPORTED_MODULE_\d+__\./g, "");
+  console.log(processorCodeCleaned);
   const url = URL.createObjectURL(new Blob([processorCodeCleaned], { type: "text/javascript" }));
   return url;
 };
@@ -897,6 +922,177 @@ Bp.args = [
 ];
 Bp.argsOffset = 1;
 Bp.docs = "math/docs/bp.html";
+
+
+/***/ }),
+
+/***/ "./src/objects/dsp/delay.ts":
+/*!**********************************!*\
+  !*** ./src/objects/dsp/delay.ts ***!
+  \**********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Delay)
+/* harmony export */ });
+/* harmony import */ var _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../common/web/jsDspProcessor */ "../../common/web/jsDspProcessor.ts");
+/* harmony import */ var _delayLine__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./delayLine */ "./src/objects/dsp/delayLine.ts");
+
+
+class Delay extends _common_web_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  process(inputs, outputs, parameters) {
+    let inputStream = inputs[0][0];
+    let delaylength = inputs[0][1];
+    let feedback = inputs[0][2];
+    let outputStream = outputs[0][0];
+    const maxDelayMs = parameters["maxDelayMs"];
+    if (maxDelayMs && maxDelayMs[0] !== this.max_delay_ms_) {
+      this.updateLineSize(maxDelayMs[0]);
+    }
+    for (let i = 0; i < inputStream.length; i++) {
+      const length = Math.max(delaylength[i], 0);
+      let sample = this.line.ReadWithDelay(length * this.sample_rate_ / 1e3);
+      const fb = Math.min(Math.max(feedback[i], 0), 1);
+      this.line.Write(sample * fb + inputStream[i]);
+      outputStream[i] = sample;
+    }
+    return true;
+  }
+  init(sampleRate) {
+    this.sample_rate_ = sampleRate;
+    this.updateLineSize(3e3);
+  }
+  updateLineSize(newDelay) {
+    this.max_delay_ms_ = newDelay;
+    this.line_size_ = Math.round(this.sample_rate_ * this.max_delay_ms_ / 1e3);
+    this.line = new _delayLine__WEBPACK_IMPORTED_MODULE_1__.DelayLine(this.line_size_);
+  }
+}
+Delay.inlets = [
+  {
+    isHot: true,
+    type: "signal",
+    description: "audio signal",
+    varLength: true
+  },
+  {
+    isHot: true,
+    type: "signal",
+    description: "delay time (milliseconds)",
+    varLength: true
+  },
+  {
+    isHot: true,
+    type: "signal",
+    description: "feedback",
+    varLength: true
+  }
+];
+Delay.outlets = [
+  {
+    type: "signal",
+    description: "output",
+    varLength: true
+  }
+];
+Delay.args = [
+  {
+    type: "number",
+    optional: true,
+    description: "initial delay time (milliseconds)",
+    default: 300
+  },
+  {
+    type: "number",
+    optional: true,
+    description: "initial feedback (0-1)",
+    default: 0.5
+  }
+];
+Delay.paramDescriptors = {
+  "maxDelayMs": {
+    name: "maxDelayMs",
+    automationRate: "k-rate",
+    defaultValue: 3e3,
+    description: "The maximum delay size in milliseconds.",
+    alwaysSerialize: true
+  }
+};
+Delay.argsOffset = 1;
+Delay.docs = "math/docs/delay.html";
+
+
+/***/ }),
+
+/***/ "./src/objects/dsp/delayLine.ts":
+/*!**************************************!*\
+  !*** ./src/objects/dsp/delayLine.ts ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "DelayLine": () => (/* binding */ DelayLine)
+/* harmony export */ });
+class DelayLine {
+  constructor(maxSize) {
+    this.maxSize = maxSize;
+    this.line = new Array(this.maxSize).fill(0);
+    this.Init();
+  }
+  Init() {
+    this.Reset();
+  }
+  Reset() {
+    this.line.fill(0);
+    this.writePtr = 0;
+    this.delay = 1;
+  }
+  SetDelay(delay) {
+    const intDelay = Math.floor(delay);
+    this.frac = delay - intDelay;
+    this.delay = intDelay < this.maxSize ? intDelay : this.maxSize - 1;
+  }
+  Write(sample) {
+    this.line[this.writePtr] = sample;
+    this.writePtr = (this.writePtr - 1 + this.maxSize) % this.maxSize;
+  }
+  Read() {
+    const a = this.line[(this.writePtr + this.delay) % this.maxSize];
+    const b = this.line[(this.writePtr + this.delay + 1) % this.maxSize];
+    return a + (b - a) * this.frac;
+  }
+  ReadWithDelay(delay) {
+    const delayIntegral = Math.floor(delay);
+    const delayFractional = delay - delayIntegral;
+    const a = this.line[(this.writePtr + delayIntegral) % this.maxSize];
+    const b = this.line[(this.writePtr + delayIntegral + 1) % this.maxSize];
+    return a + (b - a) * delayFractional;
+  }
+  ReadHermite(delay) {
+    const delayIntegral = Math.floor(delay);
+    const delayFractional = delay - delayIntegral;
+    const t = this.writePtr + delayIntegral + this.maxSize;
+    const xm1 = this.line[(t - 1) % this.maxSize];
+    const x0 = this.line[t % this.maxSize];
+    const x1 = this.line[(t + 1) % this.maxSize];
+    const x2 = this.line[(t + 2) % this.maxSize];
+    const c = (x1 - xm1) * 0.5;
+    const v = x0 - x1;
+    const w = c + v;
+    const a = w + v + (x2 - x0) * 0.5;
+    const bNeg = w + a;
+    const f = delayFractional;
+    return ((a * f - bNeg) * f + c) * f + x0;
+  }
+  Allpass(sample, delay, coefficient) {
+    const read = this.line[(this.writePtr + delay) % this.maxSize];
+    const write = sample + coefficient * read;
+    this.Write(write);
+    return -write * coefficient + read;
+  }
+}
 
 
 /***/ }),
@@ -1833,6 +2029,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _objects_dsp_abs__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./objects/dsp/abs */ "./src/objects/dsp/abs.ts");
 /* harmony import */ var _objects_dsp_log__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./objects/dsp/log */ "./src/objects/dsp/log.ts");
 /* harmony import */ var _objects_dsp_sqrt__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./objects/dsp/sqrt */ "./src/objects/dsp/sqrt.ts");
+/* harmony import */ var _objects_dsp_delay__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./objects/dsp/delay */ "./src/objects/dsp/delay.ts");
+/* harmony import */ var _objects_dsp_delayLine__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./objects/dsp/delayLine */ "./src/objects/dsp/delayLine.ts");
 var __defProp = Object.defineProperty;
 var __getOwnPropSymbols = Object.getOwnPropertySymbols;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
@@ -1868,6 +2066,8 @@ var _a, _b;
 
 
 
+
+
 const Binary = (0,_sdk__WEBPACK_IMPORTED_MODULE_2__.generateDefaultObject)(_objects_block_binary__WEBPACK_IMPORTED_MODULE_0__["default"]);
 const Unary = (0,_sdk__WEBPACK_IMPORTED_MODULE_2__.generateDefaultObject)(_objects_block_unary__WEBPACK_IMPORTED_MODULE_1__["default"]);
 const BinaryObjects = {};
@@ -1881,17 +2081,29 @@ const binary_functions = {
   "==": { f: (a, b) => a == b, n: "Equal", d: "math/docs/equal.html" },
   "!=": { f: (a, b) => a != b, n: "Not equal", d: "math/docs/notequal.html" },
   ">": { f: (a, b) => a > b, n: "Greater", d: "math/docs/greaterthan.html" },
-  ">=": { f: (a, b) => a >= b, n: "Greater or equal", d: "math/docs/greaterthanorequal.html" },
+  ">=": {
+    f: (a, b) => a >= b,
+    n: "Greater or equal",
+    d: "math/docs/greaterthanorequal.html"
+  },
   "<": { f: (a, b) => a < b, n: "Less", d: "math/docs/lessthan.html" },
   "<=": { f: (a, b) => a <= b, n: "Less or equal", d: "math/docs/lessthanorequal.html" },
-  "&&": { f: (a, b) => Number(a > 0 && b > 0), n: "Boolean AND", d: "math/docs/andlogical.html" },
-  "||": { f: (a, b) => Number(a > 0 || b > 0), n: "Boolean OR", d: "math/docs/orlogical.html" },
-  "max": { f: (a, b) => a > b ? a : b, n: "Max", d: "math/docs/max.html" },
-  "min": { f: (a, b) => a < b ? a : b, n: "Min", d: "math/docs/min.html" },
-  "pow": { f: (a, b) => a ** b, n: "Power", d: "" },
+  "&&": {
+    f: (a, b) => Number(a > 0 && b > 0),
+    n: "Boolean AND",
+    d: "math/docs/andlogical.html"
+  },
+  "||": {
+    f: (a, b) => Number(a > 0 || b > 0),
+    n: "Boolean OR",
+    d: "math/docs/orlogical.html"
+  },
+  max: { f: (a, b) => a > b ? a : b, n: "Max", d: "math/docs/max.html" },
+  min: { f: (a, b) => a < b ? a : b, n: "Min", d: "math/docs/min.html" },
+  pow: { f: (a, b) => a ** b, n: "Power", d: "" },
   "%": { f: (a, b) => a % b, n: "Mod", d: "math/docs/mod.html" },
   "!%": { f: (a, b) => b % a, n: "Reverse Mod", d: "" },
-  "log": {
+  log: {
     f: (a, b) => {
       if (a <= 0) {
         return -1e3;
@@ -1904,7 +2116,7 @@ const binary_functions = {
     n: "Log",
     d: "math/docs/log.html"
   },
-  "atan2": { f: (a, b) => Math.atan2(a, b), n: "Atan2", d: "math/docs/atan2.html" }
+  atan2: { f: (a, b) => Math.atan2(a, b), n: "Atan2", d: "math/docs/atan2.html" }
 };
 for (const key in binary_functions) {
   BinaryObjects[key] = (_a = class extends Binary {
@@ -1925,13 +2137,13 @@ const UnaryObjects = {
 const unary_functions = {
   "!": { f: (a) => !a, n: "Not", d: "" },
   "~": { f: (a) => ~a, n: "Invert", d: "" },
-  "exp": { f: (a) => Math.exp(a), n: "Exponential", d: "math/docs/exp.html" },
-  "abs": { f: (a) => Math.abs(a), n: "Absolute Value", d: "math/docs/abs.html" },
-  "sqrt": { f: (a) => a > 0 ? Math.sqrt(a) : 0, n: "Square Root", d: "math/docs/sqrt.html" },
-  "cos": { f: (a) => Math.cos(a), n: "Cosine", d: "math/docs/cos.html" },
-  "sin": { f: (a) => Math.sin(a), n: "Sine", d: "math/docs/sin.html" },
-  "tan": { f: (a) => Math.tan(a), n: "Tangent", d: "math/docs/tan.html" },
-  "atan": { f: (a) => Math.atan(a), n: "Arc Tangent", d: "math/docs/atan.html" }
+  exp: { f: (a) => Math.exp(a), n: "Exponential", d: "math/docs/exp.html" },
+  abs: { f: (a) => Math.abs(a), n: "Absolute Value", d: "math/docs/abs.html" },
+  sqrt: { f: (a) => a > 0 ? Math.sqrt(a) : 0, n: "Square Root", d: "math/docs/sqrt.html" },
+  cos: { f: (a) => Math.cos(a), n: "Cosine", d: "math/docs/cos.html" },
+  sin: { f: (a) => Math.sin(a), n: "Sine", d: "math/docs/sin.html" },
+  tan: { f: (a) => Math.tan(a), n: "Tangent", d: "math/docs/tan.html" },
+  atan: { f: (a) => Math.atan(a), n: "Arc Tangent", d: "math/docs/atan.html" }
 };
 for (const key in unary_functions) {
   UnaryObjects[key] = (_b = class extends Unary {
@@ -1959,7 +2171,10 @@ const FilterAudioObjects = {
   "bp~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_bp__WEBPACK_IMPORTED_MODULE_12__["default"], "Bp"),
   "ota~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_ota__WEBPACK_IMPORTED_MODULE_13__["default"], "Ota")
 };
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (async () => __spreadValues(__spreadValues(__spreadValues(__spreadValues({}, BinaryObjects), UnaryObjects), BinaryAudioObjects), FilterAudioObjects));
+const EffectsAudioObjects = {
+  "delay~": (0,_common_web_jsDspObject__WEBPACK_IMPORTED_MODULE_3__.generateObject)(_objects_dsp_delay__WEBPACK_IMPORTED_MODULE_18__["default"], "Delay", [_objects_dsp_delayLine__WEBPACK_IMPORTED_MODULE_19__.DelayLine])
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (async () => __spreadValues(__spreadValues(__spreadValues(__spreadValues(__spreadValues({}, BinaryObjects), UnaryObjects), BinaryAudioObjects), FilterAudioObjects), EffectsAudioObjects));
 
 })();
 

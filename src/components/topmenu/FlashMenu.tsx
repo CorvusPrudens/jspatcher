@@ -79,6 +79,9 @@ export default class FlashMenu extends React.PureComponent<P, S> {
 
         const data = await this.props.env.activeEditor.instance.serialize();
         const url = `${process.env.WS_DOMAIN}/ws/download/`;
+
+        try {
+
         const webSocket = new WebSocket(url);
 
         const filename = this.props.env.activeEditor.instance.file?.name.replace("/", "_").replace(".bell", ".zip") || "project.zip";
@@ -112,11 +115,13 @@ export default class FlashMenu extends React.PureComponent<P, S> {
 
                 this.setState({ building: false });
         };
+        } catch (e) {
+            this.setState({ build_message: "Unexpected error occurred. Please try again.", building: false, build_error: true })
+        };
     }
 
     handleErrorResponse = (event: MessageEvent<any>) => {
-        try {
-            // console.log(event.data);
+        if (typeof event.data === 'string') {
             let json = JSON.parse(event.data.toString('utf-8'));
             this.state.build_error = true;
             const error = json.Err;
@@ -143,7 +148,7 @@ export default class FlashMenu extends React.PureComponent<P, S> {
                 }
             }
             return null;
-        } catch (error) {
+        } else {
             return event.data;
         }
     }
@@ -161,74 +166,37 @@ export default class FlashMenu extends React.PureComponent<P, S> {
 
         const data = await this.props.env.activeEditor.instance.serialize();
         const url = `${process.env.WS_DOMAIN}/ws/compile/`;
-        const webSocket = new WebSocket(url);
 
-        webSocket.onopen = (event) => {
-            this.setState({ build_message: "Building program...", building: true, build_error: false, progress: null });
-            webSocket.send(data);
-        };
+        try {
 
-        // For now, we'll simply assume the connection ends here
-        webSocket.onmessage = async (event) => {
+            const webSocket = new WebSocket(url);
 
-            try {
-                // console.log(event.data);
-                let json = JSON.parse(event.data.toString('utf-8'));
-                this.state.build_error = true;
-                const error = json.Err;
+            webSocket.onopen = (event) => {
+                this.setState({ build_message: "Building program...", building: true, build_error: false, progress: null });
+                webSocket.send(data);
+            };
 
-                if (typeof error === 'string') {
-                    this.state.error_message = `Encountered "${error}" error!`;
-                } else {
-                    const key = Object.keys(error)[0];
+            // For now, we'll simply assume the connection ends here
+            webSocket.onmessage = async (event) => {
 
-                    // Error reporting
-                    if (key === 'InternalError') {
-                        const inner_key = Object.keys(error[key])[0];
-                        this.state.error_message = `Encountered internal "${inner_key}" error!`;
-                        if (inner_key === 'CompileError') {
-                            this.props.env.newLog("none", inner_key, error[key][inner_key].program.makefile);
-                            this.props.env.newLog("none", inner_key, error[key][inner_key].program.cpp);
-                            this.props.env.newLog("none", inner_key, error[key][inner_key].stderr);
-                        } else {
-                            this.props.env.newLog("none", inner_key, JSON.stringify(error[key][inner_key]));
-                        }
-                    } else {
-                        this.state.error_message = `Encountered "${key}" error!`;
-                        this.props.env.newLog("none", key, JSON.stringify(error[key]));
-                    }
+                const data = this.handleErrorResponse(event);
+                console.log(data);
+                if (data) {
+                    let blob = data as Blob;
+                    const buffer = await blob.arrayBuffer();
+                    this.props.env.newLog("none", "USB", `Flashing ${buffer.byteLength} bytes to device.`);
+                    await this.doDownload(buffer);
                 }
-            } catch (error) {
-                // var saveData = (function () {
-                //     var a = document.createElement("a");
-                //     document.body.appendChild(a);
 
-                //     a.style.display = "none";
-                //     return function (data: BinaryData, fileName: string) {
-                //         var blob = new Blob([data], { type: "octet/stream" });
-                //         var url = window.URL.createObjectURL(blob);
-                //         a.href = url;
-                //         a.download = fileName;
-                //         a.click();
-                //         window.URL.revokeObjectURL(url);
-                //     };
-                // }());
+                this.setState({ building: false });
+            };
 
-                // saveData(event.data, "patcher.bin");
-                let data = event.data as Blob;
-                const buffer = await data.arrayBuffer();
-                this.props.env.newLog("none", "USB", `Flashing ${buffer.byteLength} bytes to device.`);
-                await this.doDownload(buffer);
-            }
-
-            // this.state.building = false;
-            // this.forceUpdate();
-            this.setState({ building: false });
-        };
-
-        webSocket.onerror = () => {
-            this.setState({ build_message: "Error connecting to server. Please try again.", building: false, build_error: true });
-        };
+            webSocket.onerror = () => {
+                this.setState({ build_message: "Error connecting to server. Please try again.", building: false, build_error: true });
+            };
+        } catch (e) {
+            this.setState({ build_message: "Unexpected error occurred. Please try again.", building: false, build_error: true })
+        }
     };
     onDisconnect(reason?: string) {
         if (reason) {

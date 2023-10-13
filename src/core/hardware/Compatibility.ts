@@ -1,7 +1,26 @@
-import { BasePin, USBBus } from "./types";
+import { BasePin, I2CBus, USBBus } from "./types";
 
-export function compatibleBus(pins: BasePin[]) {
-  // USB Compatibility Check
+function compatibleI2c(pins: BasePin[]) {
+  let sdaCount = 0;
+  let sclCount = 0;
+
+  pins.forEach((pin) => {
+    if (pin.busCapabilities) {
+      for (const busType in pin.busCapabilities) {
+        const bus = pin.busCapabilities[busType] as I2CBus;
+        if (bus.i2c) {
+          // Increment counters based on I2C capabilities
+          if (bus.sda) sdaCount++;
+          if (bus.scl) sclCount++;
+        }
+      }
+    }
+  });
+
+  return sdaCount > 1 || sclCount > 1;
+}
+
+function compatibleUsb(pins: BasePin[]) {
   let dplusCount = 0;
   let dminusCount = 0;
   let idCount = 0;
@@ -36,11 +55,16 @@ export function compatibleBus(pins: BasePin[]) {
     return true;
   }
 
-  // Continue with other bus checks (SPI, I2C, etc.) here when you want to expand compatibility checks.
   return false;
 }
 
-export function compatibleDigital(pins: BasePin[]) {
+function compatibleBus(pins: BasePin[]) {
+  let compatibilities = [compatibleUsb, compatibleI2c];
+
+  return compatibilities.some((f) => f(pins));
+}
+
+function compatibleDigital(pins: BasePin[]) {
   let num_outputs = pins.filter((p) => p.digitalOutput && !p.digitalInput).length;
 
   if (num_outputs > 1) {
@@ -65,7 +89,7 @@ export function compatibleDigital(pins: BasePin[]) {
   return some_valid_config;
 }
 
-export function compatibleAnalog(pins: BasePin[]) {
+function compatibleAnalog(pins: BasePin[]) {
   let num_outputs = pins.filter((p) => p.analogOutput && !p.analogInput).length;
 
   if (num_outputs > 1) {
@@ -95,9 +119,5 @@ export function compatiblePins(pins: BasePin[]) {
 
   // If any of the compatibilities are true, then the pins are compatible
   // TODO -- this should probably return exactly which aspects are compatible
-  if (compatibilities.some((f) => f(pins))) {
-    return true;
-  }
-
-  return false;
+  return compatibilities.some((f) => f(pins));
 }

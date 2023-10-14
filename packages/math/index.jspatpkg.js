@@ -1022,7 +1022,7 @@ Delay.paramDescriptors = {
 };
 Delay.argsOffset = 1;
 Delay.docs = "math/docs/delay.html";
-Delay.helpFiles = "math/help/delay.bell";
+Delay.helpFiles = ["math/help/delay.bell"];
 
 
 /***/ }),

@@ -1101,6 +1101,7 @@ Gate.args = [{
   description: "The number of outlets to select from"
 }];
 Gate.docs = "utilities/docs/gate.html";
+Gate.helpFiles = ["utilities/help/gate.bell"];
 
 
 /***/ }),
@@ -1544,6 +1545,7 @@ Powtodb.outlets = [{
   description: "Decibels"
 }];
 Powtodb.docs = "utilities/docs/powtodb.html";
+Powtodb.helpFiles = ["utilities/help/powtodb.bell"];
 
 
 /***/ }),
@@ -1730,7 +1732,6 @@ __webpack_require__.r(__webpack_exports__);
 class Route extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
   constructor() {
     super(...arguments);
-    // static docs: string = "utilities/docs/gate.html";
     this._ = { discriminants: [] };
   }
   handleUpdateArgs(args) {
@@ -1752,7 +1753,7 @@ class Route extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultObject {
           (_, index) => ({
             isHot: false,
             type: "anything",
-            description: `The discriminant ${index + 1}`
+            description: `Set discriminant ${index + 1}`
           })
         )
       ],
@@ -1813,6 +1814,8 @@ Route.args = [
   }
 ];
 Route.outlets = [];
+Route.docs = "utilities/docs/route.html";
+Route.helpFiles = ["utilities/help/route.bell"];
 
 
 /***/ }),
@@ -2189,6 +2192,7 @@ Select.args = [{
   description: "The value to compare against"
 }];
 Select.docs = "utilities/docs/select.html";
+Select.helpFiles = ["utilities/help/select.bell"];
 
 
 /***/ }),

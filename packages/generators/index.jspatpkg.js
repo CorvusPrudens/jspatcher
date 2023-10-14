@@ -801,6 +801,7 @@ Metro.props = {
   }
 };
 Metro.docs = "generators/docs/metro.html";
+Metro.helpFiles = ["generators/help/metro.bell"];
 
 
 /***/ }),
@@ -1343,6 +1344,7 @@ Phasor.args = [
 ];
 Phasor.argsOffset = 0;
 Phasor.docs = "generators/docs/phasor.html";
+Phasor.helpFiles = ["generators/help/phasor~.bell"];
 
 
 /***/ }),
@@ -1403,6 +1405,7 @@ PureRamp.args = [
 ];
 PureRamp.argsOffset = 0;
 PureRamp.docs = "generators/docs/pramp.html";
+PureRamp.helpFiles = ["generators/help/ptri~_psaw~_pramp~.bell"];
 
 
 /***/ }),
@@ -1536,6 +1539,7 @@ PureSaw.args = [
 ];
 PureSaw.argsOffset = 0;
 PureSaw.docs = "generators/docs/psaw.html";
+PureSaw.helpFiles = ["generators/help/ptri~_psaw~_pramp~.bell"];
 
 
 /***/ }),
@@ -1596,6 +1600,7 @@ PureTri.args = [
 ];
 PureTri.argsOffset = 0;
 PureTri.docs = "generators/docs/ptri.html";
+PureTri.helpFiles = ["generators/help/ptri~_psaw~_pramp~.bell"];
 
 
 /***/ }),
@@ -1805,6 +1810,7 @@ SampleAndHoldObject.outlets = [
   }
 ];
 SampleAndHoldObject.docs = "generators/docs/sah.html";
+SampleAndHoldObject.helpFiles = ["generators/help/sah~.bell"];
 SampleAndHoldObject.argsOffset = 0;
 
 

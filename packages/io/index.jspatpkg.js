@@ -608,6 +608,7 @@ slider.props = {
   }
 };
 slider.docs = "io/docs/slider_object.html";
+slider.helpFiles = ["io/help/slider.bell"];
 slider.UI = _slider_ui__WEBPACK_IMPORTED_MODULE_2__["default"];
 
 
@@ -1345,6 +1346,7 @@ AudioOut.outlets = [{
 AudioOut.args = supportSetSinkId ? _AudioIn__WEBPACK_IMPORTED_MODULE_2__["default"].args : [];
 AudioOut.props = supportSetSinkId ? _AudioIn__WEBPACK_IMPORTED_MODULE_2__["default"].props : {};
 AudioOut.docs = "io/docs/AudioOut.html";
+AudioOut.helpFiles = ["io/help/audioOut~.bell"];
 AudioOut.UI = supportSetSinkId ? class AudioOutUI extends _sdk__WEBPACK_IMPORTED_MODULE_0__.DefaultUI {
   constructor() {
     super(...arguments);

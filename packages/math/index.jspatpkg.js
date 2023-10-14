@@ -741,6 +741,7 @@ Abs.outlets = [
 ];
 Abs.argsOffset = 0;
 Abs.docs = "math/docs/abs~.html";
+Abs.helpFiles = ["math/help/abs~.bell"];
 
 
 /***/ }),
@@ -1011,7 +1012,7 @@ Delay.args = [
   }
 ];
 Delay.paramDescriptors = {
-  "maxDelayMs": {
+  maxDelayMs: {
     name: "maxDelayMs",
     automationRate: "k-rate",
     defaultValue: 3e3,
@@ -1021,6 +1022,7 @@ Delay.paramDescriptors = {
 };
 Delay.argsOffset = 1;
 Delay.docs = "math/docs/delay.html";
+Delay.helpFiles = "math/help/delay.bell";
 
 
 /***/ }),
@@ -1194,6 +1196,7 @@ Exp.outlets = [
 ];
 Exp.argsOffset = 0;
 Exp.docs = "math/docs/exp~.html";
+Exp.helpFiles = ["math/help/exp~.bell"];
 
 
 /***/ }),
@@ -1283,6 +1286,7 @@ Hip.args = [
 ];
 Hip.argsOffset = 1;
 Hip.docs = "math/docs/hip.html";
+Hip.helpFiles = ["math/help/hip~.bell"];
 
 
 /***/ }),
@@ -1432,6 +1436,7 @@ Lop.args = [
 ];
 Lop.argsOffset = 1;
 Lop.docs = "math/docs/lop.html";
+Lop.helpFiles = ["math/help/lop~.bell"];
 
 
 /***/ }),
@@ -1769,6 +1774,7 @@ Sqrt.outlets = [
 ];
 Sqrt.argsOffset = 0;
 Sqrt.docs = "math/docs/sqrt~.html";
+Sqrt.helpFiles = ["math/help/sqrt~.bell"];
 
 
 /***/ }),

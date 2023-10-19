@@ -6,6 +6,7 @@ import Env, { EnvEventMap } from "../../core/Env";
 import { IFileEditor } from "../../core/file/FileEditor";
 import FileManagerUI from "./FileMgrUI";
 import PatcherEditor from "../../core/patcher/PatcherEditor";
+import HardwareEditor from "../../core/hardware/HardwareEditor";
 import AudioEditor from "../../core/audio/AudioEditor";
 import PluginManagerUI from "./PluginMgrUI";
 import ConfigMenu from "./ConfigMenu";
@@ -113,6 +114,17 @@ export default class LeftMenu extends React.PureComponent<P, S> {
                         </Menu.Item>
                     }
                     {this.state.editor instanceof PatcherEditor
+                        ? <>
+                            <Menu.Item name={TPanels.Objects} active={this.state.active === TPanels.Objects} onClick={this.handleItemClick} title={TPanels.Objects}>
+                                <Icon name="add" color={this.state.active === TPanels.Objects ? "teal" : "grey"} inverted />
+                            </Menu.Item>
+                            <Menu.Item name={TPanels.Packages} active={this.state.active === TPanels.Packages} onClick={this.handleItemClick} title={TPanels.Packages}>
+                                <Icon name="box" color={this.state.active === TPanels.Packages ? "teal" : "grey"} inverted />
+                            </Menu.Item>
+                        </>
+                        : undefined
+                    }
+                    {this.state.editor instanceof HardwareEditor
                         ? <>
                             <Menu.Item name={TPanels.Objects} active={this.state.active === TPanels.Objects} onClick={this.handleItemClick} title={TPanels.Objects}>
                                 <Icon name="add" color={this.state.active === TPanels.Objects ? "teal" : "grey"} inverted />

@@ -8,8 +8,11 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const { version } = require("./package.json");
 
 const internalPackagesPath = "./src/scripts/internal-packages.json";
+const internalPackagesPathHardware = "./src/scripts/internal-packages-hardware.json";
+
 /** @type {string[]} */
 const INTERNAL_PACKAGES = require(internalPackagesPath);
+const INTERNAL_PACKAGES_HARDWARE = require(internalPackagesPathHardware);
 
 const timestamp = new Date().getTime();
 
@@ -123,7 +126,9 @@ module.exports = (env, argv) => {
           { from: './node_modules/@grame/libmusicxml/libmusicxml.wasm', to: './deps/' },
           { from: './node_modules/@shren/guidolib/libGUIDOEngine.wasm', to: './deps/' },
           { from: internalPackagesPath, to: './packages/[name][ext]' },
-          ...INTERNAL_PACKAGES.map(p => ({ from: `./node_modules/@electrosmith/package-${p}/dist`, to: `./packages/${p}/` }))
+          ...INTERNAL_PACKAGES.map(p => ({ from: `./node_modules/@electrosmith/package-${p}/dist`, to: `./packages/${p}/` })),
+          { from: internalPackagesPathHardware, to: './packages/[name][ext]'},
+          ...INTERNAL_PACKAGES_HARDWARE.map(p => ({ from: `./node_modules/@electrosmith/package-${p}/dist`, to: `./packages/${p}/` }))
         ],
       }),
       new MonacoWebpackPlugin({

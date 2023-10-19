@@ -26,6 +26,7 @@
     "@electrosmith/package-ui": "file:../objects/ui/web",
     "@electrosmith/package-utilities": "file:../objects/utilities/web",
     "@electrosmith/package-midi": "file:../objects/midi/web",
+    "@electrosmith/package-daisy-hardware": "file:../objects/targets/daisy/web",
     "@ffmpeg/core": "^0.10.0",
     "@ffmpeg/ffmpeg": "^0.10.1",
     "@grame/libmusicxml": "^3.19.1",

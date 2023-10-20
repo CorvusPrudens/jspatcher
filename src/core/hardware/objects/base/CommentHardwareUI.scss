@@ -1,5 +1,4 @@
-.hardware-patcher div.box-ui {
-    &.comment {
+.hardware-patcher div.box-ui > div.comment {
         display: flex;
         word-break: break-word;
         text-align: left;
@@ -23,8 +22,8 @@
                 content: "\200b";
             }
         }
-    }
 }
+
 .hardware-patcher.unlocked div.box.selected > div.box-ui {
     &.comment > span {
         pointer-events: auto;

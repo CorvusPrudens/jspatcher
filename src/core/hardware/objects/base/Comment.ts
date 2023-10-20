@@ -1,6 +1,7 @@
 import BaseObject from "./BaseHardwareObject";
 import type { IArgsMeta, IPropsMeta } from "./AbstractHardwareObject";
 import type { CommentUIState } from "./CommentUI";
+import CommentUI from "./CommentUI";
 
 export interface CommentProps {
   bgColor: string;
@@ -16,14 +17,26 @@ export interface CommentProps {
 export default class comment extends BaseObject<
   { value: string },
   {},
-  [string],
+  [],
+  [],
   [],
   [string],
   CommentProps,
   CommentUIState
 > {
+  static UI = CommentUI;
   static description = "Text Comment";
   static docs: string = "common/docs/Comment.html";
+  // This simply prevents serious errors from occurring
+  static ios: IIosMeta = [
+    {
+      pin: {
+        pinName: "comment",
+      },
+      type: "anything",
+      description: "",
+    },
+  ];
   static args: IArgsMeta = [
     {
       type: "string",
@@ -99,7 +112,12 @@ export default class comment extends BaseObject<
   subscribe() {
     super.subscribe();
     this.on("preInit", () => {
-      this.ios = [];
+      this.ios = [
+        {
+          edge: "T",
+          position: 0.5,
+        },
+      ];
     });
   }
 }

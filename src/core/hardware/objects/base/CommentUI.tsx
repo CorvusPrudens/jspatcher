@@ -3,7 +3,7 @@ import BaseUI, { BaseUIProps, BaseUIState } from "./BaseHardwareUI";
 import { selectElementRange } from "../../../../utils/utils";
 import type comment from "./Comment";
 import type { CommentProps } from "./Comment";
-import "./CommentUI.scss";
+import "./CommentHardwareUI.scss";
 
 export interface CommentUIState extends BaseUIState, CommentProps {
   value: string;

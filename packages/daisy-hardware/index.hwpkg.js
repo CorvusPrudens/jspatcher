@@ -8292,7 +8292,7 @@ Button.ios = [
   {
     pin: { pinName: "button", digitalOutput: true },
     type: "anything",
-    description: "The button's pin"
+    description: "Button Pin"
   }
 ];
 Button.patcherOutlets = [
@@ -8812,7 +8812,7 @@ class UsbMidi extends _jspatcher_jspatcher_src_core_hardware_objects_base_Defaul
 UsbMidi.author = "Corvus Prudens";
 UsbMidi.version = "v1.0.0";
 UsbMidi.description = "USB MIDI interface";
-UsbMidi.docs = "targets/help/daisy/usbmidi.html";
+UsbMidi.docs = "targets/docs/daisy/usbmidi.html";
 UsbMidi.ios = [
   {
     pin: {

@@ -461,7 +461,6 @@ const getJsWorkletProcessor = (processor, dspId, sampleRate, dependencies, enums
 
     `;
   const processorCodeCleaned = processorCode.replace(/_.+?__WEBPACK_IMPORTED_MODULE_\d+__\./g, "");
-  console.log(processorCodeCleaned);
   const url = URL.createObjectURL(new Blob([processorCodeCleaned], { type: "text/javascript" }));
   return url;
 };

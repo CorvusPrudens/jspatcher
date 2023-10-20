@@ -482,7 +482,9 @@ const getJsWorkletProcessor = (processor, dspId, sampleRate, dependencies, enums
 
         ${deps}
 
-        const ParameterDescriptors = ${JSON.stringify(processor.paramDescriptors)}
+        const ParameterDescriptors = ${JSON.stringify(
+    processor.paramDescriptors
+  )}
 
         const ${_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"].name} = ${_jsDspProcessor__WEBPACK_IMPORTED_MODULE_0__["default"].toString()}
 
@@ -509,9 +511,13 @@ const getJsWorkletProcessor = (processor, dspId, sampleRate, dependencies, enums
         registerProcessor("${dspId}", JsWorkletProcessor);
 
     `;
-  const processorCodeCleaned = processorCode.replace(/_.+?__WEBPACK_IMPORTED_MODULE_\d+__\./g, "");
-  console.log(processorCodeCleaned);
-  const url = URL.createObjectURL(new Blob([processorCodeCleaned], { type: "text/javascript" }));
+  const processorCodeCleaned = processorCode.replace(
+    /_.+?__WEBPACK_IMPORTED_MODULE_\d+__\./g,
+    ""
+  );
+  const url = URL.createObjectURL(
+    new Blob([processorCodeCleaned], { type: "text/javascript" })
+  );
   return url;
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (getJsWorkletProcessor);

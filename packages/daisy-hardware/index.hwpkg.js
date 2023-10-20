@@ -8287,6 +8287,7 @@ class Button extends _jspatcher_jspatcher_src_core_hardware_objects_base_Default
 Button.author = "Corvus Prudens";
 Button.version = "v1.0.0";
 Button.description = "Momentary push button";
+Button.docs = "targets/docs/daisy/button.html";
 Button.ios = [
   {
     pin: { pinName: "button", digitalOutput: true },
@@ -8710,6 +8711,7 @@ class AMux extends _jspatcher_jspatcher_src_core_hardware_objects_base_DefaultHa
 AMux.author = "Corvus Prudens";
 AMux.version = "v1.0.0";
 AMux.description = "Analog multiplexer";
+AMux.docs = "targets/docs/daisy/amux.html";
 AMux.ios = [
   {
     pin: { pinName: "a0", digitalInput: true },
@@ -8810,6 +8812,7 @@ class UsbMidi extends _jspatcher_jspatcher_src_core_hardware_objects_base_Defaul
 UsbMidi.author = "Corvus Prudens";
 UsbMidi.version = "v1.0.0";
 UsbMidi.description = "USB MIDI interface";
+UsbMidi.docs = "targets/help/daisy/usbmidi.html";
 UsbMidi.ios = [
   {
     pin: {
@@ -8841,20 +8844,6 @@ UsbMidi.patcherOutlets = [
     description: "MIDI bytestream (received from host)"
   }
 ];
-UsbMidi.props = {
-  polarity: {
-    type: "number",
-    default: 0,
-    description: "determines button polarity (0 = active low, 1 = active high)",
-    alwaysSerialize: true
-  },
-  pull: {
-    type: "number",
-    default: 0,
-    description: "determines if the pull-up or pull-down state (0 = pull-down, 1 = pull-up, 2 = none)",
-    alwaysSerialize: true
-  }
-};
 
 
 /***/ }),

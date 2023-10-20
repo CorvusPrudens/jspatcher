@@ -27,6 +27,12 @@ const INTERNAL_PACKAGES = require("./internal-packages.json");
 
 fs.copyFileSync(internalPackagesPath, "./dist/packages/internal-packages.json");
 
+const internalPackagesPathHardware = "./src/scripts/internal-packages-hardware.json";
+/** @type {string[]} */
+const INTERNAL_PACKAGES_HARDWARE = require("./internal-packages-hardware.json");
+
+fs.copyFileSync(internalPackagesPathHardware, "./dist/packages/internal-packages-hardware.json");
+
 /**
  * @param {string} from
  * @param {string} to
@@ -43,3 +49,4 @@ const copyFolderSync = (from, to) => {
 };
 
 INTERNAL_PACKAGES.forEach(p => copyFolderSync(`./node_modules/@electrosmith/package-${p}/dist`, `./dist/packages/${p}/`));
+INTERNAL_PACKAGES_HARDWARE.forEach(p => copyFolderSync(`./node_modules/@electrosmith/package-${p}/dist`, `./dist/packages/${p}/`));

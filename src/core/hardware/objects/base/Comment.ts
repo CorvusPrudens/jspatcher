@@ -1,6 +1,7 @@
-import BaseObject from "./BaseObject";
-import type { IArgsMeta, IPropsMeta } from "./AbstractObject";
+import BaseObject from "./BaseHardwareObject";
+import type { IArgsMeta, IPropsMeta } from "./AbstractHardwareObject";
 import type { CommentUIState } from "./CommentUI";
+import CommentUI from "./CommentUI";
 
 export interface CommentProps {
   bgColor: string;
@@ -16,14 +17,26 @@ export interface CommentProps {
 export default class comment extends BaseObject<
   { value: string },
   {},
-  [string],
+  [],
+  [],
   [],
   [string],
   CommentProps,
   CommentUIState
 > {
+  static UI = CommentUI;
   static description = "Text Comment";
   static docs: string = "common/docs/Comment.html";
+  // This simply prevents serious errors from occurring
+  static ios: IIosMeta = [
+    {
+      pin: {
+        pinName: "comment",
+      },
+      type: "anything",
+      description: "",
+    },
+  ];
   static args: IArgsMeta = [
     {
       type: "string",
@@ -77,7 +90,8 @@ export default class comment extends BaseObject<
     fontWeight: {
       type: "string",
       default: "normal",
-      description: 'Text style: "normal" | "bold" | "lighter" | "bolder" | number',
+      description:
+        'Text style: "normal" | "bold" | "lighter" | "bolder" | number',
       isUIState: true,
     },
     textAlign: {
@@ -98,17 +112,12 @@ export default class comment extends BaseObject<
   subscribe() {
     super.subscribe();
     this.on("preInit", () => {
-      this.inlets = 1;
-      this.outlets = 0;
-    });
-    this.on("updateArgs", (args) => {
-      if (!this.data.hasOwnProperty("value")) this.setData({ value: args.join(" ") });
-    });
-    this.on("inlet", ({ data, inlet }) => {
-      if (typeof data === "string") {
-        this.setData({ value: data });
-        this.updateUI({ value: data });
-      }
+      this.ios = [
+        {
+          edge: "T",
+          position: 0.5,
+        },
+      ];
     });
   }
 }

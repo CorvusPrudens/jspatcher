@@ -1,5 +1,4 @@
-.patcher div.box-ui > div.package-base {
-    &.package-base-comment {
+.hardware-patcher div.box-ui > div.comment {
         display: flex;
         word-break: break-word;
         text-align: left;
@@ -23,10 +22,10 @@
                 content: "\200b";
             }
         }
-    }
 }
-.patcher.unlocked div.box.selected > div.box-ui > div.package-base {
-    &.package-base-comment > span {
+
+.hardware-patcher.unlocked div.box.selected > div.box-ui {
+    &.comment > span {
         pointer-events: auto;
     }
 }
